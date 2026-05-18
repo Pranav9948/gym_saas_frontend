@@ -1,0 +1,129 @@
+// ===========================================
+// Auth Types - Authentication related types
+// ===========================================
+
+import type {
+  User,
+  Tenant,
+  TenantRole,
+  InviteRole,
+  BillingInterval,
+} from './models';
+
+// JWT Payload
+export interface AccessTokenPayload {
+  userId: string;
+  tenantId: string;
+  roleId: string;
+  role: TenantRole;
+}
+
+// Request DTOs
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterGymRequest {
+  gymName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  contactPhone: string;
+  contactEmail: string;
+  address: string;
+  city: string;
+  country: string;
+  timezone?: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface InviteUserRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: InviteRole;
+}
+
+export interface DirectCreateUserRequest extends InviteUserRequest {
+  password: string;
+}
+
+export interface AcceptInviteRequest {
+  token: string;
+  password: string;
+}
+
+export interface UpgradePlanRequest {
+  planName: 'BASIC' | 'PRO';
+  interval: BillingInterval;
+}
+
+// Response Types
+
+/** Login response - note: NO `success` wrapper */
+
+export interface LoginResponse {
+  accessToken: string;
+  user: User;
+}
+
+/** Generic auth response with success wrapper */
+
+export interface AuthResponse {
+  success: true;
+  data: {
+    accessToken: string;
+    user?: User;
+    tenant?: Tenant;
+  };
+  message?: string;
+}
+
+export interface RegisterGymResponse {
+  success: true;
+  message: string;
+  data: {
+    user: User;
+    accessToken: string;
+    tenant: Tenant;
+  };
+}
+
+export interface RefreshTokenResponse {
+  success: true;
+  data: {
+    accessToken: string;
+  };
+}
+
+export interface MeResponse {
+  success: true;
+  data: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
+}
+
+// Auth State
+export interface AuthState {
+  user: User | null;
+  tenant: Tenant | null;
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  permissions: string[];
+}

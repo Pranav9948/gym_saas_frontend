@@ -75,7 +75,9 @@ export interface UpgradePlanRequest {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken?: string;
   user: User;
+  tenant?: Tenant;
 }
 
 /** Generic auth response with success wrapper */
@@ -126,4 +128,49 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   permissions: string[];
+}
+
+export interface SuperAdminSetupRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface SuperAdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface SuperAdminSetupResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    message: string;
+  };
+}
+
+export interface SuperAdminLoginResponse {
+  success: boolean;
+  data: {
+    accessToken: string;
+    superAdmin: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    };
+  };
+}
+
+export interface ApiError {
+  success: boolean;
+  message: string;
+  error?: string;
+  statusCode?: number;
 }

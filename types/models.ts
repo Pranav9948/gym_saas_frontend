@@ -17,6 +17,13 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 export type TenantRole = 'OWNER' | 'ADMIN' | 'STAFF' | 'TRAINER';
 export type InviteRole = 'ADMIN' | 'STAFF';
 
+export interface PlanFeatures {
+  maxMembers: number;
+  maxTrainers: number;
+  prioritySupport: boolean;
+  [key: string]: string | number | boolean;
+}
+
 // Core Models
 export interface User {
   id: string;
@@ -34,8 +41,8 @@ export interface Plan {
   currency: string;
   interval: BillingInterval;
   stripePriceId: string | null;
-  features: Record<string, unknown>;
-  createdAt?: string;
+  features: PlanFeatures;
+  createdAt: string;
   updatedAt?: string;
 }
 

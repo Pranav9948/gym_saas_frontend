@@ -1,36 +1,49 @@
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/store/authStore'
+'use client';
+
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks';
+import { LoadingSpinner } from '@/components/common';
+import { ROUTES } from '@/config';
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requiredRole?: string;
+}
 
 export function ProtectedRoute({
   children,
-  requiredRole?: string,
-}: {
-    children: React.ReactNode
-  requiredRole?: string
-}) {
-  const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  requiredRole,
+}: ProtectedRouteProps) {
+  const { user, isLoading, permissions } = useAuth();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login')
-      return
-    }
+  // React.useEffect(() => {
+  //   if (!isLoading) {
+  //     router.push(ROUTES.LOGIN);
+  //   }
+  // }, [isLoading, user, router]);
 
-    if (requiredRole && user?.role !== requiredRole) {
-      router.push('/dashboard') // Redirect to home if no access
-      return
-    }
-  }, [isAuthenticated, user, requiredRole, router])
-
-  if (!isAuthenticated) {
-    return <LoadingSpinner /> // Show spinner while checking
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return null
+  if (!user) {
+    return null;
   }
 
-  return <>{children}</>
+  if (requiredRole && !permissions.includes(requiredRole)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Access Denied</h1>
+          <p className="text-muted-foreground mt-2">
+            You do not have permission to access this resource.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }

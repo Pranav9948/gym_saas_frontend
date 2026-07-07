@@ -26,7 +26,10 @@ export const membersService = {
   getMembers: async (
     params?: PaginationParams,
   ): Promise<PaginatedMembersResponse> => {
-    return get<PaginatedMembersResponse>(API_ENDPOINTS.MEMBERS.LIST, params);
+    return get<PaginatedMembersResponse>(
+      API_ENDPOINTS.MEMBERS.LIST,
+      params as Record<string, unknown>,
+    );
   },
 
   /**

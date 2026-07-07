@@ -1,8 +1,8 @@
-'use client';
-
 // ===========================================
 // Toast Provider - Sonner toast wrapper
 // ===========================================
+
+'use client';
 
 import { Toaster } from 'sonner';
 import { useTheme } from 'next-themes';
@@ -34,5 +34,4 @@ export function ToastProvider({ children }: ToastProviderProps) {
   );
 }
 
-// Re-export toast for convenience
 export { toast } from 'sonner';

@@ -23,6 +23,8 @@ export const ROUTES = {
   MEMBER_DETAIL: (id: string) => `/dashboard/members/${id}`,
   MEMBER_EDIT: (id: string) => `/dashboard/members/${id}/edit`,
 
+  SUPER_ADMIN_LOGIN: '/super-admin/login',
+
   // Trainers
   TRAINERS: '/dashboard/trainers',
   TRAINER_NEW: '/dashboard/trainers/new',

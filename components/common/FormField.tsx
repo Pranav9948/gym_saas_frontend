@@ -1,6 +1,6 @@
 'use client';
-
-import React from 'react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Controller, FieldValues, Path, UseControllerProps } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,17 @@ export function FormField<TFieldValues extends FieldValues = FieldValues>({
   description,
   ...rest
 }: FormFieldProps<TFieldValues>) {
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const inputType =
+    type === 'password'
+      ? showPassword
+        ? 'text'
+        : 'password'
+      : type;
+
+
   return (
     <Controller
       name={name}
@@ -42,16 +53,38 @@ export function FormField<TFieldValues extends FieldValues = FieldValues>({
               {rest.rules?.required && <span className="text-destructive">*</span>}
             </Label>
           )}
-          <Input
-            {...field}
-            id={name}
-            type={type}
-            placeholder={placeholder}
-            disabled={disabled}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${name}-error` : undefined}
-            className={error ? 'border-destructive' : ''}
-          />
+
+          <div className="relative">
+            <Input
+              {...field}
+              id={name}
+              type={inputType}
+              placeholder={placeholder}
+              disabled={disabled}
+              aria-invalid={!!error}
+              aria-describedby={error ? `${name}-error` : undefined}
+              className={cn(
+                error && 'border-destructive',
+                type === 'password' && 'pr-10'
+              )}
+            />
+
+            {type === 'password' && (
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            )}
+          </div>
+
           {description && (
             <p className="text-xs text-muted-foreground">{description}</p>
           )}

@@ -11,9 +11,65 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Gym Manager - Modern Gym Management SaaS',
-  description: 'A comprehensive gym management platform for fitness centers and health clubs.',
-  generator: 'v0.app',
+  title: {
+    default: 'GymFlow | Gym Management SaaS Platform',
+    template: '%s | GymFlow',
+  },
+
+  description:
+    'Modern gym management software for fitness centers, personal trainers, and health clubs. Manage members, trainers, attendance, billing, analytics, and operations in one platform.',
+
+  keywords: [
+    'gym management software',
+    'fitness center management',
+    'gym SaaS',
+    'member management',
+    'attendance tracking',
+    'trainer management',
+    'fitness analytics',
+    'billing software',
+    'health club software',
+  ],
+
+  authors: [{ name: 'GymFlow Team' }],
+  creator: 'GymFlow',
+  publisher: 'GymFlow',
+
+  applicationName: 'GymFlow',
+
+  metadataBase: new URL('https://yourdomain.com'),
+
+  openGraph: {
+    title: 'GymFlow | Gym Management SaaS Platform',
+    description:
+      'All-in-one gym management platform for modern fitness businesses.',
+    url: 'https://yourdomain.com',
+    siteName: 'GymFlow',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'GymFlow Dashboard',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GymFlow | Gym Management SaaS Platform',
+    description:
+      'Manage members, attendance, trainers, billing and analytics with GymFlow.',
+    images: ['/og-image.png'],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
   icons: {
     icon: [
       {
@@ -30,8 +86,9 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+    shortcut: '/favicon.ico',
   },
-}
+};
 
 export default function RootLayout({
   children,

@@ -12,6 +12,7 @@ import { ROUTES } from '@/config/routes';
 import type { TenantRole } from '@/types';
 import { toast } from 'sonner';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/messages';
+import { setAccessToken } from '@/lib/api';
 
 export function useAuth() {
   const router = useRouter();
@@ -184,5 +185,12 @@ export function useAuth() {
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
+
+    setAuth,
+    setUser: useAuthStore.getState().setUser,
+    setTenant: useAuthStore.getState().setTenant,
+    setTokens: (accessToken: string, refreshToken?: string) => {
+      setAccessToken(accessToken);
+    },
   };
 }

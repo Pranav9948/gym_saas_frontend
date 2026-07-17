@@ -11,4 +11,4 @@ export { attendanceService } from './attendance.service';
 export { goalsService } from './goals.service';
 export { billingService } from './billing.service';
 export { analyticsService } from './analytics.service';
-export { superAdminService } from './superAdmin.service';
+export * from './super-admin';

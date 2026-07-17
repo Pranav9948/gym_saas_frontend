@@ -19,7 +19,7 @@ export function EmptyState({ onCreateClick }: EmptyStateProps) {
         Start by creating your first subscription plan.
       </p>
       <Link href="/super-admin/plans/create">
-        <Button onClick={onCreateClick} className='cursor-pointer'>Create Plan</Button>
+        <Button onClick={onCreateClick}>Create Plan</Button>
       </Link>
     </div>
   );

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services';
-import { superAdminService } from '@/services/superAdmin.service';
+import { superAdminAuthService } from '@/services/super-admin';
 import { toast } from 'sonner';
 import { ROUTES } from '@/config';
 import { useRouter } from 'next/navigation';
@@ -34,7 +34,7 @@ export function SuperAdminSetupForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<FormData>>({});
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,52 +63,55 @@ export function SuperAdminSetupForm() {
       ...prev,
       [name]: value,
     }));
-    setError(null);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
   };
 
   const validateForm = (): boolean => {
+    const newErrors: Partial<FormData> = {};
+
     if (!formData.firstName.trim()) {
-      setError('First name is required');
-      return false;
+      newErrors.firstName = 'First name is required';
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters';
     }
-    if (formData.firstName.trim().length < 2) {
-      setError('First name must be at least 2 characters');
-      return false;
-    }
+
     if (!formData.lastName.trim()) {
-      setError('Last name is required');
-      return false;
+      newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters';
     }
-    if (formData.lastName.trim().length < 2) {
-      setError('Last name must be at least 2 characters');
-      return false;
-    }
+
     if (!formData.email.trim()) {
-      setError('Email is required');
-      return false;
+      newErrors.email = 'Email is required';
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    ) {
+      newErrors.email = 'Invalid email format';
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('Invalid email format');
-      return false;
-    }
+
     if (!formData.password) {
-      setError('Password is required');
-      return false;
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return false;
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Confirm password is required';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
-    return true;
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setErrors({});
 
     if (!validateForm()) {
       return;
@@ -119,10 +122,10 @@ export function SuperAdminSetupForm() {
     try {
       const { confirmPassword, ...setupData } = formData;
 
-      const response = await superAdminService.setupSuperAdmin(setupData);
+      const response = await superAdminAuthService.setupSuperAdmin(setupData);
 
       toast.success('Super admin created successfully! Please login.', {
-        duration: 5000,
+        duration: 3000,
       });
 
       // Redirect to login page after successful setup
@@ -131,10 +134,7 @@ export function SuperAdminSetupForm() {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create super admin';
-      setError(errorMessage);
-      toast.error(errorMessage, {
-        duration: 5000,
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -178,12 +178,7 @@ export function SuperAdminSetupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -196,9 +191,20 @@ export function SuperAdminSetupForm() {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="John"
-              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
               disabled={loading}
+              className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
+    ${errors.firstName
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-border focus:ring-primary/50'
+                }
+    border focus:outline-none focus:ring-2`}
             />
+
+            {errors.firstName && (
+              <p className="text-sm text-red-500">
+                {errors.firstName}
+              </p>
+            )}
           </div>
         </div>
 
@@ -212,9 +218,19 @@ export function SuperAdminSetupForm() {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Doe"
-              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+              className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
+    ${errors.lastName
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-border focus:ring-primary/50'
+                }
+    border focus:outline-none focus:ring-2`}
               disabled={loading}
             />
+            {errors.lastName && (
+              <p className="text-sm text-red-500">
+                {errors.lastName}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -229,9 +245,20 @@ export function SuperAdminSetupForm() {
             value={formData.email}
             onChange={handleChange}
             placeholder="admin@gymflow.com"
-            className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+            className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
+    ${errors.email
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-border focus:ring-primary/50'
+              }
+    border focus:outline-none focus:ring-2`}
             disabled={loading}
           />
+
+          {errors.email && (
+            <p className="text-sm text-red-500">
+              {errors.email}
+            </p>
+          )}
         </div>
       </div>
 
@@ -245,9 +272,22 @@ export function SuperAdminSetupForm() {
             value={formData.password}
             onChange={handleChange}
             placeholder="Create a strong password"
-            className="w-full pl-10 pr-12 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+
             disabled={loading}
+            className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
+    ${errors.password
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-border focus:ring-primary/50'
+              }
+    border focus:outline-none focus:ring-2`}
           />
+
+          {errors.password && (
+            <p className="text-sm text-red-500">
+              {errors.password}
+            </p>
+          )}
+
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -320,7 +360,12 @@ export function SuperAdminSetupForm() {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Confirm your password"
-            className="w-full pl-10 pr-12 py-3 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+            className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
+    ${errors.confirmPassword
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-border focus:ring-primary/50'
+              }
+    border focus:outline-none focus:ring-2`}
             disabled={loading}
           />
           <button
@@ -338,11 +383,10 @@ export function SuperAdminSetupForm() {
         </div>
       </div>
 
-      {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-800">Passwords do not match</p>
-        </div>
+      {errors.confirmPassword && (
+        <p className="text-sm text-red-500">
+          {errors.confirmPassword}
+        </p>
       )}
 
       <Button

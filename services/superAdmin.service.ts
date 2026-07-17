@@ -1,4 +1,4 @@
-// services/superAdmin.service.ts
+// services/superAdmin.service.ts - DEPRECATED: Use services/super-admin/auth.service.ts instead
 import {
   SuperAdminLoginRequest,
   SuperAdminLoginResponse,
@@ -6,66 +6,35 @@ import {
   SuperAdminSetupResponse,
 } from '@/types';
 import { API_ENDPOINTS } from '@/config';
-import { post, refreshAccessToken } from '@/lib/api/client';
-import type { RefreshTokenResponse } from '@/types';
+import { post } from '@/lib/api/client';
+import { setAccessToken } from '@/lib/api/client';
 
 class SuperAdminService {
   async setupSuperAdmin(
     data: SuperAdminSetupRequest,
   ): Promise<SuperAdminSetupResponse> {
-    try {
-      const response = await post<SuperAdminSetupResponse>(
-        API_ENDPOINTS.SUPER_ADMIN.SETUP,
-        data,
-      );
-      return response;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async refreshTokens(): Promise<RefreshTokenResponse> {
-    const accessToken = await refreshAccessToken();
-    if (!accessToken) {
-      throw new Error('Failed to refresh session');
-    }
-    return { success: true, data: { accessToken } };
+    return await post<SuperAdminSetupResponse>(
+      API_ENDPOINTS.SUPER_ADMIN.SETUP,
+      data,
+    );
   }
 
   async loginSuperAdmin(
     data: SuperAdminLoginRequest,
   ): Promise<SuperAdminLoginResponse> {
-    try {
-      const response = await post<SuperAdminLoginResponse>(
-        API_ENDPOINTS.SUPER_ADMIN.LOGIN,
-        data,
-        {
-          withCredentials: true,
-        },
-      );
+    const response = await post<SuperAdminLoginResponse>(
+      API_ENDPOINTS.SUPER_ADMIN.LOGIN,
+      data,
+      {
+        withCredentials: true,
+      },
+    );
 
-      if (response.success) {
-        this.setToken(response.data.accessToken);
-      }
-
-      return response;
-    } catch (error: any) {
-      throw this.handleError(error);
+    if (response.success) {
+      setAccessToken(response.data.accessToken);
     }
-  }
 
-  private setToken(accessToken: string): void {
-    localStorage.setItem('accessToken', accessToken);
-  }
-
-  private handleError(error: any): Error {
-    if (error.response?.data?.message) {
-      return new Error(error.response.data.message);
-    }
-    if (error.response?.data?.error) {
-      return new Error(error.response.data.error);
-    }
-    return new Error('An unexpected error occurred');
+    return response;
   }
 }
 

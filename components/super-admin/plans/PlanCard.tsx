@@ -16,7 +16,7 @@ interface PlanCardProps {
 
 export function PlanCard({ plan, onDelete, isDeleting = false }: PlanCardProps) {
   return (
-    <Card className="p-4 border-2 border-orange-600">
+    <Card className="p-4">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -48,23 +48,23 @@ export function PlanCard({ plan, onDelete, isDeleting = false }: PlanCardProps) 
 
         {Object.keys(plan.features).length > 0 && (
           <div className="space-y-2">
-            <label className="text-sm font-medium ">Features</label>
+            <label className="text-sm font-medium">Features</label>
 
             <div className="space-y-2 mt-2">
               {Object.entries(plan.features).map(([key, value]) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between rounded-md border p-3 border-white"
+                  className="flex items-center justify-between rounded-md border p-3"
                 >
                   <span className="font-medium">{key}</span>
 
                   <Badge variant="secondary">
                     {value === -1
-                      ? "Unlimited"
-                      : typeof value === "boolean"
+                      ? 'Unlimited'
+                      : typeof value === 'boolean'
                         ? value
-                          ? "Yes"
-                          : "No"
+                          ? 'Yes'
+                          : 'No'
                         : String(value)}
                   </Badge>
                 </div>
@@ -75,8 +75,8 @@ export function PlanCard({ plan, onDelete, isDeleting = false }: PlanCardProps) 
 
         {/* Actions */}
         <div className="flex gap-2 pt-2 border-t">
-          <Link href={`/plans/${plan.id}/edit`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full border-yellow-400">
+          <Link href={`/super-admin/plans/${plan.id}/edit`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full">
               <Edit2 className="w-4 h-4 mr-2" />
               Edit
             </Button>

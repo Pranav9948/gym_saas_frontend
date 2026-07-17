@@ -3,9 +3,9 @@
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { PlanForm } from '@/components/plans/PlanForm';
-import { usePlans, usePlanById } from '@/hooks/use-plans';
-import { LoadingFormSkeleton } from '@/components/plans/LoadingSkeleton';
+import { PlanForm } from '@/components/super-admin/plans';
+import { usePlans, usePlanById } from '@/hooks/super-admin';
+import { LoadingFormSkeleton } from '@/components/super-admin/plans';
 import Link from 'next/link';
 import { CreatePlanRequest } from '@/types/plans';
 
@@ -16,7 +16,6 @@ export default function EditPlanPage() {
   const { updatePlan, isUpdating } = usePlans();
 
   const handleSubmit = async (data: CreatePlanRequest) => {
-    console.log('data in CreatePlanRequest', data)
     await updatePlan({ id: planId, data });
   };
 

@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -64,11 +63,11 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
   const form = useForm<CreatePlanFormData>({
     resolver: zodResolver(CreatePlanSchema),
     defaultValues: {
-      name: initialData?.name || 'FREE',
-      price: initialData?.price || 0,
-      currency: initialData?.currency ?? 'INR',
-      interval: initialData?.interval || 'MONTHLY',
-      stripePriceId: initialData?.stripePriceId || '',
+      name: initialData?.name ?? undefined,
+      price: initialData?.price ?? undefined,
+      currency: initialData?.currency ?? '',
+      interval: initialData?.interval ?? undefined,
+      stripePriceId: initialData?.stripePriceId ?? '',
       features: getNormalizedFeatures(),
     },
   });
@@ -76,18 +75,20 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
   const handleSubmit = async (data: CreatePlanFormData) => {
     try {
       setIsSubmitting(true);
-      await onSubmit(data);
+      const { stripePriceId, ...rest } = data;
+      await onSubmit({
+        ...rest,
+        stripePriceId: stripePriceId?.trim() ? stripePriceId : undefined,
+      });
       router.push('/super-admin/plans');
     } catch (error: unknown) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to save plan";
+        error instanceof Error ? error.message : 'Failed to save plan';
 
       toast({
-        title: "Error",
+        title: 'Error',
         description: message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -172,10 +173,7 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
               <FormItem>
                 <FormLabel>Currency</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="USD"
-                    {...field}
-                  />
+                  <Input placeholder="USD" {...field} />
                 </FormControl>
                 <FormDescription>Currency code (e.g., USD, EUR, GBP)</FormDescription>
                 <FormMessage />
@@ -215,10 +213,7 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
               <FormItem>
                 <FormLabel>Stripe Price ID (Optional)</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="price_xxx"
-                    {...field}
-                  />
+                  <Input placeholder="price_xxx" {...field} />
                 </FormControl>
                 <FormDescription>The Stripe price ID associated with this plan</FormDescription>
                 <FormMessage />
@@ -233,10 +228,7 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Features</FormLabel>
-                <FeatureEditor
-                  features={field.value}
-                  onChange={field.onChange}
-                />
+                <FeatureEditor features={field.value} onChange={field.onChange} />
                 <FormDescription>Add features included in this plan</FormDescription>
                 <FormMessage />
               </FormItem>
@@ -245,11 +237,7 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
 
           {/* Submit Button */}
           <div className="flex gap-3">
-            <Button
-              type="submit"
-              loading={isSubmitting || isLoading}
-              className='cursor-pointer'
-            >
+            <Button type="submit" loading={isSubmitting || isLoading}>
               Save Plan
             </Button>
             <Button
@@ -257,7 +245,6 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
               variant="outline"
               onClick={() => router.back()}
               disabled={isSubmitting || isLoading}
-              className='cursor-pointer'
             >
               Cancel
             </Button>

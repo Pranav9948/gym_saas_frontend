@@ -47,11 +47,11 @@ export function DeletePlanDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex gap-3 justify-end">
-          <AlertDialogCancel disabled={isLoading} className=' cursor-pointer'>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading}
-            className="bg-destructive hover:bg-destructive/90 cursor-pointer"
+            className="bg-destructive hover:bg-destructive/90"
           >
             {isLoading ? 'Deleting...' : 'Delete Plan'}
           </AlertDialogAction>

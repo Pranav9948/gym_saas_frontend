@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth, useToast } from '@/hooks';
 import { LoadingSpinner } from '@/components/common';
 import { ROUTES } from '@/config';
+import { SuperAdminDashboardLayout } from '@/components/super-admin/SuperAdminDashboardLayout';
 
 interface SuperAdminLayoutProps {
   children: React.ReactNode;
@@ -39,5 +40,5 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
     return <LoadingSpinner fullScreen />;
   }
 
-  return <>{children}</>;
+  return <SuperAdminDashboardLayout>{children}</SuperAdminDashboardLayout>;
 }

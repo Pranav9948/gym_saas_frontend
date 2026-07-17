@@ -5,6 +5,8 @@ import { Dumbbell, ArrowRight, Sparkles, Users, BarChart3, Clock, Shield, Zap, C
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ROUTES } from '@/config/routes';
+import { useAuthStore } from '@/store/authStore';
+import { useRouter } from "next/navigation";
 
 const features = [
   {
@@ -48,7 +50,42 @@ const benefits = [
   { icon: CheckCircle2, text: '24/7 support and regular updates' },
 ];
 
+
+const getRoleColor = (role?: string) => {
+  switch (role) {
+    case 'OWNER':
+      return 'text-violet-600 dark:text-violet-400';
+
+    case 'ADMIN':
+      return 'text-blue-600 dark:text-blue-400';
+
+    case 'TRAINER':
+      return 'text-green-600 dark:text-green-400';
+
+    case 'STAFF':
+      return 'text-amber-600 dark:text-amber-400';
+
+    case 'CLIENT':
+      return 'text-slate-600 dark:text-slate-400';
+
+    default:
+      return 'text-foreground';
+  }
+};
+
 export default function HomePage() {
+
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const isSuperAdmin =
+    user?.role === 'SUPER_ADMIN'
+
+  const isLoggedIn = !!user?.role;
+
+  const router = useRouter();
+
+
   return (
     <main className="w-full overflow-hidden bg-background sm:px-5 md:px-6 lg:px-10 ">
       {/* Navigation */}
@@ -73,14 +110,72 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-              <Link href={ROUTES.LOGIN}>Sign In</Link>
-            </Button>
-            <Button size="sm" asChild className="rounded-full">
-              <Link href={ROUTES.REGISTER}>Get Started</Link>
-            </Button>
+          <div className="flex items-center gap-6">
+
+            {isSuperAdmin ? (
+              <>
+                <span className="text-sm font-medium text-foreground">
+                  Welcome Super Admin
+                </span>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    logout();
+                    router.push(ROUTES.LOGIN);
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : isLoggedIn ? (
+              <>
+                <div className="hidden sm:flex items-center">
+                  <span
+                    className={`text-sm font-semibold ${getRoleColor(user?.role)}`}
+                  >
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                </div>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    logout();
+                    router.push(ROUTES.LOGIN);
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="hidden sm:inline-flex"
+                >
+                  <Link href={ROUTES.LOGIN}>Sign In</Link>
+                </Button>
+
+                <Button
+                  size="sm"
+                  asChild
+                  className="rounded-full"
+                >
+                  <Link href={ROUTES.REGISTER}>Get Started</Link>
+                </Button>
+              </>
+            )}
+
           </div>
+
+
         </div>
       </nav>
 

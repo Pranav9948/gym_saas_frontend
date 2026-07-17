@@ -71,6 +71,19 @@ export const queryKeys = {
     members: () => [...queryKeys.analytics.all, 'members'] as const,
     revenue: () => [...queryKeys.analytics.all, 'revenue'] as const,
   },
+
+  // Super Admin
+  superAdmin: {
+    all: ['super-admin'] as const,
+    plans: {
+      all: () => [...queryKeys.superAdmin.all, 'plans'] as const,
+      lists: () => [...queryKeys.superAdmin.plans.all(), 'list'] as const,
+      list: () => [...queryKeys.superAdmin.plans.lists()] as const,
+      details: () => [...queryKeys.superAdmin.plans.all(), 'detail'] as const,
+      detail: (id: string) =>
+        [...queryKeys.superAdmin.plans.details(), id] as const,
+    },
+  },
 } as const;
 
 // Helper type for extracting query key types

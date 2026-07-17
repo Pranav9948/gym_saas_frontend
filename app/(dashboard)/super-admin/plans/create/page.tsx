@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { PlanForm } from '@/components/plans/PlanForm';
-import { usePlans } from '@/hooks/use-plans';
+import { PlanForm } from '@/components/super-admin/plans';
+import { usePlans } from '@/hooks/super-admin';
 import Link from 'next/link';
 import { CreatePlanRequest } from '@/types/plans';
 
@@ -13,7 +13,6 @@ export default function CreatePlanPage() {
   const { createPlan, isCreating } = usePlans();
 
   const handleSubmit = async (data: CreatePlanRequest) => {
-    console.log('data in handleSubmit', data)
     await createPlan(data);
   };
 
@@ -21,7 +20,7 @@ export default function CreatePlanPage() {
     <div className="space-y-6 py-8">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <Link href="/dashboard/admin/plans">
+        <Link href="/super-admin/plans">
           <Button variant="ghost" size="sm">
             <ChevronLeft className="w-4 h-4" />
           </Button>

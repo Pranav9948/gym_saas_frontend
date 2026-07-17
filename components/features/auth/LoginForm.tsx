@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/common';
 import { loginSchema } from '@/schemas';
-import { authService, superAdminService } from '@/services';
+import { authService } from '@/services';
+import { superAdminAuthService } from '@/services/super-admin';
 import { useAuth } from '@/hooks';
 import { useToast } from '@/hooks/use-toast';
 import { ApiException } from '@/lib/api/errors';
@@ -23,7 +24,7 @@ type LoginFormProps = {
 
 export function LoginForm({ loginType }: LoginFormProps) {
   const router = useRouter();
-  const { setUser, setTokens, setTenant, setAuth } = useAuth();
+  const { setAuth } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -46,7 +47,7 @@ export function LoginForm({ loginType }: LoginFormProps) {
       const response =
         loginType === "user"
           ? await authService.login(data)
-          : await superAdminService.loginSuperAdmin(data)
+          : await superAdminAuthService.loginSuperAdmin(data)
 
       if (loginType === "superAdmin") {
         const adminData = (response as SuperAdminLoginResponse).data;
@@ -69,10 +70,12 @@ export function LoginForm({ loginType }: LoginFormProps) {
       toast({
         title: 'Success',
         description: 'Logged in successfully',
+        duration: 3000,
       });
 
-      // Redirect to dashboard
-      router.push(ROUTES.HOME);
+      router.push(
+        loginType === 'superAdmin' ? '/super-admin/plans' : ROUTES.DASHBOARD,
+      );
     } catch (error) {
       const message = error instanceof ApiException
         ? error.getUserMessage()
@@ -82,6 +85,7 @@ export function LoginForm({ loginType }: LoginFormProps) {
         title: 'Error',
         description: message,
         variant: 'destructive',
+        duration: 4000,
       });
     } finally {
       setIsLoading(false);
@@ -110,13 +114,13 @@ export function LoginForm({ loginType }: LoginFormProps) {
         disabled={isLoading}
       />
 
-      <Button type="submit" className="w-full" loading={isLoading}>
+      <Button type="submit" className="w-full cursor-pointer" loading={isLoading}>
         Login
       </Button>
 
       <div className="text-center text-sm">
         <span className="text-muted-foreground">Don&apos;t have an account? </span>
-        <Link href={ROUTES.REGISTER} className="font-medium hover:underline">
+        <Link href={ROUTES.REGISTER} className="font-medium hover:underline cursor-pointer">
           Register
         </Link>
       </div>

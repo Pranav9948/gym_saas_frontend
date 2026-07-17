@@ -41,10 +41,10 @@ export function PlansTable({ plans, onDelete, isDeleting = false }: PlansTablePr
 
   return (
     <>
-      <div className="border-t border-orange-700 rounded-lg overflow-hidden py-3">
-        <Table className=' border border-orange-700 '>
-          <TableHeader className=''>
-            <TableRow className="bg-muted/50 ">
+      <div className="rounded-lg border overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow>
               <TableHead>Plan Name</TableHead>
               <TableHead>Billing Interval</TableHead>
               <TableHead>Price</TableHead>
@@ -57,7 +57,7 @@ export function PlansTable({ plans, onDelete, isDeleting = false }: PlansTablePr
           </TableHeader>
           <TableBody>
             {plans.map((plan) => (
-              <TableRow key={plan.id} className="hover:bg-muted/50 border-orange-700">
+              <TableRow key={plan.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{plan.name}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{plan.interval}</Badge>
@@ -80,16 +80,14 @@ export function PlansTable({ plans, onDelete, isDeleting = false }: PlansTablePr
                           .map(([key, value]) => (
                             <div
                               key={key}
-                              className=" bg-muted/50 flex items-center justify-center gap-2 px-2  rounded-md"
+                              className="bg-muted/50 flex items-center justify-center gap-2 px-2 rounded-md"
                             >
                               <p className="text-xs text-muted-foreground">{key}</p>
                               <p className="text-sm font-medium break-all">
-                                {typeof value === "boolean" ? String(value) : value}
+                                {typeof value === 'boolean' ? String(value) : value}
                               </p>
                             </div>
                           ))}
-
-
                       </>
                     ) : (
                       <span className="text-muted-foreground text-sm">
@@ -104,14 +102,14 @@ export function PlansTable({ plans, onDelete, isDeleting = false }: PlansTablePr
                 <TableCell className="text-right">
                   <div className="flex gap-2 justify-end">
                     <Link href={`/super-admin/plans/${plan.id}/edit`}>
-                      <Button variant="ghost" size="sm" className='cursor-pointer'>
+                      <Button variant="ghost" size="sm">
                         <Edit2 className="w-4 h-4" />
                       </Button>
                     </Link>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10  cursor-pointer"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleDeleteClick(plan.id)}
                       disabled={isDeleting}
                     >

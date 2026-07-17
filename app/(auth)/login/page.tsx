@@ -52,9 +52,9 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setLoginType("user")}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${loginType === "user"
+                  className={`px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-all ${loginType === "user"
                     ? "bg-background shadow text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground "
                     }`}
                 >
                   User Login
@@ -63,7 +63,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setLoginType("superAdmin")}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${loginType === "superAdmin"
+                  className={`px-4 py-2 text-sm cursor-pointer font-medium rounded-md transition-all ${loginType === "superAdmin"
                     ? "bg-background shadow text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                     }`}

@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 interface FeatureEditorProps {
   features: PlanFeatures;
@@ -23,11 +23,7 @@ interface FeatureEditorProps {
 
 const STANDARD_KEYS = ['maxMembers', 'maxTrainers', 'prioritySupport'];
 
-const AVAILABLE_FEATURES = [
-  "maxMembers",
-  "maxTrainers",
-  "prioritySupport",
-];
+const AVAILABLE_FEATURES = ['maxMembers', 'maxTrainers', 'prioritySupport'];
 
 export function FeatureEditor({ features, onChange }: FeatureEditorProps) {
   const [newKey, setNewKey] = useState('');
@@ -94,21 +90,17 @@ export function FeatureEditor({ features, onChange }: FeatureEditorProps) {
       <div className="space-y-2">
         <label className="text-sm font-medium">Add Features</label>
         <div className="flex gap-2">
-          <Select
-            value={newKey}
-            onValueChange={setNewKey}
-          >
+          <Select value={newKey} onValueChange={setNewKey}>
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Select Feature" />
             </SelectTrigger>
 
             <SelectContent>
-              {AVAILABLE_FEATURES
-                .map((feature) => (
-                  <SelectItem key={feature} value={feature}>
-                    {feature}
-                  </SelectItem>
-                ))}
+              {AVAILABLE_FEATURES.map((feature) => (
+                <SelectItem key={feature} value={feature}>
+                  {feature}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Input
@@ -128,7 +120,7 @@ export function FeatureEditor({ features, onChange }: FeatureEditorProps) {
             size="sm"
             disabled={!newKey || !newValue.trim()}
           >
-            <Plus className="w-4 h-4 cursor-pointer" />
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -136,7 +128,7 @@ export function FeatureEditor({ features, onChange }: FeatureEditorProps) {
       {entries.length > 0 && (
         <Card className="p-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium ">Current Features</label>
+            <label className="text-sm font-medium">Current Features</label>
             <div className="space-y-2 mt-2">
               {entries.map((entry) => (
                 <div key={entry.key} className="flex items-center justify-between p-3 bg-muted rounded-lg">

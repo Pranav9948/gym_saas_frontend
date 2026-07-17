@@ -1,20 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
-import { usePlans } from '@/hooks/use-plans';
-import { PlansTable } from '@/components/plans/PlansTable';
-import { PlanCard } from '@/components/plans/PlanCard';
-import { EmptyState } from '@/components/plans/EmptyState';
-import { LoadingTableSkeleton, LoadingCardsSkeleton } from '@/components/plans/LoadingSkeleton';
+import { usePlans } from '@/hooks/super-admin';
+import { PlansTable } from '@/components/super-admin/plans';
+import { PlanCard } from '@/components/super-admin/plans';
+import { EmptyState } from '@/components/super-admin/plans';
+import { LoadingTableSkeleton, LoadingCardsSkeleton } from '@/components/super-admin/plans';
 
 export default function PlansPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const { plans, isLoading, error, deletePlan, isDeleting } = usePlans();
   const [isMobile, setIsMobile] = useState(false);
+  const { plans, isLoading, error, deletePlan, isDeleting } = usePlans();
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const filteredPlans = plans.filter(
     (plan) =>
@@ -33,7 +40,7 @@ export default function PlansPage() {
           </p>
         </div>
         <Link href="/super-admin/plans/create">
-          <Button className='cursor-pointer'>
+          <Button>
             <Plus className="w-4 h-4 mr-2" />
             Create Plan
           </Button>

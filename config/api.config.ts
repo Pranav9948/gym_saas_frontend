@@ -31,6 +31,13 @@ export const API_ENDPOINTS = {
     REFRESH: '/super-admin/rotate-refresh-token',
     LOGOUT: '/super-admin/logout',
     DASHBOARD: '/super-admin/dashboard',
+    PLANS: {
+      LIST: '/super-admin/plan/get-all-plans',
+      CREATE: '/super-admin/plan/create-plan',
+      GET: (id: string) => `/super-admin/plan/${id}`,
+      UPDATE: (id: string) => `/super-admin/plan/update-plan/${id}`,
+      DELETE: (id: string) => `/super-admin/plan/delete-plan/${id}`,
+    },
   },
 
   // Members

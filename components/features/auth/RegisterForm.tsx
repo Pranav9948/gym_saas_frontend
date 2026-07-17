@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Loader2 } from "lucide-react";
 
 type RegisterFormData = {
   firstName: string;
@@ -76,7 +77,6 @@ export function RegisterForm() {
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [phoneNumberPart, setPhoneNumberPart] = useState('');
 
-
   const {
     control,
     handleSubmit,
@@ -99,6 +99,31 @@ export function RegisterForm() {
       timezone: '',
     },
   });
+
+  React.useEffect(() => {
+    setValue(
+      "timezone",
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+      {
+        shouldValidate: true,
+      }
+    );
+  }, [setValue]);
+
+  React.useEffect(() => {
+    setValue("country", selectedCountry.name, {
+      shouldValidate: true,
+    });
+
+    setValue(
+      "contactPhone",
+      selectedCountry.dialCode,
+      {
+        shouldValidate: true,
+      }
+    );
+  }, [selectedCountry, setValue]);
+
 
   const onSubmit = async (data: RegisterFormData) => {
 
@@ -134,7 +159,7 @@ export function RegisterForm() {
         description: 'Account created successfully',
       });
 
-      router.push(ROUTES.HOME);
+      router.push(ROUTES.LOGIN);
     } catch (error) {
       const message = error instanceof ApiException
         ? error.getUserMessage()
@@ -151,7 +176,9 @@ export function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <FormField
           name="firstName"
@@ -314,13 +341,23 @@ export function RegisterForm() {
         />
       </div>
 
-      <Button type="submit" className="w-full" loading={isLoading}>
-        Create Account
+      <Button
+        type="submit"
+        disabled={isLoading}
+        className="w-full cursor-pointer"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating Account...
+          </>
+        ) : (
+          "Create Account"
+        )}
       </Button>
-
       <div className="text-center text-sm">
         <span className="text-muted-foreground">Already have an account? </span>
-        <Link href={ROUTES.LOGIN} className="font-medium hover:underline">
+        <Link href={ROUTES.LOGIN} className="font-medium hover:underline cursor-pointer">
           Login
         </Link>
       </div>

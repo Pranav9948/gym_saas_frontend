@@ -16,7 +16,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   React.useEffect(() => {
     if (!isLoading && user) {
-      router.push(ROUTES.HOME);
+      router.push(
+        user.role === 'SUPER_ADMIN' ? '/super-admin/plans' : ROUTES.DASHBOARD,
+      );
     }
   }, [isLoading, user, router]);
 
@@ -25,9 +27,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 md:px-4 px-0">
-      <div className="w-full max-w-lg space-y-8">
-        <div className="bg-background rounded-lg shadow-lg md:px-8 sm:px-2 p-0">
+    <div className="min-h-screen bg-muted/30 flex items-center justify-center  sm:px-4 sm:py-6 md:px-6 lg:px-8">
+      <div className="w-full max-w-xl">
+        <div className="rounded-xl bg-background shadow-xl border px-4 sm:px-6 md:px-8 ">
           {children}
         </div>
       </div>

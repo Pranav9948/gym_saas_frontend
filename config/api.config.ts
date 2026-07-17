@@ -6,7 +6,7 @@
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
   ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1`
-  : 'http://localhost:3001/api/v1';
+  : 'http://localhost:5000/api/v1';
 
 // Frontend URL for redirects
 export const FRONTEND_URL =
@@ -23,6 +23,21 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/generate-new-tokens',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+  },
+
+  SUPER_ADMIN: {
+    SETUP: '/super-admin/setup',
+    LOGIN: '/super-admin/login',
+    REFRESH: '/super-admin/rotate-refresh-token',
+    LOGOUT: '/super-admin/logout',
+    DASHBOARD: '/super-admin/dashboard',
+    PLANS: {
+      LIST: '/super-admin/plan/get-all-plans',
+      CREATE: '/super-admin/plan/create-plan',
+      GET: (id: string) => `/super-admin/plan/${id}`,
+      UPDATE: (id: string) => `/super-admin/plan/update-plan/${id}`,
+      DELETE: (id: string) => `/super-admin/plan/delete-plan/${id}`,
+    },
   },
 
   // Members

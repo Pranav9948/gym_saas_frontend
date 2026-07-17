@@ -25,7 +25,10 @@ export const trainersService = {
   getTrainers: async (
     params?: PaginationParams,
   ): Promise<PaginatedTrainersResponse> => {
-    return get<PaginatedTrainersResponse>(API_ENDPOINTS.TRAINERS.LIST, params);
+    return get<PaginatedTrainersResponse>(
+      API_ENDPOINTS.TRAINERS.LIST,
+      params as Record<string, unknown>,
+    );
   },
 
   /**
@@ -79,7 +82,7 @@ export const trainersService = {
   ): Promise<TrainerMembersResponse> => {
     return get<TrainerMembersResponse>(
       API_ENDPOINTS.TRAINERS.MEMBERS(id),
-      params,
+      params as Record<string, unknown>,
     );
   },
 };

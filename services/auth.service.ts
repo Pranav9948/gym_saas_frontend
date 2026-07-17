@@ -2,7 +2,7 @@
 // Auth Service - Authentication API calls
 // ===========================================
 
-import { post, get } from '@/lib/api/client';
+import { post, get, refreshAccessToken } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   LoginRequest,
@@ -13,7 +13,9 @@ import type {
   ResetPasswordRequest,
   RefreshTokenResponse,
   MeResponse,
+  SuperAdminSetupRequest,
 } from '@/types';
+import { SuperAdminLoginResponse } from '@/types/api';
 
 interface ApiSuccessResponse {
   success: true;
@@ -61,7 +63,11 @@ export const authService = {
    * Refresh access token using httpOnly cookie
    */
   refreshTokens: async (): Promise<RefreshTokenResponse> => {
-    return get<RefreshTokenResponse>(API_ENDPOINTS.AUTH.REFRESH);
+    const accessToken = await refreshAccessToken();
+    if (!accessToken) {
+      throw new Error('Failed to refresh session');
+    }
+    return { success: true, data: { accessToken } };
   },
 
   /**

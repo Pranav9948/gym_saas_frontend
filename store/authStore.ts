@@ -3,15 +3,21 @@
 // ===========================================
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import type { User, Tenant, TenantRole } from '@/types';
 import { getPermissionsForRole } from '@/config/permissions';
-import { setAccessToken, clearAccessToken } from '@/lib/api/client';
+import {
+  setAccessToken,
+  clearAccessToken,
+  setAuthType,
+  type AuthType,
+} from '@/lib/api/client';
 
 interface AuthState {
   // State
   user: User | null;
   tenant: Tenant | null;
+  authType: AuthType;
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;
@@ -35,6 +41,7 @@ interface AuthState {
 const initialState = {
   user: null,
   tenant: null,
+  authType: 'user' as AuthType,
   isAuthenticated: false,
   isLoading: true,
   isInitialized: false,
@@ -42,94 +49,156 @@ const initialState = {
 };
 
 export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+  devtools(
+    persist(
+      (set, get) => ({
+        ...initialState,
 
-      setAuth: (user, tenant, accessToken) => {
-        // Store token in memory (not persisted)
-        setAccessToken(accessToken);
+        setAuth: (user, tenant, accessToken) => {
+          setAccessToken(accessToken);
 
-        // Get permissions from role
-        const role = user.role as TenantRole;
-        const permissions = getPermissionsForRole(role);
+          const isSuperAdmin = user.role === 'SUPER_ADMIN';
+          const sessionAuthType: AuthType = isSuperAdmin ? 'superAdmin' : 'user';
+          setAuthType(sessionAuthType);
 
-        set({
-          user,
-          tenant,
-          isAuthenticated: true,
-          isLoading: false,
-          permissions,
-        });
-      },
+          const role = user.role as TenantRole;
+          const permissions = isSuperAdmin
+            ? []
+            : getPermissionsForRole(role);
 
-      setUser: (user) => {
-        const role = user.role as TenantRole;
-        const permissions = getPermissionsForRole(role);
+          set({
+            user,
+            tenant,
+            authType: sessionAuthType,
+            permissions,
+            isAuthenticated: true,
+            isInitialized: true,
+            isLoading: false,
+          });
+        },
 
-        set({
-          user,
-          permissions,
-        });
-      },
+        setUser: (user) => {
+          const role = user.role as TenantRole;
+          const permissions = getPermissionsForRole(role);
 
-      setTenant: (tenant) => {
-        set({ tenant });
-      },
+          set((state) => ({
+            ...state,
+            user,
+            permissions,
+          }));
+        },
 
-      setLoading: (isLoading) => {
-        set({ isLoading });
-      },
+        setTenant: (tenant) => {
+          set({ tenant });
+        },
 
-      setInitialized: (isInitialized) => {
-        set({ isInitialized });
-      },
+        setLoading: (isLoading) => {
+          set({ isLoading });
+        },
 
-      logout: () => {
-        clearAccessToken();
-        set({
-          ...initialState,
-          isLoading: false,
-          isInitialized: true,
-        });
-      },
+        setInitialized: (isInitialized) => {
+          set({ isInitialized });
+        },
 
-      reset: () => {
-        clearAccessToken();
-        set(initialState);
-      },
+        logout: () => {
+          clearAccessToken();
+          setAuthType('user');
+          set({
+            ...initialState,
+            isLoading: false,
+            isInitialized: true,
+          });
+        },
 
-      hasPermission: (permission) => {
-        return get().permissions.includes(permission);
-      },
+        reset: () => {
+          clearAccessToken();
+          set(initialState);
+        },
 
-      hasAnyPermission: (permissions) => {
-        const userPermissions = get().permissions;
-        return permissions.some((p) => userPermissions.includes(p));
-      },
+        hasPermission: (permission) => {
+          return get().permissions.includes(permission);
+        },
 
-      hasAllPermissions: (permissions) => {
-        const userPermissions = get().permissions;
-        return permissions.every((p) => userPermissions.includes(p));
-      },
-    }),
-    {
-      name: 'gym-auth-storage',
-      storage: createJSONStorage(() => localStorage),
-      // Only persist user and tenant, not tokens or loading state
-      partialize: (state) => ({
-        user: state.user,
-        tenant: state.tenant,
-        isAuthenticated: state.isAuthenticated,
-        permissions: state.permissions,
+        hasAnyPermission: (permissions) => {
+          const userPermissions = get().permissions;
+          return permissions.some((p) => userPermissions.includes(p));
+        },
+
+        hasAllPermissions: (permissions) => {
+          const userPermissions = get().permissions;
+          return permissions.every((p) => userPermissions.includes(p));
+        },
       }),
-    },
+      {
+        name: 'gym-auth-storage',
+        storage: createJSONStorage(() => localStorage),
+
+        partialize: (state) => ({
+          user: state.user,
+          tenant: state.tenant,
+          authType: state.authType,
+          isAuthenticated: state.isAuthenticated,
+          permissions: state.permissions,
+          isInitialized: true,
+        }),
+
+        onRehydrateStorage: () => (state) => {
+          if (state?.user) {
+            setAuthType(state.authType ?? 'user');
+            state.setLoading(false);
+            state.setInitialized(true);
+          }
+        },
+      },
+    ),
+    { name: 'AuthStore' },
   ),
 );
+
+export function getPersistedAuthSession(): {
+  authType: AuthType;
+  user: User | null;
+  isAuthenticated: boolean;
+} {
+  if (typeof window === 'undefined') {
+    return { authType: 'user', user: null, isAuthenticated: false };
+  }
+
+  try {
+    const raw = localStorage.getItem('gym-auth-storage');
+    if (!raw) {
+      return { authType: 'user', user: null, isAuthenticated: false };
+    }
+
+    const parsed = JSON.parse(raw) as {
+      state?: {
+        authType?: AuthType;
+        user?: User | null;
+        isAuthenticated?: boolean;
+      };
+    };
+    const state = parsed.state;
+    const persistedUser = state?.user ?? null;
+    const persistedAuthType: AuthType =
+      state?.authType === 'superAdmin' ||
+      persistedUser?.role === 'SUPER_ADMIN'
+        ? 'superAdmin'
+        : 'user';
+
+    return {
+      authType: persistedAuthType,
+      user: persistedUser,
+      isAuthenticated: Boolean(state?.isAuthenticated && persistedUser),
+    };
+  } catch {
+    return { authType: 'user', user: null, isAuthenticated: false };
+  }
+}
 
 // Selectors for common use cases
 export const selectUser = (state: AuthState) => state.user;
 export const selectTenant = (state: AuthState) => state.tenant;
+export const selectAuthType = (state: AuthState) => state.authType;
 export const selectIsAuthenticated = (state: AuthState) =>
   state.isAuthenticated;
 export const selectIsLoading = (state: AuthState) => state.isLoading;

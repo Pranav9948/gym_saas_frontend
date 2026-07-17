@@ -3,11 +3,12 @@
 // ===========================================
 
 import axios, {
+  AxiosRequestConfig,
   type AxiosError,
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios';
-import { API_BASE_URL } from '@/config/api.config';
+import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
 import { parseApiError, ErrorCode } from './errors';
 
 // Extend Axios config to include retry flag
@@ -17,6 +18,38 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 // Token storage (in-memory for security)
 let accessToken: string | null = null;
+
+export type AuthType = 'user' | 'superAdmin';
+
+let authType: AuthType = 'user';
+
+export function getAuthType(): AuthType {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('gym-auth-storage');
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          state?: { authType?: AuthType; user?: { role?: string } };
+        };
+        const state = parsed.state;
+        if (
+          state?.authType === 'superAdmin' ||
+          state?.user?.role === 'SUPER_ADMIN'
+        ) {
+          return 'superAdmin';
+        }
+      }
+    } catch {
+      // Fall back to in-memory value
+    }
+  }
+
+  return authType;
+}
+
+export function setAuthType(type: AuthType): void {
+  authType = type;
+}
 
 // Token getter/setter
 export function getAccessToken(): string | null {
@@ -29,6 +62,39 @@ export function setAccessToken(token: string | null): void {
 
 export function clearAccessToken(): void {
   accessToken = null;
+}
+
+let refreshPromise: Promise<string | null> | null = null;
+
+/** Shared refresh — deduplicates AuthProvider init and 401 interceptor retries. */
+export function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    const refreshPath =
+      getAuthType() === 'superAdmin'
+        ? API_ENDPOINTS.SUPER_ADMIN.REFRESH
+        : API_ENDPOINTS.AUTH.REFRESH;
+
+    const response = await axios.get(`${API_BASE_URL}${refreshPath}`, {
+      withCredentials: true,
+      params: { _: Date.now() },
+    });
+
+    const newToken = response.data?.data?.accessToken as string | undefined;
+    if (newToken) {
+      setAccessToken(newToken);
+      return newToken;
+    }
+
+    return null;
+  })().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
 }
 
 // Flag to prevent multiple refresh attempts
@@ -96,6 +162,8 @@ apiClient.interceptors.response.use(
         '/auth/login',
         '/auth/register-gym',
         '/auth/generate-new-tokens',
+        '/super-admin/login',
+        '/super-admin/rotate-refresh-token',
       ];
       if (
         skipRefreshPaths.some((path) => originalRequest.url?.includes(path))
@@ -121,23 +189,14 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Attempt to refresh token
-        const response = await axios.get(
-          `${API_BASE_URL}/auth/generate-new-tokens`,
-          {
-            withCredentials: true,
-          },
-        );
-
-        const newToken = response.data?.data?.accessToken;
+        const newToken = await refreshAccessToken();
         if (newToken) {
-          setAccessToken(newToken);
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           processQueue(null, newToken);
           return apiClient(originalRequest);
-        } else {
-          throw new Error('No token in refresh response');
         }
+
+        throw new Error('No token in refresh response');
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
         clearAccessToken();
@@ -170,6 +229,7 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 // Typed request helpers
+
 export async function get<T>(
   url: string,
   params?: Record<string, unknown>,
@@ -178,8 +238,12 @@ export async function get<T>(
   return response.data;
 }
 
-export async function post<T>(url: string, data?: unknown): Promise<T> {
-  const response = await apiClient.post<T>(url, data);
+export async function post<T>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.post<T>(url, data, config);
   return response.data;
 }
 

@@ -2,15 +2,17 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { StatusType } from '@/types';
 
-type StatusType = 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'BANNED' | 'DELETED';
 
 const statusColors: Record<StatusType, { bg: string; text: string }> = {
-  ACTIVE: { bg: 'bg-green-100', text: 'text-green-700' },
-  INACTIVE: { bg: 'bg-gray-100', text: 'text-gray-700' },
-  PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  BANNED: { bg: 'bg-red-100', text: 'text-red-700' },
-  DELETED: { bg: 'bg-gray-200', text: 'text-gray-800' },
+  ACTIVE: { bg: "bg-green-100", text: "text-green-700" },
+  TRIAL: { bg: "bg-blue-100", text: "text-blue-700" },
+  SUSPENDED: { bg: "bg-orange-100", text: "text-orange-700" },
+  PENDING: { bg: "bg-yellow-100", text: "text-yellow-700" },
+  INACTIVE: { bg: "bg-gray-100", text: "text-gray-700" },
+  BANNED: { bg: "bg-red-100", text: "text-red-700" },
+  DELETED: { bg: "bg-gray-200", text: "text-gray-800" },
 };
 
 interface StatusBadgeProps {

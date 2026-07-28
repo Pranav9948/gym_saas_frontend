@@ -1,29 +1,99 @@
-'use client';
+'use client'
 
-import React from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import Link from 'next/link'
+import { Bell, Search, User } from 'lucide-react'
+import { useAuth } from '@/hooks'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function SuperAdminNavbar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth()
+  const initials = `${user?.firstName?.[0] ?? 'S'}${user?.lastName?.[0] ?? 'A'}`.toUpperCase()
 
   return (
-    <nav className="border-b bg-background sticky top-0 z-50">
-      <div className="flex items-center justify-between h-16 px-6">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Welcome, {user?.firstName || 'Super Admin'}
+    <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
+      <div className="flex h-16 items-center justify-between gap-3 px-4 pl-16 md:px-6 md:pl-6">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">
+            Welcome back, {user?.firstName || 'Super Admin'}
+          </p>
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            Here is what is happening across your platform today.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/settings/profile">
-            <Button variant="ghost" size="sm">
-              Profile
-            </Button>
-          </Link>
+
+        <div className="flex items-center gap-2">
+          <div className="relative hidden lg:block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search gyms, owners..."
+              className="h-9 w-56 pl-9"
+              aria-label="Search"
+            />
+          </div>
+
+          <Button variant="outline" size="icon" className="relative" aria-label="Notifications">
+            <Bell className="size-4.5" />
+            <span className="absolute right-2 top-2 size-2 rounded-full bg-primary ring-2 ring-background" />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:pr-2.5">
+                <Avatar className="size-7">
+                  <AvatarFallback className="bg-primary/15 text-xs font-semibold text-primary">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden text-sm font-medium sm:inline">
+                  {user?.firstName}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <p className="text-sm font-medium">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-xs font-normal text-muted-foreground">
+                  {user?.email}
+                </p>
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <Link href="/settings/profile">
+                  <User className="size-4" />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={logout}
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
         </div>
       </div>
-    </nav>
-  );
+    </header>
+  )
 }

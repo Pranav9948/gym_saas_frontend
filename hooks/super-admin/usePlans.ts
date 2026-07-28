@@ -29,14 +29,17 @@ export function usePlans() {
   const createMutation = useMutation({
     mutationFn: (data: CreatePlanRequest) => plansService.createPlan(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.superAdmin.plans.all() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.superAdmin.plans.all(),
+      });
       toast({
         title: 'Success',
         description: 'Plan created successfully.',
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Failed to create plan.';
+      const message =
+        error instanceof Error ? error.message : 'Failed to create plan.';
       toast({
         title: 'Error',
         description: message,
@@ -50,7 +53,9 @@ export function usePlans() {
     mutationFn: ({ id, data }: { id: string; data: UpdatePlanRequest }) =>
       plansService.updatePlan(id, data),
     onSuccess: (updatedPlan) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.superAdmin.plans.all() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.superAdmin.plans.all(),
+      });
       queryClient.invalidateQueries({
         queryKey: queryKeys.superAdmin.plans.detail(updatedPlan.id),
       });
@@ -60,7 +65,8 @@ export function usePlans() {
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Failed to update plan.';
+      const message =
+        error instanceof Error ? error.message : 'Failed to update plan.';
       toast({
         title: 'Error',
         description: message,
@@ -73,14 +79,17 @@ export function usePlans() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => plansService.deletePlan(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.superAdmin.plans.all() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.superAdmin.plans.all(),
+      });
       toast({
         title: 'Success',
         description: 'Plan deleted successfully.',
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Failed to delete plan.';
+      const message =
+        error instanceof Error ? error.message : 'Failed to delete plan.';
       toast({
         title: 'Error',
         description: message,

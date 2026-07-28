@@ -14,6 +14,18 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   ACCEPT_INVITE: '/accept-invite',
 
+  // superadmin  routes
+
+  SUPER_ADMIN: '/super-admin',
+  SUPER_ADMIN_PLANS: '/super-admin/plans',
+  SUPER_ADMIN_GYMS: '/super-admin/gyms',
+  SUPER_ADMIN_OWNERS: '/super-admin/owners',
+  SUPER_ADMIN_BILLING: '/super-admin/billing',
+  SUPER_ADMIN_ANALYTICS: '/super-admin/analytics',
+  SUPER_ADMIN_SETTINGS: '/super-admin/settings',
+
+  PROFILE: '/settings/profile',
+
   // Dashboard routes
   DASHBOARD: '/dashboard',
 

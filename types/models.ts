@@ -54,6 +54,15 @@ export interface SubscriptionWithPlan {
   plan: Plan;
 }
 
+export type StatusType =
+  | 'ACTIVE'
+  | 'TRIAL'
+  | 'SUSPENDED'
+  | 'PENDING'
+  | 'INACTIVE'
+  | 'BANNED'
+  | 'DELETED';
+
 export interface Tenant {
   id: string;
   name: string;

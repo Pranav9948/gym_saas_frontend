@@ -19,6 +19,17 @@ interface ApiSuccessResponse {
   data?: unknown;
 }
 
+interface DirectCreateUserResponse {
+  success: true;
+  message?: string;
+  data: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
 export const tenantService = {
   /**
    * Get current tenant info
@@ -69,8 +80,8 @@ export const tenantService = {
    */
   createUser: async (
     data: DirectCreateUserRequest,
-  ): Promise<ApiSuccessResponse> => {
-    return post<ApiSuccessResponse>(API_ENDPOINTS.TENANT.CREATE_USER, data);
+  ): Promise<DirectCreateUserResponse> => {
+    return post<DirectCreateUserResponse>(API_ENDPOINTS.TENANT.CREATE_USER, data);
   },
 
   /**

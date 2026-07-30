@@ -1,6 +1,7 @@
 export * from './models';
 export * from './auth';
 export * from './plans';
+export * from './rbac';
 
 export {
   type PaginatedMeta,

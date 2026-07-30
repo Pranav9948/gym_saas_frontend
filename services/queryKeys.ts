@@ -64,6 +64,13 @@ export const queryKeys = {
     plans: () => [...queryKeys.billing.all, 'plans'] as const,
   },
 
+  // RBAC
+  rbac: {
+    all: ['rbac'] as const,
+    permissions: () => [...queryKeys.rbac.all, 'permissions'] as const,
+    roles: (tenantId: string) => [...queryKeys.rbac.all, 'roles', tenantId] as const,
+  },
+
   // Analytics (future)
   analytics: {
     all: ['analytics'] as const,

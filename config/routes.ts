@@ -29,6 +29,14 @@ export const ROUTES = {
   // Dashboard routes
   DASHBOARD: '/dashboard',
 
+  // Owners
+  OWNER: '/owner/dashboard',
+  OWNER_DASHBOARD: '/owner/dashboard',
+  OWNER_MEMBERS: '/owner/members',
+  OWNER_BILLING: '/owner/billing',
+  OWNER_SETTINGS: '/owner/settings',
+  OWNER_SETTINGS_ROLES: '/owner/settings/roles',
+
   // Members
   MEMBERS: '/dashboard/members',
   MEMBER_NEW: '/dashboard/members/new',
@@ -217,4 +225,10 @@ export function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}?`),
   );
+}
+
+export function getPostLoginRoute(role?: string): string {
+  if (role === 'SUPER_ADMIN') return ROUTES.SUPER_ADMIN_PLANS;
+  if (role === 'OWNER') return ROUTES.OWNER_DASHBOARD;
+  return ROUTES.DASHBOARD;
 }

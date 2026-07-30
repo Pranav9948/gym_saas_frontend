@@ -85,6 +85,19 @@ export const API_ENDPOINTS = {
     UPGRADE_PLAN: '/tenant/upgrade-plan',
   },
 
+  // RBAC
+  RBAC: {
+    PERMISSIONS: '/permissions',
+    ROLES: {
+      LIST: (tenantId: string) => `/tenants/${tenantId}/roles`,
+      CREATE: (tenantId: string) => `/tenants/${tenantId}/roles`,
+      UPDATE: (tenantId: string, roleId: string) =>
+        `/tenants/${tenantId}/roles/${roleId}`,
+      DELETE: (tenantId: string, roleId: string) =>
+        `/tenants/${tenantId}/roles/${roleId}`,
+    },
+  },
+
   // Billing
   BILLING: {
     CHECKOUT_SESSION: '/billing/checkout-session',

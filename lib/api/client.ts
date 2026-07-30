@@ -252,6 +252,11 @@ export async function patch<T>(url: string, data?: unknown): Promise<T> {
   return response.data;
 }
 
+export async function put<T>(url: string, data?: unknown): Promise<T> {
+  const response = await apiClient.put<T>(url, data);
+  return response.data;
+}
+
 export async function del<T>(url: string): Promise<T> {
   const response = await apiClient.delete<T>(url);
   return response.data;

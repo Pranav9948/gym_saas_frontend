@@ -114,6 +114,7 @@ export const API_ENDPOINTS = {
 // Request timeouts
 export const TIMEOUTS = {
   DEFAULT: 30000, // 30 seconds
+  AUTH_REFRESH: 8000, // Fail fast when API is down during session restore
   UPLOAD: 60000, // 60 seconds for file uploads
   LONG: 120000, // 2 minutes for long operations
 } as const;

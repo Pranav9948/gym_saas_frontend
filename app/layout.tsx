@@ -8,8 +8,6 @@ import { ToastProvider } from '@/providers/ToastProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-
 const geistSans = Geist({
   subsets: ['latin'],
   variable: '--font-geist-sans',

@@ -1,7 +1,5 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { RoleManagement } from '@/components/owner/roles/RoleManagement'
-
-export default function OwnerRolesPage() {
-  return <RoleManagement />
+export default function OwnerRolesRedirectPage() {
+  redirect('/owner/settings?tab=roles')
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { rbacService } from '@/services'
 import { useToast } from '@/hooks/use-toast'
 import { ApiException } from '@/lib/api/errors'
@@ -27,45 +29,79 @@ interface RoleFormDialogProps {
   onSuccess?: () => void
 }
 
-function groupPermissions(permissions: PermissionDto[]) {
-  return permissions.reduce<Record<string, PermissionDto[]>>((groups, permission) => {
-    const module = permission.name.split(':')[0] ?? 'other'
-    if (!groups[module]) {
-      groups[module] = []
+type GroupedPermissions = Record<string, PermissionDto[]>
+
+function groupPermissions(permissions: PermissionDto[]): GroupedPermissions {
+  return permissions.reduce<GroupedPermissions>((groups, permission) => {
+    const groupKey = permission.name.split(':')[0] ?? 'other'
+    if (!groups[groupKey]) {
+      groups[groupKey] = []
     }
-    groups[module].push(permission)
+    groups[groupKey].push(permission)
     return groups
   }, {})
 }
 
-function formatModuleLabel(module: string) {
-  return module.charAt(0).toUpperCase() + module.slice(1)
+function filterGroupedPermissions(
+  grouped: GroupedPermissions,
+  query: string,
+): GroupedPermissions {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) {
+    return grouped
+  }
+
+  return Object.fromEntries(
+    Object.entries(grouped)
+      .map(([groupKey, groupPermissions]) => [
+        groupKey,
+        groupPermissions.filter(
+          (permission) =>
+            permission.name.toLowerCase().includes(normalizedQuery) ||
+            (permission.description?.toLowerCase().includes(normalizedQuery) ??
+              false),
+        ),
+      ])
+      .filter((entry): entry is [string, PermissionDto[]] => entry[1].length > 0),
+  )
 }
 
-export function RoleFormDialog({
-  open,
-  onOpenChange,
+function formatGroupLabel(groupKey: string) {
+  return groupKey.charAt(0).toUpperCase() + groupKey.slice(1)
+}
+
+interface RoleFormBodyProps {
+  tenantId?: string
+  permissions: PermissionDto[]
+  role?: RoleDto | null
+  onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
+}
+
+function RoleFormBody({
   tenantId,
   permissions,
   role,
+  onOpenChange,
   onSuccess,
-}: RoleFormDialogProps) {
+}: RoleFormBodyProps) {
   const { toast } = useToast()
   const isEditing = Boolean(role)
-  const [name, setName] = React.useState('')
-  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
+  const [name, setName] = React.useState(() => role?.name ?? '')
+  const [selectedIds, setSelectedIds] = React.useState<string[]>(
+    () => role?.permissions.map((permission) => permission.id) ?? [],
+  )
+  const [permissionSearch, setPermissionSearch] = React.useState('')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  React.useEffect(() => {
-    if (!open) return
-
-    setName(role?.name ?? '')
-    setSelectedIds(role?.permissions.map((p) => p.id) ?? [])
-  }, [open, role])
 
   const grouped = React.useMemo(
     () => groupPermissions(permissions),
     [permissions],
+  )
+
+  const filteredGrouped = React.useMemo(
+    () => filterGroupedPermissions(grouped, permissionSearch),
+    [grouped, permissionSearch],
   )
 
   const togglePermission = (permissionId: string, checked: boolean) => {
@@ -76,19 +112,29 @@ export function RoleFormDialog({
     )
   }
 
-  const toggleGroup = (module: string, checked: boolean) => {
-    const moduleIds = grouped[module]?.map((p) => p.id) ?? []
+  const toggleGroup = (groupKey: string, checked: boolean) => {
+    const groupIds = grouped[groupKey]?.map((permission) => permission.id) ?? []
     setSelectedIds((current) => {
       if (checked) {
-        return [...new Set([...current, ...moduleIds])]
+        return [...new Set([...current, ...groupIds])]
       }
-      return current.filter((id) => !moduleIds.includes(id))
+      return current.filter((id) => !groupIds.includes(id))
     })
   }
 
-  const isGroupFullySelected = (module: string) => {
-    const moduleIds = grouped[module]?.map((p) => p.id) ?? []
-    return moduleIds.length > 0 && moduleIds.every((id) => selectedIds.includes(id))
+  const isGroupFullySelected = (groupKey: string) => {
+    const groupIds = grouped[groupKey]?.map((permission) => permission.id) ?? []
+    return (
+      groupIds.length > 0 && groupIds.every((id) => selectedIds.includes(id))
+    )
+  }
+
+  const selectAll = () => {
+    setSelectedIds(permissions.map((permission) => permission.id))
+  }
+
+  const clearAll = () => {
+    setSelectedIds([])
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -140,7 +186,7 @@ export function RoleFormDialog({
         })
         toast({
           title: 'Role created',
-          description: `"${trimmedName}" is ready to assign.`,
+          description: `"${trimmedName}" is ready to assign to team members.`,
         })
       }
 
@@ -161,113 +207,164 @@ export function RoleFormDialog({
   }
 
   return (
+    <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 space-y-4 border-b px-6 py-4">
+        <div className="space-y-2">
+          <Label htmlFor="roleName">Role name</Label>
+          <Input
+            id="roleName"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="e.g. Front Desk, Gym Manager"
+            disabled={isSubmitting || Boolean(role?.isSystem)}
+          />
+          {role?.isSystem ? (
+            <p className="text-xs text-muted-foreground">
+              System role names are fixed.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">{selectedIds.length} selected</Badge>
+          <Button type="button" variant="outline" size="sm" onClick={selectAll}>
+            Select all
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={clearAll}>
+            Clear all
+          </Button>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Filter permissions..."
+            value={permissionSearch}
+            onChange={(event) => setPermissionSearch(event.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
+        <div className="space-y-4 pr-1">
+          {Object.keys(filteredGrouped).length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No permissions match your search.
+            </p>
+          ) : null}
+
+          {(Object.entries(filteredGrouped) as [string, PermissionDto[]][]).map(
+            ([groupKey, groupPermissions]) => (
+              <div
+                key={groupKey}
+                className="rounded-lg border border-border p-4"
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`group-${groupKey}`}
+                      checked={isGroupFullySelected(groupKey)}
+                      onCheckedChange={(checked) =>
+                        toggleGroup(groupKey, checked === true)
+                      }
+                    />
+                    <Label htmlFor={`group-${groupKey}`} className="font-medium">
+                      {formatGroupLabel(groupKey)}
+                    </Label>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {
+                      groupPermissions.filter((permission) =>
+                        selectedIds.includes(permission.id),
+                      ).length
+                    }
+                    /{groupPermissions.length}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {groupPermissions.map((permission) => (
+                    <label
+                      key={permission.id}
+                      htmlFor={permission.id}
+                      className="flex cursor-pointer items-start gap-3 rounded-md border border-transparent p-2 hover:bg-muted/40"
+                    >
+                      <Checkbox
+                        id={permission.id}
+                        checked={selectedIds.includes(permission.id)}
+                        onCheckedChange={(checked) =>
+                          togglePermission(permission.id, checked === true)
+                        }
+                      />
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium leading-none">
+                          {permission.name}
+                        </p>
+                        {permission.description ? (
+                          <p className="text-xs text-muted-foreground">
+                            {permission.description}
+                          </p>
+                        ) : null}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+
+      <DialogFooter className="shrink-0 border-t px-6 py-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" loading={isSubmitting}>
+          {isEditing ? 'Save changes' : 'Create role'}
+        </Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
+export function RoleFormDialog({
+  open,
+  onOpenChange,
+  tenantId,
+  permissions,
+  role,
+  onSuccess,
+}: RoleFormDialogProps) {
+  const formKey = role?.id ?? 'create'
+
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle>{isEditing ? 'Edit role' : 'Create role'}</DialogTitle>
+      <DialogContent className="flex h-[min(90vh,720px)] max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl [&>button]:z-10">
+        <DialogHeader className="shrink-0 border-b px-6 py-4">
+          <DialogTitle>{role ? 'Edit role' : 'Create role'}</DialogTitle>
           <DialogDescription>
-            {isEditing
+            {role
               ? 'Update permissions for this role. System role names cannot be changed.'
-              : 'Define a custom role and choose exactly what it can access.'}
+              : 'Name your role and select the permissions this team member type should have.'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="space-y-6 overflow-y-auto px-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="roleName">Role name</Label>
-              <Input
-                id="roleName"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Gym Manager"
-                disabled={isSubmitting || Boolean(role?.isSystem)}
-              />
-              {role?.isSystem ? (
-                <p className="text-xs text-muted-foreground">
-                  System role names are fixed.
-                </p>
-              ) : null}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Permissions</p>
-                <p className="text-xs text-muted-foreground">
-                  Grouped by module. Use select all for quick assignment.
-                </p>
-              </div>
-
-              {Object.entries(grouped).map(([module, modulePermissions]) => (
-                <div
-                  key={module}
-                  className="rounded-lg border border-border p-4"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id={`group-${module}`}
-                        checked={isGroupFullySelected(module)}
-                        onCheckedChange={(checked) =>
-                          toggleGroup(module, checked === true)
-                        }
-                      />
-                      <Label htmlFor={`group-${module}`} className="font-medium">
-                        {formatModuleLabel(module)}
-                      </Label>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {modulePermissions.filter((p) => selectedIds.includes(p.id)).length}
-                      /{modulePermissions.length} selected
-                    </span>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {modulePermissions.map((permission) => (
-                      <label
-                        key={permission.id}
-                        htmlFor={permission.id}
-                        className="flex cursor-pointer items-start gap-3 rounded-md border border-transparent p-2 hover:bg-muted/40"
-                      >
-                        <Checkbox
-                          id={permission.id}
-                          checked={selectedIds.includes(permission.id)}
-                          onCheckedChange={(checked) =>
-                            togglePermission(permission.id, checked === true)
-                          }
-                        />
-                        <div className="space-y-0.5">
-                          <p className="text-sm font-medium leading-none">
-                            {permission.name}
-                          </p>
-                          {permission.description ? (
-                            <p className="text-xs text-muted-foreground">
-                              {permission.description}
-                            </p>
-                          ) : null}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter className="border-t px-6 py-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              {isEditing ? 'Save changes' : 'Create role'}
-            </Button>
-          </DialogFooter>
-        </form>
+        {open ? (
+          <RoleFormBody
+            key={formKey}
+            tenantId={tenantId}
+            permissions={permissions}
+            role={role}
+            onOpenChange={onOpenChange}
+            onSuccess={onSuccess}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   )

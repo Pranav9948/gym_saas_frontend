@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { UploadCloud, Send } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,26 +17,43 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { PageHeader } from '@/components/common'
+import { PageHeader, LoadingSpinner } from '@/components/common'
+import { RoleManagement } from '@/components/owner/roles/RoleManagement'
 import { gym, owner } from '@/lib/owner-mock'
-import { ROUTES } from '@/config'
 
-export default function OwnerSettingsPage() {
+const SETTINGS_TABS = ['gym', 'team', 'roles', 'account'] as const
+type SettingsTab = (typeof SETTINGS_TABS)[number]
+
+function isSettingsTab(value: string | null): value is SettingsTab {
+  return SETTINGS_TABS.includes(value as SettingsTab)
+}
+
+function OwnerSettingsContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const activeTab: SettingsTab = isSettingsTab(tabParam) ? tabParam : 'gym'
+
+  const handleTabChange = (value: string) => {
+    if (value === 'gym') {
+      router.replace('/owner/settings', { scroll: false })
+      return
+    }
+    router.replace(`/owner/settings?tab=${value}`, { scroll: false })
+  }
+
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Manage your gym profile, team and account." />
+      <PageHeader title="Settings" description="Manage your gym profile, team, roles and account." />
 
-      <Tabs defaultValue="gym" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="gym">Gym Profile</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="roles" asChild>
-            <Link href={ROUTES.OWNER_SETTINGS_ROLES}>Roles</Link>
-          </TabsTrigger>
+          <TabsTrigger value="roles">Roles</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
 
-        {/* Gym Profile */}
         <TabsContent value="gym">
           <Card>
             <CardHeader>
@@ -93,7 +110,6 @@ export default function OwnerSettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Team */}
         <TabsContent value="team">
           <Card>
             <CardHeader>
@@ -143,7 +159,10 @@ export default function OwnerSettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Account */}
+        <TabsContent value="roles">
+          <RoleManagement embedded />
+        </TabsContent>
+
         <TabsContent value="account">
           <Card>
             <CardHeader>
@@ -192,5 +211,13 @@ export default function OwnerSettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+export default function OwnerSettingsPage() {
+  return (
+    <React.Suspense fallback={<LoadingSpinner fullScreen label="Loading settings..." />}>
+      <OwnerSettingsContent />
+    </React.Suspense>
   )
 }

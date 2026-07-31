@@ -8,7 +8,7 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
+import { API_BASE_URL, API_ENDPOINTS, TIMEOUTS } from '@/config/api.config';
 import { parseApiError, ErrorCode } from './errors';
 
 // Extend Axios config to include retry flag
@@ -81,6 +81,7 @@ export function refreshAccessToken(): Promise<string | null> {
     const response = await axios.get(`${API_BASE_URL}${refreshPath}`, {
       withCredentials: true,
       params: { _: Date.now() },
+      timeout: TIMEOUTS.AUTH_REFRESH,
     });
 
     const newToken = response.data?.data?.accessToken as string | undefined;
@@ -121,7 +122,7 @@ const processQueue = (
 // Create Axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: TIMEOUTS.DEFAULT,
   headers: {
     'Content-Type': 'application/json',
   },

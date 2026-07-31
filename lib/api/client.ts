@@ -165,6 +165,8 @@ apiClient.interceptors.response.use(
         '/auth/generate-new-tokens',
         '/super-admin/login',
         '/super-admin/rotate-refresh-token',
+        '/tenant/users/accept-invite',
+        '/tenant/users/invites/preview',
       ];
       if (
         skipRefreshPaths.some((path) => originalRequest.url?.includes(path))

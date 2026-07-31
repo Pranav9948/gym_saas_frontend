@@ -8,6 +8,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, getPersistedAuthSession } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
+import { tenantService } from '@/services/tenant.service';
 import { setAccessToken, clearAccessToken, refreshAccessToken, setAuthType } from '@/lib/api/client';
 import { ROUTES } from '@/config/routes';
 import { toast } from 'sonner';
@@ -60,6 +61,17 @@ async function initializeAuthSession(): Promise<void> {
     const meResponse = await authService.getMe();
 
     if (meResponse.success && meResponse.data) {
+      let tenant = null;
+
+      if (meResponse.data.role === 'OWNER') {
+        try {
+          const tenantResponse = await tenantService.getTenant();
+          tenant = tenantResponse.data ?? null;
+        } catch {
+          tenant = null;
+        }
+      }
+
       setAuth(
         {
           id: meResponse.data.id,
@@ -68,7 +80,7 @@ async function initializeAuthSession(): Promise<void> {
           lastName: meResponse.data.lastName,
           role: meResponse.data.role,
         },
-        null,
+        tenant,
         accessToken,
       );
     } else {

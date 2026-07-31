@@ -14,6 +14,8 @@ export const queryKeys = {
   tenant: {
     all: ['tenant'] as const,
     current: () => [...queryKeys.tenant.all, 'current'] as const,
+    team: () => [...queryKeys.tenant.all, 'team'] as const,
+    invites: () => [...queryKeys.tenant.all, 'invites'] as const,
   },
 
   // Members

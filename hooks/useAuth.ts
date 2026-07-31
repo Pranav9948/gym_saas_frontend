@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
+import { tenantService } from '@/services/tenant.service';
 import { ROUTES, getPostLoginRoute } from '@/config/routes';
 import { applyAppTheme } from '@/components/theme-sync';
 import type { TenantRole } from '@/types';
@@ -42,7 +43,19 @@ export function useAuth() {
         const response = await authService.login({ email, password });
 
         if (response.accessToken && response.user) {
-          setAuth(response.user, null, response.accessToken);
+          let tenant = response.tenant ?? null;
+
+          if (!tenant && response.user.role === 'OWNER') {
+            try {
+              setAccessToken(response.accessToken);
+              const tenantResponse = await tenantService.getTenant();
+              tenant = tenantResponse.data ?? null;
+            } catch {
+              tenant = null;
+            }
+          }
+
+          setAuth(response.user, tenant, response.accessToken);
           if (response.user.role === 'OWNER') {
             applyAppTheme('light');
             setTheme('light');

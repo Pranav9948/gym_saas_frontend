@@ -16,7 +16,7 @@ export const updateTenantSchema = z.object({
   contactPhone: z
     .string()
     .min(8, 'Phone number must be at least 8 characters')
-    .max(15, 'Phone number must be at most 15 characters')
+    .max(20, 'Phone number must be at most 20 characters')
     .regex(/^[0-9+\-() ]+$/, 'Phone number contains invalid characters')
     .optional(),
   contactEmail: z
@@ -32,6 +32,11 @@ export const updateTenantSchema = z.object({
     .string()
     .min(2, 'City must be at least 2 characters')
     .max(100, 'City must be at most 100 characters')
+    .optional(),
+  state: z
+    .string()
+    .min(2, 'State must be at least 2 characters')
+    .max(100, 'State must be at most 100 characters')
     .optional(),
   country: z
     .string()
@@ -73,6 +78,19 @@ export const directCreateUserSchema = z.object({
 });
 
 export type DirectCreateUserFormData = z.infer<typeof directCreateUserSchema>;
+
+export const directCreateTeamMemberSchema = directCreateUserSchema
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type DirectCreateTeamMemberFormData = z.infer<
+  typeof directCreateTeamMemberSchema
+>;
 
 // Accept invite schema
 export const acceptInviteSchema = z

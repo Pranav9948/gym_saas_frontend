@@ -71,6 +71,7 @@ export interface Tenant {
   contactEmail: string;
   contactPhone: string;
   city: string;
+  state?: string;
   country: string;
   address?: string;
   timezone?: string;

@@ -4,10 +4,12 @@ import React from 'react'
 import Link from 'next/link'
 import { Menu, Search, Plus, UserPlus, ArrowUpCircle, User, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks'
+import { useOwnerTenant } from '@/hooks/useOwnerTenant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { GymBrand } from '@/components/owner/GymBrand'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { owner, subscription } from '@/lib/owner-mock'
 import { ROUTES } from '@/config'
 
 interface OwnerNavbarProps {
@@ -24,8 +25,16 @@ interface OwnerNavbarProps {
 }
 
 export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
-  const { logout } = useAuth()
-  const initials = `${owner.firstName[0]}${owner.lastName[0]}`.toUpperCase()
+  const { user, logout } = useAuth()
+  const { tenant } = useOwnerTenant()
+
+  const initials = user
+    ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
+    : 'OW'
+
+  const activePlan =
+    tenant?.subscriptions?.find((subscription) => subscription.status === 'ACTIVE')
+      ?.plan?.name ?? 'FREE'
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
@@ -40,7 +49,15 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
           <Menu className="size-5" />
         </Button>
 
-        {/* Search (center) */}
+        <div className="hidden shrink-0 md:flex">
+          <GymBrand
+            name={tenant?.name}
+            logoUrl={tenant?.logoUrl}
+            subtitle="Owner Portal"
+            iconClassName="size-8 rounded-md"
+          />
+        </div>
+
         <div className="relative w-full max-w-md">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -57,10 +74,8 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
             className="hidden gap-1.5 border-success/30 bg-success/10 text-success sm:inline-flex"
           >
             <span className="size-1.5 rounded-full bg-success" />
-            {subscription.plan} · ACTIVE
+            {activePlan} · ACTIVE
           </Badge>
-
-          {/* Quick actions */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -78,7 +93,7 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={ROUTES.OWNER_SETTINGS}>
+                <Link href={`${ROUTES.OWNER_SETTINGS}?tab=team`}>
                   <User className="size-4" />
                   <span>Invite Staff</span>
                 </Link>
@@ -92,8 +107,6 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Avatar menu */}
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:pr-2.5">
@@ -102,19 +115,21 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium sm:inline">{owner.firstName}</span>
+                <span className="hidden text-sm font-medium sm:inline">
+                  {user?.firstName}
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <p className="text-sm font-medium">
-                  {owner.firstName} {owner.lastName}
+                  {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs font-normal text-muted-foreground">{owner.email}</p>
+                <p className="text-xs font-normal text-muted-foreground">{user?.email}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={ROUTES.OWNER_SETTINGS}>
+                <Link href={`${ROUTES.OWNER_SETTINGS}?tab=account`}>
                   <User className="size-4" />
                   <span>Profile</span>
                 </Link>
@@ -131,7 +146,6 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </div>
     </header>

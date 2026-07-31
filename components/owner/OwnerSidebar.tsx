@@ -6,9 +6,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { Dumbbell, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks'
-import { gym } from '@/lib/owner-mock'
+import { useOwnerTenant } from '@/hooks/useOwnerTenant'
+import { GymBrand } from '@/components/owner/GymBrand'
 import { ownerNavItems } from './owner-nav-items'
 import { ROUTES } from '@/config'
 
@@ -22,17 +23,16 @@ function isItemActive(pathname: string, href: string) {
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
   const { logout } = useAuth()
+  const { tenant } = useOwnerTenant()
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Dumbbell className="size-5" />
-        </div>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-sidebar-foreground">{gym.name}</p>
-          <p className="text-xs text-muted-foreground">Owner Portal</p>
-        </div>
+      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
+        <GymBrand
+          name={tenant?.name}
+          logoUrl={tenant?.logoUrl}
+          subtitle="Owner Portal"
+        />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
@@ -86,12 +86,10 @@ interface OwnerSidebarProps {
 export function OwnerSidebar({ mobileOpen, onMobileOpenChange }: OwnerSidebarProps) {
   return (
     <>
-      {/* Desktop */}
       <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
         <SidebarContent />
       </aside>
 
-      {/* Mobile drawer */}
       <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
         <SheetContent side="left" className="w-72 bg-sidebar p-0">
           <SheetTitle className="sr-only">Navigation menu</SheetTitle>

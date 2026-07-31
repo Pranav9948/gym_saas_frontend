@@ -3,6 +3,7 @@
 // ===========================================
 
 export { useAuth } from './useAuth';
+export { useOwnerTenant } from './useOwnerTenant';
 export { useApi, useApiMutation } from './useApi';
 export { useFetch, useQueryClient } from './useFetch';
 export { useMutation } from './useMutation';

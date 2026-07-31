@@ -31,6 +31,9 @@ interface DirectCreateUserResponse {
     email: string;
     firstName: string;
     lastName: string;
+    role: string;
+    trainerId?: string;
+    specialization?: string | null;
   };
 }
 

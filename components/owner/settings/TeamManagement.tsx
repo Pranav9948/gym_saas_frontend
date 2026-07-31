@@ -42,8 +42,8 @@ import {
   type DirectCreateTeamMemberFormData,
   type InviteUserFormData,
 } from '@/schemas/settings.schema'
-import { INVITABLE_ROLES, ROLE_LABELS } from '@/constants/roles'
-import type { InviteRole, TenantRole } from '@/types'
+import { INVITABLE_ROLES, DIRECT_CREATABLE_ROLES, ROLE_LABELS } from '@/constants/roles'
+import type { DirectCreateRole, InviteRole, TenantRole } from '@/types'
 
 interface TeamManagementProps {
   embedded?: boolean
@@ -76,6 +76,7 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.tenant.team() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.tenant.invites() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.trainers.all }),
     ])
   }
 
@@ -98,8 +99,12 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
       role: 'STAFF',
       password: '',
       confirmPassword: '',
+      specialization: '',
+      bio: '',
     },
   })
+
+  const createRole = createForm.watch('role')
 
   const inviteMutation = useMutation({
     mutationFn: (data: InviteUserFormData) => tenantService.inviteUser(data),
@@ -131,11 +136,20 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
         lastName: data.lastName,
         role: data.role,
         password: data.password,
+        ...(data.role === 'TRAINER'
+          ? {
+              specialization: data.specialization?.trim(),
+              bio: data.bio?.trim() || undefined,
+            }
+          : {}),
       }),
     onSuccess: (_result, variables) => {
+      const isTrainer = variables.role === 'TRAINER'
       toast({
-        title: 'Staff created',
-        description: `${variables.firstName} ${variables.lastName} can log in immediately.`,
+        title: isTrainer ? 'Trainer created' : 'Staff created',
+        description: isTrainer
+          ? `${variables.firstName} ${variables.lastName} was added as a trainer and can log in now.`
+          : `${variables.firstName} ${variables.lastName} can log in immediately.`,
       })
       createForm.reset({
         email: '',
@@ -144,12 +158,14 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
         role: 'STAFF',
         password: '',
         confirmPassword: '',
+        specialization: '',
+        bio: '',
       })
       void invalidateTeam()
     },
     onError: (error) => {
       toast({
-        title: 'Could not create staff',
+        title: 'Could not create team member',
         description:
           error instanceof ApiException
             ? error.getUserMessage()
@@ -286,10 +302,11 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <UserPlus className="size-4 text-primary" />
-              Create staff directly
+              Create team member directly
             </CardTitle>
             <CardDescription>
-              Create an account with a password so they can log in right away.
+              Create admin, staff, or trainer accounts with a password for
+              immediate login.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -323,18 +340,22 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
                 <label className="text-sm font-medium leading-none">Role</label>
                 <Select
                   value={createForm.watch('role')}
-                  onValueChange={(value) =>
-                    createForm.setValue('role', value as InviteRole, {
+                  onValueChange={(value) => {
+                    createForm.setValue('role', value as DirectCreateRole, {
                       shouldValidate: true,
                     })
-                  }
+                    if (value !== 'TRAINER') {
+                      createForm.setValue('specialization', '')
+                      createForm.setValue('bio', '')
+                    }
+                  }}
                   disabled={createMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {INVITABLE_ROLES.map((role) => (
+                    {DIRECT_CREATABLE_ROLES.map((role) => (
                       <SelectItem key={role} value={role}>
                         {ROLE_LABELS[role]}
                       </SelectItem>
@@ -347,6 +368,26 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
                   </p>
                 ) : null}
               </div>
+              {createRole === 'TRAINER' ? (
+                <>
+                  <FormField
+                    name="specialization"
+                    control={createForm.control}
+                    label="Specialization"
+                    placeholder="Strength training, yoga, HIIT…"
+                    error={createForm.formState.errors.specialization?.message}
+                    disabled={createMutation.isPending}
+                  />
+                  <FormField
+                    name="bio"
+                    control={createForm.control}
+                    label="Bio (optional)"
+                    placeholder="Short trainer bio"
+                    error={createForm.formState.errors.bio?.message}
+                    disabled={createMutation.isPending}
+                  />
+                </>
+              ) : null}
               <FormField
                 name="password"
                 control={createForm.control}
@@ -369,7 +410,7 @@ export function TeamManagement({ embedded = false }: TeamManagementProps) {
                 loading={createMutation.isPending}
               >
                 <UserPlus className="size-4" />
-                Create staff
+                {createRole === 'TRAINER' ? 'Create trainer' : 'Create member'}
               </Button>
             </form>
           </CardContent>

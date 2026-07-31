@@ -16,6 +16,7 @@ export type GoalType = 'GAIN' | 'LOSS';
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 export type TenantRole = 'OWNER' | 'ADMIN' | 'STAFF' | 'TRAINER';
 export type InviteRole = 'ADMIN' | 'STAFF';
+export type DirectCreateRole = 'ADMIN' | 'STAFF' | 'TRAINER';
 
 export interface PlanFeatures {
   maxMembers: number;

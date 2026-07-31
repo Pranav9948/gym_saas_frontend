@@ -64,18 +64,43 @@ export const inviteUserSchema = z.object({
 export type InviteUserFormData = z.infer<typeof inviteUserSchema>;
 
 // Direct create user schema (with password)
-export const directCreateUserSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  firstName: z
-    .string()
-    .trim()
-    .min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().trim().min(1, 'Last name is required'),
-  role: z.enum(['ADMIN', 'STAFF'], {
-    message: 'Please select a role',
-  }),
-  password: passwordSchema,
-});
+export const directCreateUserSchema = z
+  .object({
+    email: z.string().email('Please enter a valid email address'),
+    firstName: z
+      .string()
+      .trim()
+      .min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().trim().min(1, 'Last name is required'),
+    role: z.enum(['ADMIN', 'STAFF', 'TRAINER'], {
+      message: 'Please select a role',
+    }),
+    password: passwordSchema,
+    specialization: z
+      .string()
+      .trim()
+      .min(3, 'Specialization must be at least 3 characters')
+      .max(200, 'Specialization is too long')
+      .optional()
+      .or(z.literal('')),
+    bio: z
+      .string()
+      .max(500, 'Bio must be at most 500 characters')
+      .optional()
+      .or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.role === 'TRAINER' &&
+      (!data.specialization || data.specialization.trim().length < 3)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['specialization'],
+        message: 'Specialization is required for trainers',
+      });
+    }
+  });
 
 export type DirectCreateUserFormData = z.infer<typeof directCreateUserSchema>;
 

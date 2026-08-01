@@ -33,6 +33,8 @@ export const addStaffPersonSchema = personBaseSchema
     path: ['confirmPassword'],
   });
 
+export const addAdminPersonSchema = addStaffPersonSchema;
+
 export const addTrainerPersonSchema = personBaseSchema
   .merge(passwordFieldsSchema)
   .extend({
@@ -53,6 +55,7 @@ export const addTrainerPersonSchema = personBaseSchema
 
 export type AddMemberPersonFormData = z.infer<typeof addMemberPersonSchema>;
 export type AddStaffPersonFormData = z.infer<typeof addStaffPersonSchema>;
+export type AddAdminPersonFormData = z.infer<typeof addAdminPersonSchema>;
 export type AddTrainerPersonFormData = z.infer<typeof addTrainerPersonSchema>;
 
-export type PersonType = 'member' | 'staff' | 'trainer';
+export type PersonType = 'member' | 'staff' | 'admin' | 'trainer';

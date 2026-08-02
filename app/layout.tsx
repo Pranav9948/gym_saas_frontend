@@ -6,6 +6,7 @@ import { ThemeSync } from '@/components/theme-sync'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { ToastProvider } from '@/providers/ToastProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
+import { AppErrorBoundary } from '@/components/providers/AppErrorBoundary'
 import './globals.css'
 
 const geistSans = Geist({
@@ -134,7 +135,7 @@ export default function RootLayout({
           <QueryProvider>
             <ToastProvider>
               <AuthProvider>
-                {children}
+                <AppErrorBoundary>{children}</AppErrorBoundary>
               </AuthProvider>
             </ToastProvider>
           </QueryProvider>

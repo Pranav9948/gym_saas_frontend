@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { GlobalErrorUI } from './GlobalErrorUI';
+import { Button } from '@/components/ui/button';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -34,14 +36,15 @@ export class ErrorBoundary extends React.Component<
       return this.props.fallback ? (
         this.props.fallback(this.state.error)
       ) : (
-        <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
-          <p className="text-sm font-medium text-destructive">
-            Something went wrong
-          </p>
-          <p className="text-xs text-destructive/80 mt-1">
-            {this.state.error.message}
-          </p>
-        </div>
+        <GlobalErrorUI
+          title="Something went wrong"
+          description={this.state.error.message}
+          actions={
+            <Button onClick={() => this.setState({ hasError: false, error: null })}>
+              Try again
+            </Button>
+          }
+        />
       );
     }
 

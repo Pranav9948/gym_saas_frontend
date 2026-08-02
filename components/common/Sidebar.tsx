@@ -6,35 +6,23 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard,
-  Users,
-  Dumbbell,
-  CheckCircle,
-  Settings,
-  CreditCard,
-  BarChart3,
   LogOut,
   Menu,
   X,
 } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/members', label: 'Members', icon: Users },
-  { href: '/trainers', label: 'Trainers', icon: Dumbbell },
-  { href: '/attendance', label: 'Attendance', icon: CheckCircle },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/billing', label: 'Billing', icon: CreditCard },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+import { STAFF_NAV_ITEMS, filterNavItems } from '@/config/navigation';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, permissions } = useAuth();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = React.useState(false);
+  const navItems = React.useMemo(
+    () => filterNavItems(STAFF_NAV_ITEMS, permissions),
+    [permissions],
+  );
 
   const handleLogout = async () => {
     await logout();

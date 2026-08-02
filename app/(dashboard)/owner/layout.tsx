@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useToast } from '@/hooks'
 import { LoadingSpinner } from '@/components/common'
-import { ROUTES } from '@/config'
+import { ROUTES, getPostLoginRoute } from '@/config'
 import { OwnerDashboardLayout } from '@/components/owner/OwnerDashboardLayout'
 import { applyAppTheme } from '@/components/theme-sync'
 
@@ -28,7 +28,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
         description: 'Only gym owners can access this area.',
         variant: 'destructive',
       })
-      router.push(ROUTES.DASHBOARD)
+      router.push(getPostLoginRoute(user.role))
     }
   }, [isLoading, isInitialized, user, router, toast])
 

@@ -27,6 +27,7 @@ interface AuthState {
   setAuth: (user: User, tenant: Tenant | null, accessToken: string) => void;
   setUser: (user: User) => void;
   setTenant: (tenant: Tenant) => void;
+  setPermissions: (permissions: string[]) => void;
   setLoading: (loading: boolean) => void;
   setInitialized: (initialized: boolean) => void;
   logout: () => void;
@@ -90,6 +91,10 @@ export const useAuthStore = create<AuthState>()(
 
         setTenant: (tenant) => {
           set({ tenant });
+        },
+
+        setPermissions: (permissions) => {
+          set({ permissions });
         },
 
         setLoading: (isLoading) => {

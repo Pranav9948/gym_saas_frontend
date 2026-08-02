@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils'
 interface UsageMeterProps {
   label: string
   current: number
-  max: number
+  max: number | null
+  isUnlimited?: boolean
   /** override the auto threshold color */
   tone?: 'primary' | 'success' | 'warning' | 'destructive'
   className?: string
@@ -22,8 +23,17 @@ function toneClass(tone: NonNullable<UsageMeterProps['tone']>) {
   }
 }
 
-export function UsageMeter({ label, current, max, tone, className }: UsageMeterProps) {
-  const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
+export function UsageMeter({
+  label,
+  current,
+  max,
+  isUnlimited = false,
+  tone,
+  className,
+}: UsageMeterProps) {
+  const unlimited = isUnlimited || max === null
+  const pct =
+    !unlimited && max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
   const autoTone: NonNullable<UsageMeterProps['tone']> =
     pct >= 90 ? 'destructive' : pct >= 70 ? 'warning' : 'success'
   const resolvedTone = tone ?? autoTone
@@ -33,7 +43,7 @@ export function UsageMeter({ label, current, max, tone, className }: UsageMeterP
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-foreground">{label}</span>
         <span className="font-mono tabular-nums text-muted-foreground">
-          {current} / {max}
+          {unlimited ? `${current} / Unlimited` : `${current} / ${max}`}
         </span>
       </div>
       <div
@@ -41,12 +51,12 @@ export function UsageMeter({ label, current, max, tone, className }: UsageMeterP
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={0}
-        aria-valuemax={max}
+        aria-valuemax={unlimited ? current : max ?? 0}
         aria-label={label}
       >
         <div
           className={cn('h-full rounded-full transition-all', toneClass(resolvedTone))}
-          style={{ width: `${pct}%` }}
+          style={{ width: unlimited ? '100%' : `${pct}%` }}
         />
       </div>
     </div>

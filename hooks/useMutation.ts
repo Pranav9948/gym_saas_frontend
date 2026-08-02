@@ -12,6 +12,8 @@ import {
 } from '@tanstack/react-query';
 import { parseApiError, type ApiException } from '@/lib/api/errors';
 import { toast } from 'sonner';
+import { useFeatureLimitStore } from '@/store/featureLimitStore';
+import type { PlanName } from '@/types/models';
 
 interface UseMutationHookOptions<TData, TVariables> extends Omit<
   UseMutationOptions<TData, ApiException, TVariables>,
@@ -66,6 +68,16 @@ export function useMutation<TData, TVariables = void>(
     },
 
     onError: (error, variables, onMutateResult, context) => {
+      if (error.isFeatureLimitError()) {
+        useFeatureLimitStore.getState().show({
+          message: error.message,
+          feature: error.featureLimit?.feature || 'MEMBERS',
+          currentPlan: (error.featureLimit?.currentPlan || 'FREE') as PlanName,
+          limit: error.featureLimit?.limit ?? 0,
+          used: error.featureLimit?.used ?? 0,
+        });
+      }
+
       if (showErrorToast) {
         const message = errorMessage || error.getUserMessage();
         toast.error(message);

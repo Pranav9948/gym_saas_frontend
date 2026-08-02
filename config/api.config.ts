@@ -104,8 +104,13 @@ export const API_ENDPOINTS = {
 
   // Billing
   BILLING: {
+    PLANS: '/billing/plans',
+    SUBSCRIPTION: '/billing/subscription',
+    SUMMARY: '/billing/summary',
+    USAGE: '/billing/usage',
+    PAYMENT_HISTORY: '/billing/payment-history',
     CHECKOUT_SESSION: '/billing/checkout-session',
-    PLANS: '/super-admin/get-all-plans',
+    CUSTOMER_PORTAL: '/billing/customer-portal',
   },
 
   // Health

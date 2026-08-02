@@ -11,6 +11,7 @@ export { useDebounce, useDebouncedCallback } from './useDebounce';
 export { usePagination } from './usePagination';
 export { useSearch } from './useSearch';
 export { useLocalStorage, useSessionStorage } from './useLocalStorage';
+export * from './billing';
 
 // Re-export existing hooks
 export { useIsMobile } from './use-mobile';

@@ -43,6 +43,11 @@ export const mutationKeys = {
     updatePlan: (id: string) => ['super-admin', 'update-plan', id] as const,
     deletePlan: (id: string) => ['super-admin', 'delete-plan', id] as const,
   },
+
+  billing: {
+    checkout: ['billing', 'checkout'] as const,
+    customerPortal: ['billing', 'customer-portal'] as const,
+  },
 } as const;
 
 export type MutationKeys = typeof mutationKeys;

@@ -67,6 +67,8 @@ export const ROUTES = {
   OWNER_DASHBOARD: '/owner/dashboard',
   OWNER_MEMBERS: '/owner/members',
   OWNER_BILLING: '/owner/billing',
+  OWNER_BILLING_SUCCESS: '/owner/billing/success',
+  OWNER_BILLING_CANCEL: '/owner/billing/cancel',
   OWNER_SETTINGS: '/owner/settings',
   OWNER_SETTINGS_ROLES: '/owner/settings/roles',
 

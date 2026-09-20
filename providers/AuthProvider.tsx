@@ -9,7 +9,12 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore, getPersistedAuthSession } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
 import { tenantService } from '@/services/tenant.service';
-import { setAccessToken, clearAccessToken, refreshAccessToken, setAuthType } from '@/lib/api/client';
+import {
+  setAccessToken,
+  refreshAccessToken,
+  setAuthType,
+  getAuthSessionEpoch,
+} from '@/lib/api/client';
 import { ROUTES } from '@/config/routes';
 import { toast } from 'sonner';
 
@@ -40,11 +45,17 @@ async function initializeAuthSession(): Promise<void> {
 
   const sessionAuthType = persisted.authType;
   const sessionUser = persisted.user;
+  const epochAtStart = getAuthSessionEpoch();
+  const sessionWasReplaced = () => getAuthSessionEpoch() !== epochAtStart;
 
   setAuthType(sessionAuthType);
 
   try {
     const accessToken = await refreshAccessToken();
+
+    if (sessionWasReplaced()) {
+      return;
+    }
 
     if (!accessToken) {
       logout();
@@ -60,6 +71,10 @@ async function initializeAuthSession(): Promise<void> {
 
     const meResponse = await authService.getMe();
 
+    if (sessionWasReplaced()) {
+      return;
+    }
+
     if (meResponse.success && meResponse.data) {
       let tenant = null;
 
@@ -70,6 +85,10 @@ async function initializeAuthSession(): Promise<void> {
         } catch {
           tenant = null;
         }
+      }
+
+      if (sessionWasReplaced()) {
+        return;
       }
 
       setAuth(
@@ -87,11 +106,14 @@ async function initializeAuthSession(): Promise<void> {
       logout();
     }
   } catch {
-    clearAccessToken();
-    logout();
+    if (!sessionWasReplaced()) {
+      logout();
+    }
   } finally {
-    setLoading(false);
-    setInitialized(true);
+    if (!sessionWasReplaced()) {
+      setLoading(false);
+      setInitialized(true);
+    }
   }
 }
 

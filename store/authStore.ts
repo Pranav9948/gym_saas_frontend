@@ -10,6 +10,7 @@ import {
   setAccessToken,
   clearAccessToken,
   setAuthType,
+  bumpAuthSessionEpoch,
   type AuthType,
 } from '@/lib/api/client';
 
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
         ...initialState,
 
         setAuth: (user, tenant, accessToken) => {
+          bumpAuthSessionEpoch();
           const isSuperAdmin = user.role === 'SUPER_ADMIN';
           const sessionAuthType: AuthType = isSuperAdmin ? 'superAdmin' : 'user';
           setAuthType(sessionAuthType);

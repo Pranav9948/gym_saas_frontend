@@ -58,21 +58,33 @@ export function LoginForm({ loginType }: LoginFormProps) {
       let redirectTo: string = ROUTES.DASHBOARD;
 
       if (loginType === "superAdmin") {
-        const adminData = (response as SuperAdminLoginResponse).data;
+        const adminResponse = response as SuperAdminLoginResponse;
+        const adminData = adminResponse.data;
+        const accessToken = adminData?.accessToken;
+
+        if (!accessToken || !adminData?.superAdmin) {
+          throw new Error('Login succeeded but no session token was returned');
+        }
 
         setAuth(
           adminData.superAdmin,
           null,
-          adminData.accessToken
+          accessToken
         );
 
         redirectTo = getPostLoginRoute(adminData.superAdmin.role);
       } else {
         const userData = response as LoginResponse;
+        const accessToken = userData.accessToken;
+
+        if (!accessToken || !userData.user) {
+          throw new Error('Login succeeded but no session token was returned');
+        }
+
         setAuth(
           userData.user,
           userData.tenant ?? null,
-          userData.accessToken,
+          accessToken,
         );
 
         redirectTo = getPostLoginRoute(userData.user.role);

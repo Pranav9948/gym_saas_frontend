@@ -1,6 +1,6 @@
 type AuthType = 'user' | 'superAdmin';
 
-export async function persistAccessSessionCookie(
+async function syncAccessSessionCookie(
   accessToken: string | null,
   authType: AuthType = 'user',
 ): Promise<void> {
@@ -13,8 +13,9 @@ export async function persistAccessSessionCookie(
       method: 'DELETE',
       credentials: 'include',
     });
-    if (!response.ok) {
-      throw new Error('Failed to clear access session cookie');
+    // 404 means the cookie/route is already gone — treat as cleared.
+    if (!response.ok && response.status !== 404) {
+      console.error('Failed to clear access session cookie', response.status);
     }
     return;
   }
@@ -26,6 +27,17 @@ export async function persistAccessSessionCookie(
     body: JSON.stringify({ accessToken, authType }),
   });
   if (!response.ok) {
-    throw new Error('Failed to persist access session cookie');
+    console.error('Failed to persist access session cookie', response.status);
+  }
+}
+
+export async function persistAccessSessionCookie(
+  accessToken: string | null,
+  authType: AuthType = 'user',
+): Promise<void> {
+  try {
+    await syncAccessSessionCookie(accessToken, authType);
+  } catch (error) {
+    console.error('Session cookie sync failed', error);
   }
 }

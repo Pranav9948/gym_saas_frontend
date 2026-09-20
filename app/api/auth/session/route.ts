@@ -7,13 +7,13 @@ function isProduction(): boolean {
   return process.env.NODE_ENV === 'production';
 }
 
-function accessCookieOptions() {
+function accessCookieOptions(maxAge = ACCESS_TOKEN_MAX_AGE_SECONDS) {
   return {
     httpOnly: true,
     secure: isProduction(),
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: ACCESS_TOKEN_MAX_AGE_SECONDS,
+    maxAge,
   };
 }
 
@@ -22,48 +22,63 @@ function isLikelyJwt(value: unknown): value is string {
 }
 
 export async function POST(request: Request) {
-  let body: unknown;
-
   try {
-    body = await request.json();
-  } catch {
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: 'Invalid session payload' },
+        { status: 400 },
+      );
+    }
+
+    const accessToken =
+      typeof body === 'object' && body !== null && 'accessToken' in body
+        ? (body as { accessToken?: unknown }).accessToken
+        : undefined;
+
+    if (!isLikelyJwt(accessToken)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid access token' },
+        { status: 400 },
+      );
+    }
+
+    const cookieStore = await cookies();
+    cookieStore.set('accessToken', accessToken, accessCookieOptions());
+
+    const authType =
+      typeof body === 'object' &&
+      body !== null &&
+      'authType' in body &&
+      (body as { authType?: unknown }).authType === 'superAdmin'
+        ? 'superAdmin'
+        : 'user';
+
+    cookieStore.set('authType', authType, accessCookieOptions());
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to persist session cookie', error);
     return NextResponse.json(
-      { success: false, message: 'Invalid session payload' },
-      { status: 400 },
+      { success: false, message: 'Failed to persist session cookie' },
+      { status: 500 },
     );
   }
-
-  const accessToken =
-    typeof body === 'object' && body !== null && 'accessToken' in body
-      ? (body as { accessToken?: unknown }).accessToken
-      : undefined;
-
-  if (!isLikelyJwt(accessToken)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid access token' },
-      { status: 400 },
-    );
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set('accessToken', accessToken, accessCookieOptions());
-
-  const authType =
-    typeof body === 'object' &&
-    body !== null &&
-    'authType' in body &&
-    (body as { authType?: unknown }).authType === 'superAdmin'
-      ? 'superAdmin'
-      : 'user';
-
-  cookieStore.set('authType', authType, accessCookieOptions());
-
-  return NextResponse.json({ success: true });
 }
 
 export async function DELETE() {
-  const cookieStore = await cookies();
-  cookieStore.delete('accessToken');
-  cookieStore.delete('authType');
-  return NextResponse.json({ success: true });
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set('accessToken', '', accessCookieOptions(0));
+    cookieStore.set('authType', '', accessCookieOptions(0));
+    cookieStore.delete('accessToken');
+    cookieStore.delete('authType');
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to clear session cookie', error);
+    return NextResponse.json({ success: true });
+  }
 }

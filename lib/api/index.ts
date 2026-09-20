@@ -9,6 +9,8 @@ export {
   setAccessToken,
   clearAccessToken,
   whenSessionCookieSynced,
+  getAuthSessionEpoch,
+  bumpAuthSessionEpoch,
 } from './client';
 export * from './errors';
 export * from './types';

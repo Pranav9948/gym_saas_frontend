@@ -8,6 +8,7 @@ export enum ErrorCode {
   UNAUTHORIZED = 1001,
   TOKEN_EXPIRED = 1002,
   INVALID_TOKEN = 1003,
+  INVALID_CREDENTIALS = 1004,
 
   // Validation errors (2xxx)
   VALIDATION_FAILED = 2001,
@@ -32,9 +33,10 @@ export enum ErrorCode {
 
 // Error code to user-friendly message mapping
 export const ERROR_MESSAGES: Record<number, string> = {
-  [ErrorCode.UNAUTHORIZED]: 'You must be logged in to perform this action.',
+  [ErrorCode.UNAUTHORIZED]: 'Authentication token missing or expired.',
   [ErrorCode.TOKEN_EXPIRED]: 'Your session has expired. Please log in again.',
-  [ErrorCode.INVALID_TOKEN]: 'Invalid authentication token.',
+  [ErrorCode.INVALID_TOKEN]: 'Authentication token missing or expired.',
+  [ErrorCode.INVALID_CREDENTIALS]: 'Invalid email or password',
   [ErrorCode.VALIDATION_FAILED]: 'Please check your input and try again.',
   [ErrorCode.EMAIL_ALREADY_EXISTS]: 'This email is already registered.',
   [ErrorCode.INVALID_INPUT]: 'Invalid input provided.',
@@ -55,7 +57,10 @@ export const ERROR_MESSAGES: Record<number, string> = {
 // Custom API Error class
 export class ApiException extends Error {
   public readonly errorCode: number;
-  public readonly errors: Record<string, string[]> | null;
+  public readonly errors:
+    | Record<string, string[]>
+    | Array<{ field: string; message: string }>
+    | null;
   public readonly statusCode: number;
   public readonly featureLimit?: {
     code: 'FEATURE_LIMIT_REACHED';
@@ -68,7 +73,10 @@ export class ApiException extends Error {
   constructor(
     message: string,
     errorCode: number,
-    errors: Record<string, string[]> | null = null,
+    errors:
+      | Record<string, string[]>
+      | Array<{ field: string; message: string }>
+      | null = null,
     statusCode: number = 500,
     featureLimit?: ApiException['featureLimit'],
   ) {
@@ -82,7 +90,10 @@ export class ApiException extends Error {
 
   // Get user-friendly message
   getUserMessage(): string {
-    return ERROR_MESSAGES[this.errorCode] || this.message;
+    if (this.message && this.message.trim()) {
+      return this.message;
+    }
+    return ERROR_MESSAGES[this.errorCode] || 'An unexpected error occurred';
   }
 
   // Check if error is due to authentication
@@ -91,6 +102,7 @@ export class ApiException extends Error {
       ErrorCode.UNAUTHORIZED,
       ErrorCode.TOKEN_EXPIRED,
       ErrorCode.INVALID_TOKEN,
+      ErrorCode.INVALID_CREDENTIALS,
     ].includes(this.errorCode);
   }
 
@@ -121,6 +133,18 @@ export class ApiException extends Error {
   getFieldErrors(): Record<string, string> {
     if (!this.errors) return {};
 
+    if (Array.isArray(this.errors)) {
+      return this.errors.reduce(
+        (acc, item) => {
+          if (item?.field && item?.message) {
+            acc[item.field] = item.message;
+          }
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+    }
+
     return Object.entries(this.errors).reduce(
       (acc, [field, messages]) => {
         acc[field] = messages[0] || 'Invalid value';
@@ -140,7 +164,9 @@ export function parseApiError(error: unknown): ApiException {
         data?: {
           message?: string;
           errorCode?: number;
-          errors?: Record<string, string[]>;
+          errors?:
+            | Record<string, string[]>
+            | Array<{ field: string; message: string }>;
         };
         status?: number;
       };
@@ -151,7 +177,9 @@ export function parseApiError(error: unknown): ApiException {
       | {
           message?: string;
           errorCode?: number;
-          errors?: Record<string, string[]>;
+          errors?:
+            | Record<string, string[]>
+            | Array<{ field: string; message: string }>;
           code?: string;
           feature?: string;
           currentPlan?: string;

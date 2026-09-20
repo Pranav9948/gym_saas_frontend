@@ -16,7 +16,7 @@ export const updateTenantSchema = z.object({
   contactPhone: z
     .string()
     .min(8, 'Phone number must be at least 8 characters')
-    .max(15, 'Phone number must be at most 15 characters')
+    .max(20, 'Phone number must be at most 20 characters')
     .regex(/^[0-9+\-() ]+$/, 'Phone number contains invalid characters')
     .optional(),
   contactEmail: z
@@ -32,6 +32,11 @@ export const updateTenantSchema = z.object({
     .string()
     .min(2, 'City must be at least 2 characters')
     .max(100, 'City must be at most 100 characters')
+    .optional(),
+  state: z
+    .string()
+    .min(2, 'State must be at least 2 characters')
+    .max(100, 'State must be at most 100 characters')
     .optional(),
   country: z
     .string()
@@ -59,20 +64,58 @@ export const inviteUserSchema = z.object({
 export type InviteUserFormData = z.infer<typeof inviteUserSchema>;
 
 // Direct create user schema (with password)
-export const directCreateUserSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  firstName: z
-    .string()
-    .trim()
-    .min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().trim().min(1, 'Last name is required'),
-  role: z.enum(['ADMIN', 'STAFF'], {
-    message: 'Please select a role',
-  }),
-  password: passwordSchema,
-});
+export const directCreateUserSchema = z
+  .object({
+    email: z.string().email('Please enter a valid email address'),
+    firstName: z
+      .string()
+      .trim()
+      .min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().trim().min(1, 'Last name is required'),
+    role: z.enum(['ADMIN', 'STAFF', 'TRAINER'], {
+      message: 'Please select a role',
+    }),
+    password: passwordSchema,
+    specialization: z
+      .string()
+      .trim()
+      .min(3, 'Specialization must be at least 3 characters')
+      .max(200, 'Specialization is too long')
+      .optional()
+      .or(z.literal('')),
+    bio: z
+      .string()
+      .max(500, 'Bio must be at most 500 characters')
+      .optional()
+      .or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.role === 'TRAINER' &&
+      (!data.specialization || data.specialization.trim().length < 3)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['specialization'],
+        message: 'Specialization is required for trainers',
+      });
+    }
+  });
 
 export type DirectCreateUserFormData = z.infer<typeof directCreateUserSchema>;
+
+export const directCreateTeamMemberSchema = directCreateUserSchema
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type DirectCreateTeamMemberFormData = z.infer<
+  typeof directCreateTeamMemberSchema
+>;
 
 // Accept invite schema
 export const acceptInviteSchema = z

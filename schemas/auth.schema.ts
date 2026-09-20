@@ -47,7 +47,7 @@ export const registerGymSchema = z
     contactPhone: z
       .string()
       .min(8, 'Phone number must be at least 8 characters')
-      .max(15, 'Phone number must be at most 15 characters')
+      .max(20, 'Phone number must be at most 20 characters')
       .regex(/^[0-9+\-() ]+$/, 'Phone number contains invalid characters'),
     contactEmail: z.string().email('Please enter a valid contact email'),
     address: z
@@ -58,6 +58,10 @@ export const registerGymSchema = z
       .string()
       .min(2, 'City must be at least 2 characters')
       .max(100, 'City must be at most 100 characters'),
+    state: z
+      .string()
+      .min(2, 'State must be at least 2 characters')
+      .max(100, 'State must be at most 100 characters'),
     country: z
       .string()
       .min(2, 'Country must be at least 2 characters')

@@ -2,7 +2,7 @@
 // Tenant Service - Tenant/Gym API calls
 // ===========================================
 
-import { get, post, patch, uploadFile } from '@/lib/api/client';
+import { get, post, patch, uploadFile, del } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   TenantResponse,
@@ -11,12 +11,30 @@ import type {
   DirectCreateUserRequest,
   AcceptInviteRequest,
   UpgradePlanRequest,
+  TeamMembersResponse,
+  PendingInvitesResponse,
+  InvitePreviewResponse,
+  AcceptInviteResponse,
 } from '@/types';
 
 interface ApiSuccessResponse {
   success: true;
   message?: string;
   data?: unknown;
+}
+
+interface DirectCreateUserResponse {
+  success: true;
+  message?: string;
+  data: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    trainerId?: string;
+    specialization?: string | null;
+  };
 }
 
 export const tenantService = {
@@ -48,6 +66,36 @@ export const tenantService = {
   },
 
   /**
+   * List team members for the current tenant
+   */
+  listTeamMembers: async (): Promise<TeamMembersResponse> => {
+    return get<TeamMembersResponse>(API_ENDPOINTS.TENANT.LIST_USERS);
+  },
+
+  /**
+   * List pending team invites
+   */
+  listPendingInvites: async (): Promise<PendingInvitesResponse> => {
+    return get<PendingInvitesResponse>(API_ENDPOINTS.TENANT.LIST_INVITES);
+  },
+
+  /**
+   * Preview invite details from email link (public)
+   */
+  getInvitePreview: async (token: string): Promise<InvitePreviewResponse> => {
+    return get<InvitePreviewResponse>(API_ENDPOINTS.TENANT.INVITE_PREVIEW, {
+      token,
+    });
+  },
+
+  /**
+   * Cancel a pending invite
+   */
+  cancelInvite: async (inviteId: string): Promise<ApiSuccessResponse> => {
+    return del<ApiSuccessResponse>(API_ENDPOINTS.TENANT.CANCEL_INVITE(inviteId));
+  },
+
+  /**
    * Invite a user to the tenant
    */
   inviteUser: async (data: InviteUserRequest): Promise<ApiSuccessResponse> => {
@@ -55,13 +103,12 @@ export const tenantService = {
   },
 
   /**
-   * Accept an invitation
-   * Note: Backend requires auth which is unusual for invite acceptance
+   * Accept an invitation (public — sets refresh cookie on success)
    */
   acceptInvite: async (
     data: AcceptInviteRequest,
-  ): Promise<ApiSuccessResponse> => {
-    return post<ApiSuccessResponse>(API_ENDPOINTS.TENANT.ACCEPT_INVITE, data);
+  ): Promise<AcceptInviteResponse> => {
+    return post<AcceptInviteResponse>(API_ENDPOINTS.TENANT.ACCEPT_INVITE, data);
   },
 
   /**
@@ -69,8 +116,8 @@ export const tenantService = {
    */
   createUser: async (
     data: DirectCreateUserRequest,
-  ): Promise<ApiSuccessResponse> => {
-    return post<ApiSuccessResponse>(API_ENDPOINTS.TENANT.CREATE_USER, data);
+  ): Promise<DirectCreateUserResponse> => {
+    return post<DirectCreateUserResponse>(API_ENDPOINTS.TENANT.CREATE_USER, data);
   },
 
   /**

@@ -14,6 +14,7 @@ import type {
   GoalType,
   BillingInterval,
   InviteRole,
+  DirectCreateRole,
 } from './models';
 
 // Pagination
@@ -145,6 +146,7 @@ export interface UpdateTenantRequest {
   contactEmail?: string;
   address?: string;
   city?: string;
+  state?: string;
   country?: string;
   isActive?: boolean;
 }
@@ -161,8 +163,14 @@ export interface InviteUserRequest {
   role: InviteRole;
 }
 
-export interface DirectCreateUserRequest extends InviteUserRequest {
+export interface DirectCreateUserRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: DirectCreateRole;
   password: string;
+  specialization?: string;
+  bio?: string;
 }
 
 export interface AcceptInviteRequest {

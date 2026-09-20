@@ -10,7 +10,7 @@ interface SuperAdminDashboardLayoutProps {
 
 export function SuperAdminDashboardLayout({ children }: SuperAdminDashboardLayoutProps) {
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="dark flex h-dvh overflow-hidden bg-background text-foreground">
       <SuperAdminSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <SuperAdminNavbar />

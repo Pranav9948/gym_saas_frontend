@@ -22,6 +22,7 @@ export enum ErrorCode {
   // Permission errors (4xxx)
   FORBIDDEN = 4001,
   ACCESS_DENIED = 4002,
+  FEATURE_LIMIT_REACHED = 4003,
 
   // Server errors (5xxx)
   INTERNAL_EXCEPTION = 5001,
@@ -42,6 +43,8 @@ export const ERROR_MESSAGES: Record<number, string> = {
   [ErrorCode.RESOURCE_ALREADY_EXISTS]: 'This resource already exists.',
   [ErrorCode.FORBIDDEN]: 'You do not have permission to perform this action.',
   [ErrorCode.ACCESS_DENIED]: 'Access denied.',
+  [ErrorCode.FEATURE_LIMIT_REACHED]:
+    'You have reached the limit for your current plan. Upgrade to continue.',
   [ErrorCode.INTERNAL_EXCEPTION]:
     'An unexpected error occurred. Please try again.',
   [ErrorCode.DATABASE_ERROR]: 'A database error occurred. Please try again.',
@@ -54,18 +57,27 @@ export class ApiException extends Error {
   public readonly errorCode: number;
   public readonly errors: Record<string, string[]> | null;
   public readonly statusCode: number;
+  public readonly featureLimit?: {
+    code: 'FEATURE_LIMIT_REACHED';
+    feature: string;
+    currentPlan: string;
+    limit: number;
+    used: number;
+  };
 
   constructor(
     message: string,
     errorCode: number,
     errors: Record<string, string[]> | null = null,
     statusCode: number = 500,
+    featureLimit?: ApiException['featureLimit'],
   ) {
     super(message);
     this.name = 'ApiException';
     this.errorCode = errorCode;
     this.errors = errors;
     this.statusCode = statusCode;
+    this.featureLimit = featureLimit;
   }
 
   // Get user-friendly message
@@ -91,8 +103,17 @@ export class ApiException extends Error {
 
   // Check if error is permission related
   isPermissionError(): boolean {
-    return [ErrorCode.FORBIDDEN, ErrorCode.ACCESS_DENIED].includes(
-      this.errorCode,
+    return [
+      ErrorCode.FORBIDDEN,
+      ErrorCode.ACCESS_DENIED,
+      ErrorCode.FEATURE_LIMIT_REACHED,
+    ].includes(this.errorCode);
+  }
+
+  isFeatureLimitError(): boolean {
+    return (
+      this.errorCode === ErrorCode.FEATURE_LIMIT_REACHED ||
+      this.featureLimit?.code === 'FEATURE_LIMIT_REACHED'
     );
   }
 
@@ -126,10 +147,37 @@ export function parseApiError(error: unknown): ApiException {
       message?: string;
     };
 
-    const data = axiosError.response?.data;
+    const data = axiosError.response?.data as
+      | {
+          message?: string;
+          errorCode?: number;
+          errors?: Record<string, string[]>;
+          code?: string;
+          feature?: string;
+          currentPlan?: string;
+          limit?: number;
+          used?: number;
+        }
+      | undefined;
     const status = axiosError.response?.status || 500;
 
     if (data) {
+      if (data.code === 'FEATURE_LIMIT_REACHED') {
+        return new ApiException(
+          data.message || 'Plan limit reached. Upgrade to continue.',
+          ErrorCode.FEATURE_LIMIT_REACHED,
+          null,
+          status,
+          {
+            code: 'FEATURE_LIMIT_REACHED',
+            feature: data.feature || 'MEMBERS',
+            currentPlan: data.currentPlan || 'FREE',
+            limit: data.limit ?? 0,
+            used: data.used ?? 0,
+          },
+        );
+      }
+
       return new ApiException(
         data.message || 'An error occurred',
         data.errorCode || ErrorCode.INTERNAL_EXCEPTION,

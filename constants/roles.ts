@@ -28,6 +28,13 @@ export const ROLE_DESCRIPTIONS: Record<TenantRole, string> = {
 // Roles that can be invited (OWNER cannot be invited)
 export const INVITABLE_ROLES: TenantRole[] = ['ADMIN', 'STAFF'] as const;
 
+// Roles that can be created directly with a password
+export const DIRECT_CREATABLE_ROLES: TenantRole[] = [
+  'ADMIN',
+  'STAFF',
+  'TRAINER',
+] as const;
+
 // Role hierarchy (higher index = more permissions)
 export const ROLE_HIERARCHY: TenantRole[] = [
   'TRAINER',

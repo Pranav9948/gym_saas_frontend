@@ -2,14 +2,15 @@
 // API Client - Axios instance with interceptors
 // ===========================================
 
+import { API_BASE_URL, API_ENDPOINTS, TIMEOUTS } from "@/config/api.config";
+import { persistAccessSessionCookie } from "@/lib/auth/frontend-session";
 import axios, {
   AxiosRequestConfig,
   type AxiosError,
   type AxiosInstance,
   type InternalAxiosRequestConfig,
-} from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '@/config/api.config';
-import { parseApiError, ErrorCode } from './errors';
+} from "axios";
+import { ErrorCode, parseApiError } from "./errors";
 
 // Extend Axios config to include retry flag
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -19,24 +20,24 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 // Token storage (in-memory for security)
 let accessToken: string | null = null;
 
-export type AuthType = 'user' | 'superAdmin';
+export type AuthType = "user" | "superAdmin";
 
-let authType: AuthType = 'user';
+let authType: AuthType = "user";
 
 export function getAuthType(): AuthType {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
-      const raw = localStorage.getItem('gym-auth-storage');
+      const raw = localStorage.getItem("gym-auth-storage");
       if (raw) {
         const parsed = JSON.parse(raw) as {
           state?: { authType?: AuthType; user?: { role?: string } };
         };
         const state = parsed.state;
         if (
-          state?.authType === 'superAdmin' ||
-          state?.user?.role === 'SUPER_ADMIN'
+          state?.authType === "superAdmin" ||
+          state?.user?.role === "SUPER_ADMIN"
         ) {
-          return 'superAdmin';
+          return "superAdmin";
         }
       }
     } catch {
@@ -58,10 +59,22 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null): void {
   accessToken = token;
+  queueSessionCookieSync(token);
 }
 
 export function clearAccessToken(): void {
   accessToken = null;
+  queueSessionCookieSync(null);
+}
+
+let cookieSync: Promise<void> = Promise.resolve();
+
+function queueSessionCookieSync(token: string | null): void {
+  cookieSync = persistAccessSessionCookie(token, getAuthType());
+}
+
+export function whenSessionCookieSynced(): Promise<void> {
+  return cookieSync;
 }
 
 let refreshPromise: Promise<string | null> | null = null;
@@ -74,18 +87,20 @@ export function refreshAccessToken(): Promise<string | null> {
 
   refreshPromise = (async () => {
     const refreshPath =
-      getAuthType() === 'superAdmin'
+      getAuthType() === "superAdmin"
         ? API_ENDPOINTS.SUPER_ADMIN.REFRESH
         : API_ENDPOINTS.AUTH.REFRESH;
 
     const response = await axios.get(`${API_BASE_URL}${refreshPath}`, {
       withCredentials: true,
       params: { _: Date.now() },
+      timeout: TIMEOUTS.AUTH_REFRESH,
     });
 
     const newToken = response.data?.data?.accessToken as string | undefined;
     if (newToken) {
       setAccessToken(newToken);
+      await whenSessionCookieSynced();
       return newToken;
     }
 
@@ -121,9 +136,9 @@ const processQueue = (
 // Create Axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: TIMEOUTS.DEFAULT,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Required for refresh token cookie
 });
@@ -159,11 +174,13 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Don't retry for login, register, or refresh endpoints
       const skipRefreshPaths = [
-        '/auth/login',
-        '/auth/register-gym',
-        '/auth/generate-new-tokens',
-        '/super-admin/login',
-        '/super-admin/rotate-refresh-token',
+        "/auth/login",
+        "/auth/register-gym",
+        "/auth/generate-new-tokens",
+        "/super-admin/login",
+        "/super-admin/rotate-refresh-token",
+        "/tenant/users/accept-invite",
+        "/tenant/users/invites/preview",
       ];
       if (
         skipRefreshPaths.some((path) => originalRequest.url?.includes(path))
@@ -196,14 +213,14 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
 
-        throw new Error('No token in refresh response');
+        throw new Error("No token in refresh response");
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
         clearAccessToken();
 
         // Redirect to login (handled by auth store/provider)
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('auth:logout'));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("auth:logout"));
         }
 
         return Promise.reject(
@@ -211,7 +228,7 @@ apiClient.interceptors.response.use(
             response: {
               status: 401,
               data: {
-                message: 'Session expired. Please log in again.',
+                message: "Session expired. Please log in again.",
                 errorCode: ErrorCode.TOKEN_EXPIRED,
               },
             },
@@ -252,6 +269,11 @@ export async function patch<T>(url: string, data?: unknown): Promise<T> {
   return response.data;
 }
 
+export async function put<T>(url: string, data?: unknown): Promise<T> {
+  const response = await apiClient.put<T>(url, data);
+  return response.data;
+}
+
 export async function del<T>(url: string): Promise<T> {
   const response = await apiClient.delete<T>(url);
   return response.data;
@@ -261,7 +283,7 @@ export async function del<T>(url: string): Promise<T> {
 export async function uploadFile<T>(
   url: string,
   file: File,
-  fieldName = 'file',
+  fieldName = "file",
 ): Promise<T> {
   const formData = new FormData();
   formData.append(fieldName, file);
@@ -269,7 +291,7 @@ export async function uploadFile<T>(
   const response = await apiClient.post<T>(url, formData, {
     headers: {
       // Let browser set Content-Type with boundary
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   return response.data;

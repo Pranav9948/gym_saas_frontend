@@ -1,48 +1,67 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks';
 import { LoadingSpinner } from '@/components/common';
-import { ROUTES } from '@/config';
+import { ROUTES, getForbiddenRedirect } from '@/config';
+import type { TenantRole } from '@/types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requiredRoles?: (TenantRole | string)[];
+  requiredPermissions?: string[];
+  requireAllPermissions?: boolean;
+  fallbackRoute?: string;
 }
 
 export function ProtectedRoute({
   children,
-  requiredRole,
+  requiredRoles,
+  requiredPermissions,
+  requireAllPermissions = true,
+  fallbackRoute,
 }: ProtectedRouteProps) {
-  const { user, isLoading, permissions } = useAuth();
+  const {
+    user,
+    isLoading,
+    isInitialized,
+    hasAllPermissions,
+    hasAnyPermission,
+  } = useAuth();
   const router = useRouter();
 
-  // React.useEffect(() => {
-  //   if (!isLoading) {
-  //     router.push(ROUTES.LOGIN);
-  //   }
-  // }, [isLoading, user, router]);
+  const hasRoleAccess = requiredRoles?.length
+    ? !!user?.role && requiredRoles.includes(user.role)
+    : true;
 
-  if (isLoading) {
+  const hasPermissionAccess = requiredPermissions?.length
+    ? requireAllPermissions
+      ? hasAllPermissions(requiredPermissions)
+      : hasAnyPermission(requiredPermissions)
+    : true;
+
+  const hasAccess = hasRoleAccess && hasPermissionAccess;
+
+  useEffect(() => {
+    if (isLoading || !isInitialized) return;
+
+    if (!user) {
+      router.replace(ROUTES.UNAUTHORIZED);
+      return;
+    }
+
+    if (!hasAccess) {
+      router.replace(fallbackRoute ?? getForbiddenRedirect(user.role));
+    }
+  }, [isLoading, isInitialized, user, hasAccess, router, fallbackRoute]);
+
+  if (isLoading || !isInitialized) {
     return <LoadingSpinner fullScreen />;
   }
 
-  if (!user) {
-    return null;
-  }
-
-  if (requiredRole && !permissions.includes(requiredRole)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Access Denied</h1>
-          <p className="text-muted-foreground mt-2">
-            You do not have permission to access this resource.
-          </p>
-        </div>
-      </div>
-    );
+  if (!user || !hasAccess) {
+    return <LoadingSpinner fullScreen />;
   }
 
   return <>{children}</>;

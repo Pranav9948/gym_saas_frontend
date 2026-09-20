@@ -27,6 +27,7 @@ interface AuthState {
   setAuth: (user: User, tenant: Tenant | null, accessToken: string) => void;
   setUser: (user: User) => void;
   setTenant: (tenant: Tenant) => void;
+  setPermissions: (permissions: string[]) => void;
   setLoading: (loading: boolean) => void;
   setInitialized: (initialized: boolean) => void;
   logout: () => void;
@@ -55,11 +56,10 @@ export const useAuthStore = create<AuthState>()(
         ...initialState,
 
         setAuth: (user, tenant, accessToken) => {
-          setAccessToken(accessToken);
-
           const isSuperAdmin = user.role === 'SUPER_ADMIN';
           const sessionAuthType: AuthType = isSuperAdmin ? 'superAdmin' : 'user';
           setAuthType(sessionAuthType);
+          setAccessToken(accessToken);
 
           const role = user.role as TenantRole;
           const permissions = isSuperAdmin
@@ -90,6 +90,10 @@ export const useAuthStore = create<AuthState>()(
 
         setTenant: (tenant) => {
           set({ tenant });
+        },
+
+        setPermissions: (permissions) => {
+          set({ permissions });
         },
 
         setLoading: (isLoading) => {
@@ -145,8 +149,6 @@ export const useAuthStore = create<AuthState>()(
         onRehydrateStorage: () => (state) => {
           if (state?.user) {
             setAuthType(state.authType ?? 'user');
-            state.setLoading(false);
-            state.setInitialized(true);
           }
         },
       },

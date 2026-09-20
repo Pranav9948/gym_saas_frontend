@@ -1,3 +1,16 @@
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+
+# Install native optional deps for both Windows (Cursor) and WSL (npm run dev).
+supportedArchitectures:
+  os:
+    - current
+    - win32
+    - linux
+  cpu:
+    - current
+    - x64
+  libc:
+    - current
+    - glibc

@@ -3,7 +3,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/common';
 import { loginSchema } from '@/schemas';
@@ -13,7 +14,10 @@ import { useAuth } from '@/hooks';
 import { useToast } from '@/hooks/use-toast';
 import { ApiException } from '@/lib/api/errors';
 import Link from 'next/link';
-import { ROUTES } from '@/config';
+import { ROUTES, getPostLoginRoute } from '@/config';
+import { getSafeInternalPath } from '@/lib/auth/protected-routes';
+import { whenSessionCookieSynced } from '@/lib/api';
+import { applyAppTheme } from '@/components/theme-sync';
 import { LoginResponse, SuperAdminLoginResponse } from '@/types';
 
 
@@ -24,6 +28,8 @@ type LoginFormProps = {
 
 export function LoginForm({ loginType }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setTheme } = useTheme();
   const { setAuth } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -49,6 +55,8 @@ export function LoginForm({ loginType }: LoginFormProps) {
           ? await authService.login(data)
           : await superAdminAuthService.loginSuperAdmin(data)
 
+      let redirectTo: string = ROUTES.DASHBOARD;
+
       if (loginType === "superAdmin") {
         const adminData = (response as SuperAdminLoginResponse).data;
 
@@ -58,6 +66,7 @@ export function LoginForm({ loginType }: LoginFormProps) {
           adminData.accessToken
         );
 
+        redirectTo = getPostLoginRoute(adminData.superAdmin.role);
       } else {
         const userData = response as LoginResponse;
         setAuth(
@@ -65,7 +74,18 @@ export function LoginForm({ loginType }: LoginFormProps) {
           userData.tenant ?? null,
           userData.accessToken,
         );
+
+        redirectTo = getPostLoginRoute(userData.user.role);
+        if (userData.user.role === 'OWNER') {
+          applyAppTheme('light');
+          setTheme('light');
+        } else {
+          applyAppTheme('dark');
+          setTheme('dark');
+        }
       }
+
+      await whenSessionCookieSynced();
 
       toast({
         title: 'Success',
@@ -73,13 +93,14 @@ export function LoginForm({ loginType }: LoginFormProps) {
         duration: 3000,
       });
 
-      router.push(
-        loginType === 'superAdmin' ? '/super-admin/plans' : ROUTES.DASHBOARD,
-      );
+      const nextPath = getSafeInternalPath(searchParams.get('next'));
+      router.push(nextPath ?? redirectTo);
     } catch (error) {
       const message = error instanceof ApiException
         ? error.getUserMessage()
         : 'Login failed. Please try again.';
+
+      console.log('message', message)
 
       toast({
         title: 'Error',

@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   SUPER_ADMIN: {
     SETUP: '/super-admin/setup',
     LOGIN: '/super-admin/login',
+    ME: '/super-admin/me',
     REFRESH: '/super-admin/rotate-refresh-token',
     LOGOUT: '/super-admin/logout',
     DASHBOARD: '/super-admin/dashboard',
@@ -79,16 +80,38 @@ export const API_ENDPOINTS = {
     GET: '/tenant',
     UPDATE: '/tenant',
     UPLOAD_LOGO: '/tenant/logo',
+    LIST_USERS: '/tenant/users',
+    LIST_INVITES: '/tenant/users/invites',
+    INVITE_PREVIEW: '/tenant/users/invites/preview',
+    CANCEL_INVITE: (id: string) => `/tenant/users/invites/${id}`,
     INVITE_USER: '/tenant/users/invite',
     ACCEPT_INVITE: '/tenant/users/accept-invite',
     CREATE_USER: '/tenant/users',
     UPGRADE_PLAN: '/tenant/upgrade-plan',
   },
 
+  // RBAC
+  RBAC: {
+    PERMISSIONS: '/permissions',
+    ROLES: {
+      LIST: (tenantId: string) => `/tenants/${tenantId}/roles`,
+      CREATE: (tenantId: string) => `/tenants/${tenantId}/roles`,
+      UPDATE: (tenantId: string, roleId: string) =>
+        `/tenants/${tenantId}/roles/${roleId}`,
+      DELETE: (tenantId: string, roleId: string) =>
+        `/tenants/${tenantId}/roles/${roleId}`,
+    },
+  },
+
   // Billing
   BILLING: {
+    PLANS: '/billing/plans',
+    SUBSCRIPTION: '/billing/subscription',
+    SUMMARY: '/billing/summary',
+    USAGE: '/billing/usage',
+    PAYMENT_HISTORY: '/billing/payment-history',
     CHECKOUT_SESSION: '/billing/checkout-session',
-    PLANS: '/super-admin/get-all-plans',
+    CUSTOMER_PORTAL: '/billing/customer-portal',
   },
 
   // Health
@@ -101,6 +124,7 @@ export const API_ENDPOINTS = {
 // Request timeouts
 export const TIMEOUTS = {
   DEFAULT: 30000, // 30 seconds
+  AUTH_REFRESH: 8000, // Fail fast when API is down during session restore
   UPLOAD: 60000, // 60 seconds for file uploads
   LONG: 120000, // 2 minutes for long operations
 } as const;

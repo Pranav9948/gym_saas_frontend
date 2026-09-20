@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { Dumbbell } from 'lucide-react';
 import { LoginForm } from '@/components/features/auth';
@@ -74,7 +74,9 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <LoginForm loginType={loginType} />
+            <Suspense fallback={<p className="text-sm text-muted-foreground text-center">Loading…</p>}>
+              <LoginForm loginType={loginType} />
+            </Suspense>
 
             {/* Divider */}
             <div className="relative my-6">

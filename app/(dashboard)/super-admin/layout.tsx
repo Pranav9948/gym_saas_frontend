@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, useToast } from '@/hooks'
 import { LoadingSpinner } from '@/components/common'
-import { ROUTES } from '@/config'
+import { ROUTES, getPostLoginRoute } from '@/config'
 import { SuperAdminDashboardLayout } from '@/components/super-admin/SuperAdminDashboardLayout'
 
 interface SuperAdminLayoutProps {
@@ -24,14 +24,14 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
           description: 'Please log in to access this page.',
           variant: 'destructive',
         })
-        router.push(ROUTES.LOGIN)
+        router.push(ROUTES.UNAUTHORIZED)
       } else if (user.role !== 'SUPER_ADMIN') {
         toast({
           title: 'Access Denied',
           description: 'Only Super Admins can access this page.',
           variant: 'destructive',
         })
-        router.push(ROUTES.LOGIN)
+        router.push(getPostLoginRoute(user.role))
       }
     }
   }, [isLoading, isInitialized, user, router, toast])

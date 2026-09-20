@@ -6,16 +6,20 @@
 
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
-import { ROUTES } from '@/config/routes';
+import { tenantService } from '@/services/tenant.service';
+import { ROUTES, getPostLoginRoute } from '@/config/routes';
+import { applyAppTheme } from '@/components/theme-sync';
 import type { TenantRole } from '@/types';
 import { toast } from 'sonner';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/messages';
-import { setAccessToken } from '@/lib/api';
+import { setAccessToken, whenSessionCookieSynced } from '@/lib/api';
 
 export function useAuth() {
   const router = useRouter();
+  const { setTheme } = useTheme();
   const {
     user,
     tenant,
@@ -39,9 +43,29 @@ export function useAuth() {
         const response = await authService.login({ email, password });
 
         if (response.accessToken && response.user) {
-          setAuth(response.user, null, response.accessToken);
+          let tenant = response.tenant ?? null;
+
+          if (!tenant && response.user.role === 'OWNER') {
+            try {
+              setAccessToken(response.accessToken);
+              const tenantResponse = await tenantService.getTenant();
+              tenant = tenantResponse.data ?? null;
+            } catch {
+              tenant = null;
+            }
+          }
+
+          setAuth(response.user, tenant, response.accessToken);
+          await whenSessionCookieSynced();
+          if (response.user.role === 'OWNER') {
+            applyAppTheme('light');
+            setTheme('light');
+          } else {
+            applyAppTheme('dark');
+            setTheme('dark');
+          }
           toast.success(SUCCESS_MESSAGES.LOGIN_SUCCESS);
-          router.push(ROUTES.DASHBOARD);
+          router.push(getPostLoginRoute(response.user.role));
           return { success: true };
         }
 
@@ -55,7 +79,7 @@ export function useAuth() {
         setLoading(false);
       }
     },
-    [setAuth, setLoading, router],
+    [setAuth, setLoading, router, setTheme],
   );
 
   // Register handler
@@ -71,8 +95,11 @@ export function useAuth() {
             response.data.tenant,
             response.data.accessToken,
           );
+          await whenSessionCookieSynced();
+          applyAppTheme('light');
+          setTheme('light');
           toast.success(SUCCESS_MESSAGES.REGISTER_SUCCESS);
-          router.push(ROUTES.DASHBOARD);
+          router.push(getPostLoginRoute(response.data.user.role));
           return { success: true };
         }
 
@@ -88,7 +115,7 @@ export function useAuth() {
         setLoading(false);
       }
     },
-    [setAuth, setLoading, router],
+    [setAuth, setLoading, router, setTheme],
   );
 
   // Logout handler
@@ -99,10 +126,13 @@ export function useAuth() {
       // Ignore logout errors
     } finally {
       clearAuth();
+      await whenSessionCookieSynced();
+      applyAppTheme('dark');
+      setTheme('dark');
       toast.success(SUCCESS_MESSAGES.LOGOUT_SUCCESS);
       router.push(ROUTES.LOGIN);
     }
-  }, [clearAuth, router]);
+  }, [clearAuth, router, setTheme]);
 
   // Forgot password handler
   const forgotPassword = useCallback(async (email: string) => {

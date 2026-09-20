@@ -1,28 +1,36 @@
 'use client';
 
 import React from 'react';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner } from '@/components/common';
-import { ROUTES } from '@/config';
+import { getPostLoginRoute } from '@/config';
+import { applyAppTheme } from '@/components/theme-sync';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isInitialized } = useAuth();
   const router = useRouter();
+  const { setTheme } = useTheme();
 
   React.useEffect(() => {
-    if (!isLoading && user) {
-      router.push(
-        user.role === 'SUPER_ADMIN' ? '/super-admin/plans' : ROUTES.DASHBOARD,
-      );
+    if (!isLoading && isInitialized && user) {
+      if (user.role === 'OWNER') {
+        applyAppTheme('light');
+        setTheme('light');
+      } else {
+        applyAppTheme('dark');
+        setTheme('dark');
+      }
+      router.push(getPostLoginRoute(user.role));
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isInitialized, user, router, setTheme]);
 
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return <LoadingSpinner fullScreen />;
   }
 

@@ -2,6 +2,8 @@
 // Query Keys - TanStack Query key factory
 // ===========================================
 
+import type { PaymentHistoryParams } from '@/types/billing';
+
 // Query key factory for consistent cache management
 export const queryKeys = {
   // Auth
@@ -14,6 +16,8 @@ export const queryKeys = {
   tenant: {
     all: ['tenant'] as const,
     current: () => [...queryKeys.tenant.all, 'current'] as const,
+    team: () => [...queryKeys.tenant.all, 'team'] as const,
+    invites: () => [...queryKeys.tenant.all, 'invites'] as const,
   },
 
   // Members
@@ -62,6 +66,18 @@ export const queryKeys = {
   billing: {
     all: ['billing'] as const,
     plans: () => [...queryKeys.billing.all, 'plans'] as const,
+    summary: () => [...queryKeys.billing.all, 'summary'] as const,
+    subscription: () => [...queryKeys.billing.all, 'subscription'] as const,
+    usage: () => [...queryKeys.billing.all, 'usage'] as const,
+    paymentHistory: (params?: PaymentHistoryParams) =>
+      [...queryKeys.billing.all, 'payment-history', params ?? {}] as const,
+  },
+
+  // RBAC
+  rbac: {
+    all: ['rbac'] as const,
+    permissions: () => [...queryKeys.rbac.all, 'permissions'] as const,
+    roles: (tenantId: string) => [...queryKeys.rbac.all, 'roles', tenantId] as const,
   },
 
   // Analytics (future)

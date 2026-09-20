@@ -8,7 +8,7 @@ export default function Page() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <Card className="border border-border bg-card p-6 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold tracking-tight">Analytics > Revenue</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">Analytics / Revenue</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">

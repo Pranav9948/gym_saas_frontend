@@ -1,14 +1,23 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeSync } from '@/components/theme-sync'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { ToastProvider } from '@/providers/ToastProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
+import { AppErrorBoundary } from '@/components/providers/AppErrorBoundary'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geistSans = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist-sans',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -90,24 +99,43 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  colorScheme: 'dark',
+  themeColor: '#1a1a1a',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`dark ${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=location.pathname;var ownerPath=p.indexOf('/owner')===0;var isOwner=false;if(ownerPath){var raw=localStorage.getItem('gym-auth-storage');if(raw){var s=JSON.parse(raw).state;if(s&&s.user&&s.user.role==='OWNER')isOwner=true}}if(ownerPath&&isOwner){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light')}else{document.documentElement.classList.remove('light');document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased bg-background">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
+          storageKey="gymflow-theme"
+          themes={['dark', 'light']}
         >
+          <ThemeSync />
           <QueryProvider>
             <ToastProvider>
               <AuthProvider>
-                {children}
+                <AppErrorBoundary>{children}</AppErrorBoundary>
               </AuthProvider>
             </ToastProvider>
           </QueryProvider>

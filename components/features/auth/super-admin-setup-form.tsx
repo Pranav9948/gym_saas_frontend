@@ -1,14 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { authService } from '@/services';
-import { superAdminAuthService } from '@/services/super-admin';
-import { toast } from 'sonner';
-import { ROUTES } from '@/config';
-import { useRouter } from 'next/navigation';
-
+import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/config";
+import { superAdminAuthService } from "@/services/super-admin";
+import { CheckCircle2, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface FormData {
   firstName: string;
@@ -26,11 +24,11 @@ interface PasswordStrength {
 
 export function SuperAdminSetupForm() {
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -48,11 +46,12 @@ export function SuperAdminSetupForm() {
     if (/\d/.test(password)) score++;
     if (/[^a-zA-Z\d]/.test(password)) score++;
 
-    if (score === 0) return { score: 0, message: 'Too weak', color: 'bg-red-500' };
-    if (score <= 2) return { score, message: 'Weak', color: 'bg-orange-500' };
-    if (score <= 3) return { score, message: 'Fair', color: 'bg-yellow-500' };
-    if (score <= 4) return { score, message: 'Good', color: 'bg-blue-500' };
-    return { score, message: 'Strong', color: 'bg-green-500' };
+    if (score === 0)
+      return { score: 0, message: "Too weak", color: "bg-red-500" };
+    if (score <= 2) return { score, message: "Weak", color: "bg-orange-500" };
+    if (score <= 3) return { score, message: "Fair", color: "bg-yellow-500" };
+    if (score <= 4) return { score, message: "Good", color: "bg-blue-500" };
+    return { score, message: "Strong", color: "bg-green-500" };
   };
 
   const passwordStrength = checkPasswordStrength(formData.password);
@@ -65,7 +64,7 @@ export function SuperAdminSetupForm() {
     }));
     setErrors((prev) => ({
       ...prev,
-      [name]: '',
+      [name]: "",
     }));
   };
 
@@ -73,35 +72,33 @@ export function SuperAdminSetupForm() {
     const newErrors: Partial<FormData> = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = "First name is required";
     } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
+      newErrors.firstName = "First name must be at least 2 characters";
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = "Last name is required";
     } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
+      newErrors.lastName = "Last name must be at least 2 characters";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    ) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm password is required';
+      newErrors.confirmPassword = "Confirm password is required";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -124,16 +121,16 @@ export function SuperAdminSetupForm() {
 
       const response = await superAdminAuthService.setupSuperAdmin(setupData);
 
-      toast.success('Super admin created successfully! Please login.', {
+      toast.success("Super admin created successfully! Please login.", {
         duration: 3000,
       });
 
       // Redirect to login page after successful setup
 
       router.push(`${ROUTES.LOGIN}`);
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create super admin';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create super admin";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -149,24 +146,30 @@ export function SuperAdminSetupForm() {
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className="text-3xl font-bold text-foreground">Setup Complete!</h2>
+          <h2 className="text-3xl font-bold text-foreground">
+            Setup Complete!
+          </h2>
           <p className="text-muted-foreground text-lg">
             Your super admin account has been successfully created.
           </p>
         </div>
         <div className="bg-secondary/10 border border-primary/30 rounded-xl p-4">
           <p className="text-sm text-muted-foreground mb-2">Email:</p>
-          <p className="font-mono text-foreground font-semibold">{formData.email}</p>
+          <p className="font-mono text-foreground font-semibold">
+            {formData.email}
+          </p>
         </div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-left">
-          <p className="text-sm font-semibold text-yellow-900 mb-2">⚠️ Important Security Notice</p>
+          <p className="text-sm font-semibold text-yellow-900 mb-2">
+            ⚠️ Important Security Notice
+          </p>
           <p className="text-sm text-yellow-800">
-            Save these credentials securely. You will use them to log in to the admin dashboard.
-            Do not share this information with anyone.
+            Save these credentials securely. You will use them to log in to the
+            admin dashboard. Do not share this information with anyone.
           </p>
         </div>
         <Button
-          onClick={() => (window.location.href = '/auth/login')}
+          onClick={() => (window.location.href = "/auth/login")}
           className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:shadow-primary/30"
           size="lg"
         >
@@ -178,11 +181,11 @@ export function SuperAdminSetupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-foreground">First Name</label>
+          <label className="block text-sm font-semibold text-foreground">
+            First Name
+          </label>
           <div className="relative">
             <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
             <input
@@ -193,23 +196,24 @@ export function SuperAdminSetupForm() {
               placeholder="John"
               disabled={loading}
               className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
-    ${errors.firstName
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-border focus:ring-primary/50'
-                }
+    ${
+      errors.firstName
+        ? "border-red-500 focus:ring-red-500"
+        : "border-border focus:ring-primary/50"
+    }
     border focus:outline-none focus:ring-2`}
             />
 
             {errors.firstName && (
-              <p className="text-sm text-red-500">
-                {errors.firstName}
-              </p>
+              <p className="text-sm text-red-500">{errors.firstName}</p>
             )}
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-foreground">Last Name</label>
+          <label className="block text-sm font-semibold text-foreground">
+            Last Name
+          </label>
           <div className="relative">
             <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
             <input
@@ -219,24 +223,25 @@ export function SuperAdminSetupForm() {
               onChange={handleChange}
               placeholder="Doe"
               className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
-    ${errors.lastName
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-border focus:ring-primary/50'
-                }
+    ${
+      errors.lastName
+        ? "border-red-500 focus:ring-red-500"
+        : "border-border focus:ring-primary/50"
+    }
     border focus:outline-none focus:ring-2`}
               disabled={loading}
             />
             {errors.lastName && (
-              <p className="text-sm text-red-500">
-                {errors.lastName}
-              </p>
+              <p className="text-sm text-red-500">{errors.lastName}</p>
             )}
           </div>
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-foreground">Email Address</label>
+        <label className="block text-sm font-semibold text-foreground">
+          Email Address
+        </label>
         <div className="relative">
           <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
           <input
@@ -246,46 +251,45 @@ export function SuperAdminSetupForm() {
             onChange={handleChange}
             placeholder="admin@gymflow.com"
             className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
-    ${errors.email
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-border focus:ring-primary/50'
-              }
+    ${
+      errors.email
+        ? "border-red-500 focus:ring-red-500"
+        : "border-border focus:ring-primary/50"
+    }
     border focus:outline-none focus:ring-2`}
             disabled={loading}
           />
 
           {errors.email && (
-            <p className="text-sm text-red-500">
-              {errors.email}
-            </p>
+            <p className="text-sm text-red-500">{errors.email}</p>
           )}
         </div>
       </div>
 
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-foreground">Password</label>
+        <label className="block text-sm font-semibold text-foreground">
+          Password
+        </label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Create a strong password"
-
             disabled={loading}
             className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
-    ${errors.password
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-border focus:ring-primary/50'
-              }
+    ${
+      errors.password
+        ? "border-red-500 focus:ring-red-500"
+        : "border-border focus:ring-primary/50"
+    }
     border focus:outline-none focus:ring-2`}
           />
 
           {errors.password && (
-            <p className="text-sm text-red-500">
-              {errors.password}
-            </p>
+            <p className="text-sm text-red-500">{errors.password}</p>
           )}
 
           <button
@@ -317,32 +321,50 @@ export function SuperAdminSetupForm() {
             </div>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li className="flex items-center gap-2">
-                <span className={formData.password.length >= 8 ? 'text-green-600' : ''}>
-                  {formData.password.length >= 8 ? '✓' : '○'} At least 8 characters
+                <span
+                  className={
+                    formData.password.length >= 8 ? "text-green-600" : ""
+                  }
+                >
+                  {formData.password.length >= 8 ? "✓" : "○"} At least 8
+                  characters
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <span
                   className={
-                    /[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password)
-                      ? 'text-green-600'
-                      : ''
+                    /[a-z]/.test(formData.password) &&
+                    /[A-Z]/.test(formData.password)
+                      ? "text-green-600"
+                      : ""
                   }
                 >
-                  {/[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password)
-                    ? '✓'
-                    : '○'}{' '}
+                  {/[a-z]/.test(formData.password) &&
+                  /[A-Z]/.test(formData.password)
+                    ? "✓"
+                    : "○"}{" "}
                   Mix of uppercase and lowercase
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <span className={/\d/.test(formData.password) ? 'text-green-600' : ''}>
-                  {/\d/.test(formData.password) ? '✓' : '○'} At least one number
+                <span
+                  className={
+                    /\d/.test(formData.password) ? "text-green-600" : ""
+                  }
+                >
+                  {/\d/.test(formData.password) ? "✓" : "○"} At least one number
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <span className={/[^a-zA-Z\d]/.test(formData.password) ? 'text-green-600' : ''}>
-                  {/[^a-zA-Z\d]/.test(formData.password) ? '✓' : '○'} Special character
+                <span
+                  className={
+                    /[^a-zA-Z\d]/.test(formData.password)
+                      ? "text-green-600"
+                      : ""
+                  }
+                >
+                  {/[^a-zA-Z\d]/.test(formData.password) ? "✓" : "○"} Special
+                  character
                 </span>
               </li>
             </ul>
@@ -351,20 +373,23 @@ export function SuperAdminSetupForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-foreground">Confirm Password</label>
+        <label className="block text-sm font-semibold text-foreground">
+          Confirm Password
+        </label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
           <input
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Confirm your password"
             className={`w-full pl-10 pr-4 py-3 bg-input rounded-lg transition
-    ${errors.confirmPassword
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-border focus:ring-primary/50'
-              }
+    ${
+      errors.confirmPassword
+        ? "border-red-500 focus:ring-red-500"
+        : "border-border focus:ring-primary/50"
+    }
     border focus:outline-none focus:ring-2`}
             disabled={loading}
           />
@@ -384,9 +409,7 @@ export function SuperAdminSetupForm() {
       </div>
 
       {errors.confirmPassword && (
-        <p className="text-sm text-red-500">
-          {errors.confirmPassword}
-        </p>
+        <p className="text-sm text-red-500">{errors.confirmPassword}</p>
       )}
 
       <Button

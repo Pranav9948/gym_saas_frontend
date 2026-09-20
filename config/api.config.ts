@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   SUPER_ADMIN: {
     SETUP: '/super-admin/setup',
     LOGIN: '/super-admin/login',
+    ME: '/super-admin/me',
     REFRESH: '/super-admin/rotate-refresh-token',
     LOGOUT: '/super-admin/logout',
     DASHBOARD: '/super-admin/dashboard',

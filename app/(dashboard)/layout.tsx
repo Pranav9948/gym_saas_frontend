@@ -1,12 +1,13 @@
-'use client';
+import { StaffPortalLayoutShell } from "@/components/layouts/StaffPortalLayoutShell";
+import { requireDashboardSession } from "@/lib/auth/require-dashboard-session";
 
-import React from 'react';
-import { StaffPortalLayoutShell } from '@/components/layouts/StaffPortalLayoutShell';
+export const dynamic = "force-dynamic";
 
-export default function DashboardGroupLayout({
+export default async function DashboardGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await requireDashboardSession();
   return <StaffPortalLayoutShell>{children}</StaffPortalLayoutShell>;
 }

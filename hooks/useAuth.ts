@@ -15,7 +15,7 @@ import { applyAppTheme } from '@/components/theme-sync';
 import type { TenantRole } from '@/types';
 import { toast } from 'sonner';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '@/constants/messages';
-import { setAccessToken } from '@/lib/api';
+import { setAccessToken, whenSessionCookieSynced } from '@/lib/api';
 
 export function useAuth() {
   const router = useRouter();
@@ -56,6 +56,7 @@ export function useAuth() {
           }
 
           setAuth(response.user, tenant, response.accessToken);
+          await whenSessionCookieSynced();
           if (response.user.role === 'OWNER') {
             applyAppTheme('light');
             setTheme('light');
@@ -94,6 +95,7 @@ export function useAuth() {
             response.data.tenant,
             response.data.accessToken,
           );
+          await whenSessionCookieSynced();
           applyAppTheme('light');
           setTheme('light');
           toast.success(SUCCESS_MESSAGES.REGISTER_SUCCESS);
@@ -124,6 +126,7 @@ export function useAuth() {
       // Ignore logout errors
     } finally {
       clearAuth();
+      await whenSessionCookieSynced();
       applyAppTheme('dark');
       setTheme('dark');
       toast.success(SUCCESS_MESSAGES.LOGOUT_SUCCESS);

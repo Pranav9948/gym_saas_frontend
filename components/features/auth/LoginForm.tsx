@@ -3,7 +3,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/common';
@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ApiException } from '@/lib/api/errors';
 import Link from 'next/link';
 import { ROUTES, getPostLoginRoute } from '@/config';
+import { getSafeInternalPath } from '@/lib/auth/protected-routes';
+import { whenSessionCookieSynced } from '@/lib/api';
 import { applyAppTheme } from '@/components/theme-sync';
 import { LoginResponse, SuperAdminLoginResponse } from '@/types';
 
@@ -26,6 +28,7 @@ type LoginFormProps = {
 
 export function LoginForm({ loginType }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTheme } = useTheme();
   const { setAuth } = useAuth();
   const { toast } = useToast();
@@ -82,13 +85,16 @@ export function LoginForm({ loginType }: LoginFormProps) {
         }
       }
 
+      await whenSessionCookieSynced();
+
       toast({
         title: 'Success',
         description: 'Logged in successfully',
         duration: 3000,
       });
 
-      router.push(redirectTo);
+      const nextPath = getSafeInternalPath(searchParams.get('next'));
+      router.push(nextPath ?? redirectTo);
     } catch (error) {
       const message = error instanceof ApiException
         ? error.getUserMessage()

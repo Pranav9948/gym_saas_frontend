@@ -56,11 +56,10 @@ export const useAuthStore = create<AuthState>()(
         ...initialState,
 
         setAuth: (user, tenant, accessToken) => {
-          setAccessToken(accessToken);
-
           const isSuperAdmin = user.role === 'SUPER_ADMIN';
           const sessionAuthType: AuthType = isSuperAdmin ? 'superAdmin' : 'user';
           setAuthType(sessionAuthType);
+          setAccessToken(accessToken);
 
           const role = user.role as TenantRole;
           const permissions = isSuperAdmin
@@ -150,8 +149,6 @@ export const useAuthStore = create<AuthState>()(
         onRehydrateStorage: () => (state) => {
           if (state?.user) {
             setAuthType(state.authType ?? 'user');
-            state.setLoading(false);
-            state.setInitialized(true);
           }
         },
       },

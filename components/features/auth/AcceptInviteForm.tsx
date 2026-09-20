@@ -11,6 +11,7 @@ import { FormField, LoadingSpinner } from '@/components/common'
 import { acceptInviteSchema, type AcceptInviteFormData } from '@/schemas/settings.schema'
 import { tenantService } from '@/services'
 import { useAuthStore } from '@/store/authStore'
+import { whenSessionCookieSynced } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { ApiException } from '@/lib/api/errors'
 import { ROUTES, getPostLoginRoute } from '@/config/routes'
@@ -66,6 +67,7 @@ export function AcceptInviteForm() {
       })
 
       setAuth(response.data.user, null, response.data.accessToken)
+      await whenSessionCookieSynced()
 
       toast({
         title: 'Welcome aboard!',

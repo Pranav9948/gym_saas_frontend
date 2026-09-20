@@ -13,12 +13,12 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isInitialized } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme();
 
   React.useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && isInitialized && user) {
       if (user.role === 'OWNER') {
         applyAppTheme('light');
         setTheme('light');
@@ -28,9 +28,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       }
       router.push(getPostLoginRoute(user.role));
     }
-  }, [isLoading, user, router, setTheme]);
+  }, [isLoading, isInitialized, user, router, setTheme]);
 
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return <LoadingSpinner fullScreen />;
   }
 

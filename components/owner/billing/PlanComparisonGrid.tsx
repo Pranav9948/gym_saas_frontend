@@ -157,9 +157,15 @@ export function PlanComparisonGrid() {
                       note: `planId=${plan.id}, planName=${plan.name}`,
                     });
                     setUpgradingPlanId(plan.id);
-                    checkout.mutate(plan.id, {
-                      onSettled: () => setUpgradingPlanId(null),
-                    });
+                    checkout.mutate(
+                      {
+                        planId: plan.id,
+                        priceId: plan.stripePriceId ?? undefined,
+                      },
+                      {
+                        onSettled: () => setUpgradingPlanId(null),
+                      },
+                    );
                   }}
                 >
                   {isCurrent ? (

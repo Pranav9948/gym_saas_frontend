@@ -1,4 +1,5 @@
 export { BillingSectionError } from './BillingSectionError';
+export { BillingCheckoutReturn } from './BillingCheckoutReturn';
 export { CurrentPlanCard } from './CurrentPlanCard';
 export { FeatureLimitDialog } from './FeatureLimitDialog';
 export { FeatureUsageSection } from './FeatureUsageSection';

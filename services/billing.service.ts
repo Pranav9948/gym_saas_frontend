@@ -160,8 +160,8 @@ export const billingService = {
     }
   },
 
-  redirectToCheckout: async (planId: string): Promise<void> => {
-    const response = await billingService.createCheckoutSession({ planId });
+  redirectToCheckout: async (payload: CheckoutSessionRequest): Promise<void> => {
+    const response = await billingService.createCheckoutSession(payload);
 
     if (response.success && response.data?.url) {
       window.location.href = response.data.url;

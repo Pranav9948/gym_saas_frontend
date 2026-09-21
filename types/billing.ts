@@ -30,6 +30,7 @@ export interface BillingPlan {
   price: number;
   currency: string;
   interval: BillingInterval;
+  stripePriceId: string | null;
   features: BillingPlanFeature[];
   current: boolean;
 }
@@ -150,7 +151,8 @@ export interface CustomerPortalResponse {
 }
 
 export interface CheckoutSessionRequest {
-  planId: string;
+  planId?: string;
+  priceId?: string;
 }
 
 export interface PaymentHistoryParams {

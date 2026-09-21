@@ -13,6 +13,7 @@ import {
   getStatusBadgeClass,
 } from '@/lib/billing/format';
 import { BillingSectionError } from './BillingSectionError';
+import { ManageBillingButton } from './ManageBillingButton';
 
 export function CurrentPlanCard() {
   const { data, isLoading, isError, refetch } = useBillingSummary();
@@ -40,6 +41,7 @@ export function CurrentPlanCard() {
     );
   }
 
+  const isActive = summary.status === 'ACTIVE' || summary.status === 'TRIALING';
   const renewalText = summary.nextRenewal
     ? `Renews on ${formatBillingDate(summary.nextRenewal)} · in ${summary.daysRemaining} days`
     : summary.isPaid
@@ -50,10 +52,23 @@ export function CurrentPlanCard() {
     <Card className="overflow-hidden">
       <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Current plan
+          </p>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-xl font-bold tracking-tight text-foreground">
               {summary.plan.name} Plan
             </h2>
+            <Badge
+              variant="outline"
+              className={
+                isActive
+                  ? 'border-success/30 bg-success/10 text-success'
+                  : 'border-muted-foreground/30 bg-muted text-muted-foreground'
+              }
+            >
+              {isActive ? 'Active' : 'Inactive'}
+            </Badge>
             <Badge variant="outline" className={getStatusBadgeClass(summary.status)}>
               {summary.status}
             </Badge>
@@ -77,6 +92,10 @@ export function CurrentPlanCard() {
             </span>
           </p>
         </div>
+
+        {summary.isPaid ? (
+          <ManageBillingButton variant="outline" />
+        ) : null}
       </CardContent>
     </Card>
   );

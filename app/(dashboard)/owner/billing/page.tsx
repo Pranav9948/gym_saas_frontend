@@ -2,6 +2,7 @@
 
 import { PageHeader } from "@/components/common";
 import {
+  BillingCheckoutReturn,
   CurrentPlanCard,
   FeatureUsageSection,
   ManageBillingButton,
@@ -21,6 +22,8 @@ export default function OwnerBillingPage() {
 
   return (
     <div className="space-y-6">
+      <BillingCheckoutReturn />
+
       <PageHeader
         title="Billing"
         description="Manage your GymFlow subscription, usage and plan."

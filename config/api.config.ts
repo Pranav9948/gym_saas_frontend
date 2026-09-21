@@ -111,7 +111,9 @@ export const API_ENDPOINTS = {
     USAGE: '/billing/usage',
     PAYMENT_HISTORY: '/billing/payment-history',
     CHECKOUT_SESSION: '/billing/checkout-session',
+    CREATE_CHECKOUT_SESSION: '/billing/create-checkout-session',
     CUSTOMER_PORTAL: '/billing/customer-portal',
+    CREATE_PORTAL_SESSION: '/billing/create-portal-session',
   },
 
   // Health

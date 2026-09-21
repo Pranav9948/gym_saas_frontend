@@ -52,25 +52,40 @@ export function setAuthType(type: AuthType): void {
   authType = type;
 }
 
+let sessionEpoch = 0;
+
+export function getAuthSessionEpoch(): number {
+  return sessionEpoch;
+}
+
+export function bumpAuthSessionEpoch(): number {
+  sessionEpoch += 1;
+  return sessionEpoch;
+}
+
 // Token getter/setter
 export function getAccessToken(): string | null {
   return accessToken;
 }
 
 export function setAccessToken(token: string | null): void {
-  accessToken = token;
-  queueSessionCookieSync(token);
+  accessToken = token && token.length > 0 ? token : null;
+  queueSessionCookieSync(accessToken);
 }
 
 export function clearAccessToken(): void {
   accessToken = null;
+  bumpAuthSessionEpoch();
   queueSessionCookieSync(null);
 }
 
 let cookieSync: Promise<void> = Promise.resolve();
 
 function queueSessionCookieSync(token: string | null): void {
-  cookieSync = persistAccessSessionCookie(token, getAuthType());
+  const sessionAuthType = getAuthType();
+  cookieSync = cookieSync
+    .catch(() => undefined)
+    .then(() => persistAccessSessionCookie(token, sessionAuthType));
 }
 
 export function whenSessionCookieSynced(): Promise<void> {
@@ -86,6 +101,7 @@ export function refreshAccessToken(): Promise<string | null> {
   }
 
   refreshPromise = (async () => {
+    const epochBeforeRefresh = getAuthSessionEpoch();
     const refreshPath =
       getAuthType() === "superAdmin"
         ? API_ENDPOINTS.SUPER_ADMIN.REFRESH
@@ -97,11 +113,17 @@ export function refreshAccessToken(): Promise<string | null> {
       timeout: TIMEOUTS.AUTH_REFRESH,
     });
 
+    if (getAuthSessionEpoch() !== epochBeforeRefresh) {
+      return getAccessToken();
+    }
+
     const newToken = response.data?.data?.accessToken as string | undefined;
     if (newToken) {
       setAccessToken(newToken);
       await whenSessionCookieSynced();
-      return newToken;
+      return getAuthSessionEpoch() !== epochBeforeRefresh
+        ? getAccessToken()
+        : newToken;
     }
 
     return null;

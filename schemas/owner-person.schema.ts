@@ -24,6 +24,8 @@ export const addMemberPersonSchema = personBaseSchema.extend({
     .optional()
     .or(z.literal('')),
   assignedTrainerId: z.string().uuid('Invalid trainer').optional().or(z.literal('')),
+  packageId: z.string().uuid('Please select a package'),
+  paymentStatus: z.enum(['PAID', 'PENDING']),
 });
 
 export const addStaffPersonSchema = personBaseSchema

@@ -24,8 +24,14 @@ export const queryKeys = {
   members: {
     all: ['members'] as const,
     lists: () => [...queryKeys.members.all, 'list'] as const,
-    list: (params?: { page?: number; limit?: number }) =>
-      [...queryKeys.members.lists(), params] as const,
+    list: (params?: {
+      page?: number;
+      limit?: number;
+      packageId?: string;
+      paymentStatus?: string;
+      expirationWindow?: string;
+      search?: string;
+    }) => [...queryKeys.members.lists(), params] as const,
     details: () => [...queryKeys.members.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.members.details(), id] as const,
     attendance: (id: string) =>
@@ -43,6 +49,23 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.trainers.details(), id] as const,
     members: (id: string, params?: { page?: number; limit?: number }) =>
       [...queryKeys.trainers.detail(id), 'members', params] as const,
+    overview: () => [...queryKeys.trainers.all, 'overview'] as const,
+    performance: (
+      id: string,
+      params?: { range?: string; from?: string; to?: string },
+    ) => [...queryKeys.trainers.detail(id), 'performance', params] as const,
+  },
+
+  packages: {
+    all: ['packages'] as const,
+    list: (includeInactive?: boolean) =>
+      [...queryKeys.packages.all, 'list', includeInactive] as const,
+  },
+
+  staffAttendance: {
+    all: ['staff-attendance'] as const,
+    metrics: (params?: { range?: string; from?: string; to?: string }) =>
+      [...queryKeys.staffAttendance.all, 'metrics', params] as const,
   },
 
   // Attendance

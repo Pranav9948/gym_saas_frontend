@@ -9,6 +9,8 @@ import type {
   PaginatedTrainersResponse,
   TrainerResponse,
   TrainerMembersResponse,
+  TrainerOverviewResponse,
+  TrainerPerformanceResponse,
   CreateTrainerRequest,
   UpdateTrainerRequest,
 } from '@/types';
@@ -82,6 +84,20 @@ export const trainersService = {
   ): Promise<TrainerMembersResponse> => {
     return get<TrainerMembersResponse>(
       API_ENDPOINTS.TRAINERS.MEMBERS(id),
+      params as Record<string, unknown>,
+    );
+  },
+
+  getOverview: async (): Promise<TrainerOverviewResponse> => {
+    return get<TrainerOverviewResponse>(API_ENDPOINTS.TRAINERS.OVERVIEW);
+  },
+
+  getPerformance: async (
+    id: string,
+    params?: { range?: 'this_month' | 'last_month' | 'custom'; from?: string; to?: string },
+  ): Promise<TrainerPerformanceResponse> => {
+    return get<TrainerPerformanceResponse>(
+      API_ENDPOINTS.TRAINERS.PERFORMANCE(id),
       params as Record<string, unknown>,
     );
   },

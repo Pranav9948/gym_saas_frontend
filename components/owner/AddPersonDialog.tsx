@@ -37,6 +37,7 @@ import {
 } from '@/schemas/owner-person.schema'
 import {
   membersService,
+  packagesService,
   queryKeys,
   tenantService,
   trainersService,
@@ -68,6 +69,12 @@ export function AddPersonDialog({
     enabled: open && personType === 'member',
   })
 
+  const packagesQuery = useQuery({
+    queryKey: queryKeys.packages.list(false),
+    queryFn: () => packagesService.list(false),
+    enabled: open && personType === 'member',
+  })
+
   const memberForm = useForm<AddMemberPersonFormData>({
     resolver: zodResolver(addMemberPersonSchema),
     defaultValues: {
@@ -76,6 +83,8 @@ export function AddPersonDialog({
       lastName: '',
       phone: '',
       assignedTrainerId: '',
+      packageId: '',
+      paymentStatus: 'PAID',
     },
   })
 
@@ -143,6 +152,8 @@ export function AddPersonDialog({
         lastName: data.lastName,
         phone: data.phone || undefined,
         assignedTrainerId: data.assignedTrainerId || undefined,
+        packageId: data.packageId,
+        paymentStatus: data.paymentStatus,
       })
       toast({
         title: 'Member added',
@@ -265,7 +276,10 @@ export function AddPersonDialog({
   }
 
   const trainers = trainersQuery.data?.trainers ?? []
+  const packages = packagesQuery.data?.data ?? []
   const assignedTrainerId = memberForm.watch('assignedTrainerId')
+  const selectedPackageId = memberForm.watch('packageId')
+  const selectedPaymentStatus = memberForm.watch('paymentStatus')
 
   const submitLabel =
     personType === 'member'
@@ -342,6 +356,60 @@ export function AddPersonDialog({
                   error={memberForm.formState.errors.phone?.message}
                   disabled={isSubmitting}
                 />
+                <div className="space-y-2">
+                  <Label htmlFor="memberPackage">Package *</Label>
+                  {packagesQuery.isLoading ? (
+                    <LoadingSpinner label="Loading packages…" />
+                  ) : (
+                    <Select
+                      value={selectedPackageId || undefined}
+                      onValueChange={(value) =>
+                        memberForm.setValue('packageId', value, {
+                          shouldValidate: true,
+                        })
+                      }
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger id="memberPackage" className="w-full">
+                        <SelectValue placeholder="Select a package" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {packages.map((pkg) => (
+                          <SelectItem key={pkg.id} value={pkg.id}>
+                            {pkg.name} · {pkg.durationDays} days
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {memberForm.formState.errors.packageId?.message ? (
+                    <p className="text-xs text-destructive">
+                      {memberForm.formState.errors.packageId.message}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="paymentStatus">Payment status</Label>
+                  <Select
+                    value={selectedPaymentStatus}
+                    onValueChange={(value) =>
+                      memberForm.setValue(
+                        'paymentStatus',
+                        value as 'PAID' | 'PENDING',
+                        { shouldValidate: true },
+                      )
+                    }
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger id="paymentStatus" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PAID">Paid</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="assignedTrainer">Assigned trainer (optional)</Label>
                   {trainersQuery.isLoading ? (

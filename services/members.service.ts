@@ -50,6 +50,8 @@ export const membersService = {
       phone: data.phone || undefined,
       dateOfBirth: data.dateOfBirth || undefined,
       assignedTrainerId: data.assignedTrainerId || undefined,
+      packageId: data.packageId,
+      paymentStatus: data.paymentStatus,
     };
     return post<MemberResponse>(API_ENDPOINTS.MEMBERS.CREATE, cleanData);
   },
@@ -86,5 +88,11 @@ export const membersService = {
     id: string,
   ): Promise<MemberAttendanceResponse> => {
     return get<MemberAttendanceResponse>(API_ENDPOINTS.MEMBERS.ATTENDANCE(id));
+  },
+
+  sendRenewalReminder: async (
+    id: string,
+  ): Promise<{ success: true; message?: string }> => {
+    return post(API_ENDPOINTS.MEMBERS.RENEWAL_REMINDER(id));
   },
 };

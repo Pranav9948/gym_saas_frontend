@@ -28,6 +28,10 @@ export interface PaginatedMeta {
 export interface PaginationParams {
   page?: number;
   limit?: number;
+  packageId?: string;
+  paymentStatus?: 'PAID' | 'PENDING' | 'OVERDUE' | 'UNPAID';
+  expirationWindow?: 'expiring_7' | 'expiring_today' | 'expired';
+  search?: string;
 }
 
 // Members
@@ -38,6 +42,8 @@ export interface CreateMemberRequest {
   phone?: string;
   dateOfBirth?: string;
   assignedTrainerId?: string | null;
+  packageId: string;
+  paymentStatus?: 'PAID' | 'PENDING';
 }
 
 export interface UpdateMemberRequest {
@@ -47,6 +53,8 @@ export interface UpdateMemberRequest {
   phone?: string;
   dateOfBirth?: string;
   assignedTrainerId?: string | null;
+  packageId?: string;
+  paymentStatus?: 'PAID' | 'PENDING';
 }
 
 export interface PaginatedMembersResponse {
@@ -229,3 +237,96 @@ export interface CreatePlanRequest {
 }
 
 export type UpdatePlanRequest = Partial<CreatePlanRequest>;
+
+export interface PackagesResponse {
+  success: true;
+  data: import('./models').MembershipPackage[];
+}
+
+export interface PackageResponse {
+  success: true;
+  data: import('./models').MembershipPackage;
+}
+
+export interface TrainerOverviewMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: import('./models').MemberStatus;
+  trainingStatus: 'ACTIVE' | 'INACTIVE';
+  membershipExpiresAt?: string | null;
+  membershipPackage?: { id: string; name: string } | null;
+}
+
+export interface TrainerOverview {
+  id: string;
+  specialization: string | null;
+  bio: string | null;
+  userId: string;
+  createdAt: string;
+  assignedMemberCount: number;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    isActive: boolean;
+  };
+  members: TrainerOverviewMember[];
+}
+
+export interface TrainerOverviewResponse {
+  success: true;
+  data: TrainerOverview[];
+}
+
+export interface TrainerPerformance {
+  trainer: {
+    id: string;
+    specialization: string | null;
+    bio: string | null;
+    userId: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      isActive: boolean;
+    };
+  };
+  from: string;
+  to: string;
+  totalDaysInRange: number;
+  daysPresent: number;
+  assignedMembers: Array<
+    TrainerOverviewMember & {
+      paymentStatus?: import('./models').MemberPaymentStatus;
+    }
+  >;
+}
+
+export interface TrainerPerformanceResponse {
+  success: true;
+  data: TrainerPerformance;
+}
+
+export interface StaffAttendancePerson {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  daysPresent: number;
+}
+
+export interface StaffMetrics {
+  from: string;
+  to: string;
+  totalDaysInRange: number;
+  staff: StaffAttendancePerson[];
+}
+
+export interface StaffMetricsResponse {
+  success: true;
+  data: StaffMetrics;
+}

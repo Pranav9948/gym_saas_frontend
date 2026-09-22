@@ -83,6 +83,24 @@ export interface Tenant {
   subscriptions?: SubscriptionWithPlan[];
 }
 
+export type MemberPaymentStatus = 'PAID' | 'PENDING' | 'OVERDUE';
+
+export interface MembershipPackage {
+  id: string;
+  tenantId?: string;
+  name: string;
+  description: string | null;
+  durationDays: number;
+  price: number;
+  currency: string;
+  isActive: boolean;
+  memberCount?: number;
+  features?: string[];
+  featureLimits?: Record<string, number>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Member {
   id: string;
   firstName: string;
@@ -92,6 +110,19 @@ export interface Member {
   status: MemberStatus;
   createdAt: string;
   dateOfBirth?: string | null;
+  packageId?: string | null;
+  membershipStartDate?: string | null;
+  membershipExpiresAt?: string | null;
+  paymentStatus?: MemberPaymentStatus;
+  remainingDays?: number | null;
+  canSendRenewalReminder?: boolean;
+  membershipPackage?: {
+    id: string;
+    name: string;
+    durationDays: number;
+    price: number;
+    currency: string;
+  } | null;
   assignedTrainer?: {
     id: string;
     user: { firstName: string; lastName: string };

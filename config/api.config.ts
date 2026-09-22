@@ -49,6 +49,14 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/members/${id}`,
     DELETE: (id: string) => `/members/${id}`,
     ATTENDANCE: (id: string) => `/members/${id}/attendance`,
+    RENEWAL_REMINDER: (id: string) => `/members/${id}/renewal-reminder`,
+  },
+
+  PACKAGES: {
+    LIST: '/packages',
+    CREATE: '/packages',
+    UPDATE: (id: string) => `/packages/${id}`,
+    DELETE: (id: string) => `/packages/${id}`,
   },
 
   // Trainers
@@ -59,6 +67,8 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/trainers/${id}`,
     DELETE: (id: string) => `/trainers/${id}`,
     MEMBERS: (id: string) => `/trainers/${id}/members`,
+    OVERVIEW: '/trainers/overview',
+    PERFORMANCE: (id: string) => `/trainers/${id}/performance`,
   },
 
   // Attendance
@@ -67,6 +77,11 @@ export const API_ENDPOINTS = {
     TODAY: '/attendance/today',
     HISTORY: '/attendance/history',
     STATS: (memberId: string) => `/attendance/stats/${memberId}`,
+  },
+
+  STAFF_ATTENDANCE: {
+    METRICS: '/staff-attendance/metrics',
+    MARK: '/staff-attendance',
   },
 
   // Goals

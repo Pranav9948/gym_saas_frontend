@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/members/${id}`,
     ATTENDANCE: (id: string) => `/members/${id}/attendance`,
     RENEWAL_REMINDER: (id: string) => `/members/${id}/renewal-reminder`,
+    MARK_PAID: (id: string) => `/members/${id}/mark-paid`,
   },
 
   PACKAGES: {
@@ -82,6 +83,7 @@ export const API_ENDPOINTS = {
   STAFF_ATTENDANCE: {
     METRICS: '/staff-attendance/metrics',
     MARK: '/staff-attendance',
+    LIST: '/staff-attendance',
   },
 
   // Goals

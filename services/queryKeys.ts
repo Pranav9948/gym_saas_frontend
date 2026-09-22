@@ -66,6 +66,8 @@ export const queryKeys = {
     all: ['staff-attendance'] as const,
     metrics: (params?: { range?: string; from?: string; to?: string }) =>
       [...queryKeys.staffAttendance.all, 'metrics', params] as const,
+    byDate: (date: string) =>
+      [...queryKeys.staffAttendance.all, 'date', date] as const,
   },
 
   // Attendance

@@ -8,7 +8,6 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, getPersistedAuthSession } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
-import { tenantService } from '@/services/tenant.service';
 import {
   setAccessToken,
   refreshAccessToken,
@@ -76,16 +75,7 @@ async function initializeAuthSession(): Promise<void> {
     }
 
     if (meResponse.success && meResponse.data) {
-      let tenant = null;
-
-      if (meResponse.data.role === 'OWNER') {
-        try {
-          const tenantResponse = await tenantService.getTenant();
-          tenant = tenantResponse.data ?? null;
-        } catch {
-          tenant = null;
-        }
-      }
+      const tenant = meResponse.data.tenant ?? persisted.tenant ?? null;
 
       if (sessionWasReplaced()) {
         return;

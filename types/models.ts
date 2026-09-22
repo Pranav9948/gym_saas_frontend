@@ -122,6 +122,7 @@ export interface Member {
     durationDays: number;
     price: number;
     currency: string;
+    features?: string[];
   } | null;
   assignedTrainer?: {
     id: string;
@@ -153,11 +154,13 @@ export interface Attendance {
   date?: string;
   deviceInfo?: string | null;
   member?: {
+    id?: string;
     firstName: string;
     lastName: string;
     email?: string;
     status?: MemberStatus;
   };
+  memberId?: string;
 }
 
 export interface AttendanceStats {

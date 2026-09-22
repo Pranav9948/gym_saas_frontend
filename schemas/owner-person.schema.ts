@@ -28,6 +28,10 @@ export const addMemberPersonSchema = personBaseSchema.extend({
   paymentStatus: z.enum(['PAID', 'PENDING']),
 });
 
+export const editMemberPersonSchema = addMemberPersonSchema.omit({
+  paymentStatus: true,
+});
+
 export const addStaffPersonSchema = personBaseSchema
   .merge(passwordFieldsSchema)
   .refine((data) => data.password === data.confirmPassword, {
@@ -56,6 +60,7 @@ export const addTrainerPersonSchema = personBaseSchema
   });
 
 export type AddMemberPersonFormData = z.infer<typeof addMemberPersonSchema>;
+export type EditMemberPersonFormData = z.infer<typeof editMemberPersonSchema>;
 export type AddStaffPersonFormData = z.infer<typeof addStaffPersonSchema>;
 export type AddAdminPersonFormData = z.infer<typeof addAdminPersonSchema>;
 export type AddTrainerPersonFormData = z.infer<typeof addTrainerPersonSchema>;

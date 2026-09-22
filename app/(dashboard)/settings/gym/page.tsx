@@ -1,21 +1,15 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { LoadingSpinner } from '@/components/common'
 
-export default function Page() {
-  return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <Card className="border border-border bg-card p-6 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold tracking-tight">Settings / Gym</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm">
-            The <strong>/settings/gym</strong> page is currently under construction.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+export default function StaffGymRedirectPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace('/settings?tab=gym')
+  }, [router])
+
+  return <LoadingSpinner label="Opening gym settings…" />
 }

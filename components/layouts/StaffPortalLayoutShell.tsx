@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { DashboardLayout } from '@/components/common';
 import { StaffPortalGuard } from '@/components/guards';
+import { StaffDashboardLayout } from '@/components/staff/StaffDashboardLayout';
 import {
   isMemberPortalRoute,
   isOwnerPortalRoute,
@@ -29,7 +29,7 @@ export function StaffPortalLayoutShell({
 
   return (
     <StaffPortalGuard>
-      <DashboardLayout>{children}</DashboardLayout>
+      <StaffDashboardLayout>{children}</StaffDashboardLayout>
     </StaffPortalGuard>
   );
 }

@@ -95,4 +95,8 @@ export const membersService = {
   ): Promise<{ success: true; message?: string }> => {
     return post(API_ENDPOINTS.MEMBERS.RENEWAL_REMINDER(id));
   },
+
+  markPaid: async (id: string): Promise<MemberResponse> => {
+    return post<MemberResponse>(API_ENDPOINTS.MEMBERS.MARK_PAID(id));
+  },
 };

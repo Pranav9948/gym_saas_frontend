@@ -16,7 +16,7 @@ interface StaffPortalGuardProps {
 }
 
 export function StaffPortalGuard({ children }: StaffPortalGuardProps) {
-  const { user, permissions, isLoading, isInitialized } = useAuth();
+  const { user, tenant, permissions, isLoading, isInitialized } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -38,10 +38,15 @@ export function StaffPortalGuard({ children }: StaffPortalGuardProps) {
       return;
     }
 
+    if (tenant?.staffPortalEnabled === false) {
+      router.replace(ROUTES.FORBIDDEN);
+      return;
+    }
+
     if (!hasRouteAccess) {
       router.replace(ROUTES.FORBIDDEN);
     }
-  }, [isLoading, isInitialized, user, isStaffRole, hasRouteAccess, router]);
+  }, [isLoading, isInitialized, user, tenant, isStaffRole, hasRouteAccess, router]);
 
   if (isLoading || !isInitialized) {
     return <LoadingSpinner fullScreen />;

@@ -125,6 +125,7 @@ export interface MeResponse {
     firstName: string;
     lastName: string;
     role: string;
+    avatarUrl?: string | null;
     tenant?: Tenant | null;
   };
 }

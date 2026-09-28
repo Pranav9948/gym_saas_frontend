@@ -8,6 +8,7 @@ import {
   isMemberPortalRoute,
   isOwnerPortalRoute,
   isSuperAdminRoute,
+  isTrainerPortalRoute,
 } from '@/config';
 
 interface StaffPortalLayoutShellProps {
@@ -22,7 +23,8 @@ export function StaffPortalLayoutShell({
   if (
     isOwnerPortalRoute(pathname) ||
     isSuperAdminRoute(pathname) ||
-    isMemberPortalRoute(pathname)
+    isMemberPortalRoute(pathname) ||
+    isTrainerPortalRoute(pathname)
   ) {
     return <>{children}</>;
   }

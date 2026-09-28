@@ -70,6 +70,40 @@ export const API_ENDPOINTS = {
     MEMBERS: (id: string) => `/trainers/${id}/members`,
     OVERVIEW: '/trainers/overview',
     PERFORMANCE: (id: string) => `/trainers/${id}/performance`,
+    ME: '/trainers/me',
+    ME_MEMBERS: '/trainers/me/members',
+    ME_AVATAR: '/trainers/me/avatar',
+  },
+
+  WORKOUTS: {
+    UPSERT: (memberId: string) => `/workouts/${memberId}`,
+    LIST: (memberId: string) => `/workouts/${memberId}`,
+    LAST_PERFORMANCE: (memberId: string) =>
+      `/workouts/${memberId}/last-performance`,
+  },
+
+  DIETS: {
+    UPSERT: (memberId: string) => `/diets/${memberId}`,
+    LIST: (memberId: string) => `/diets/${memberId}`,
+    PUBLISH: (memberId: string) => `/diets/${memberId}/publish`,
+  },
+
+  PORTAL: {
+    ME: '/portal/me',
+    TRAINING: '/portal/training',
+    PROFILE: '/portal/profile',
+    AVATAR: '/portal/avatar',
+    ACTUALS: '/portal/workouts/actuals',
+    HISTORY: '/portal/history',
+    WORKOUT_LOGS: '/portal/workout-logs',
+    WORKOUT_LOG_CATALOG: '/portal/workout-logs/catalog',
+    WORKOUT_LOG_PERFORMANCE: '/portal/workout-logs/performance',
+  },
+
+  WORKOUT_LOGS: {
+    LIST: (memberId: string) => `/workout-logs/${memberId}`,
+    CATALOG: (memberId: string) => `/workout-logs/${memberId}/catalog`,
+    PERFORMANCE: (memberId: string) => `/workout-logs/${memberId}/performance`,
   },
 
   // Attendance
@@ -90,6 +124,8 @@ export const API_ENDPOINTS = {
   GOALS: {
     CREATE: (memberId: string) => `/goals/${memberId}`,
     LIST: (memberId: string) => `/goals/${memberId}`,
+    TARGETS: (memberId: string) => `/goals/${memberId}/targets`,
+    WEIGHTS: (memberId: string) => `/goals/${memberId}/weights`,
   },
 
   // Tenant

@@ -52,6 +52,7 @@ export const membersService = {
       assignedTrainerId: data.assignedTrainerId || undefined,
       packageId: data.packageId,
       paymentStatus: data.paymentStatus,
+      portalPassword: data.portalPassword || undefined,
     };
     return post<MemberResponse>(API_ENDPOINTS.MEMBERS.CREATE, cleanData);
   },
@@ -70,6 +71,7 @@ export const membersService = {
       dateOfBirth: data.dateOfBirth || undefined,
       assignedTrainerId:
         data.assignedTrainerId === '' ? null : data.assignedTrainerId,
+      portalPassword: data.portalPassword || undefined,
     };
     return patch<MemberResponse>(API_ENDPOINTS.MEMBERS.UPDATE(id), cleanData);
   },

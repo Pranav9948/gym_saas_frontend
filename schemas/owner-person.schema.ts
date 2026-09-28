@@ -17,20 +17,46 @@ const passwordFieldsSchema = z.object({
   confirmPassword: z.string(),
 });
 
-export const addMemberPersonSchema = personBaseSchema.extend({
-  phone: z
-    .string()
-    .regex(phoneRegex, 'Please enter a valid phone number (E.164 format)')
-    .optional()
-    .or(z.literal('')),
-  assignedTrainerId: z.string().uuid('Invalid trainer').optional().or(z.literal('')),
-  packageId: z.string().uuid('Please select a package'),
-  paymentStatus: z.enum(['PAID', 'PENDING']),
-});
+export const addMemberPersonSchema = personBaseSchema
+  .extend({
+    phone: z
+      .string()
+      .regex(phoneRegex, 'Please enter a valid phone number (E.164 format)')
+      .optional()
+      .or(z.literal('')),
+    assignedTrainerId: z.string().uuid('Invalid trainer').optional().or(z.literal('')),
+    packageId: z.string().uuid('Please select a package'),
+    paymentStatus: z.enum(['PAID', 'PENDING']),
+    portalPassword: z.union([passwordSchema, z.literal('')]).optional(),
+    confirmPortalPassword: z.string().optional(),
+  })
+  .refine(
+    (data) => !data.portalPassword || data.portalPassword === data.confirmPortalPassword,
+    {
+      message: 'Passwords do not match',
+      path: ['confirmPortalPassword'],
+    },
+  );
 
-export const editMemberPersonSchema = addMemberPersonSchema.omit({
-  paymentStatus: true,
-});
+export const editMemberPersonSchema = personBaseSchema
+  .extend({
+    phone: z
+      .string()
+      .regex(phoneRegex, 'Please enter a valid phone number (E.164 format)')
+      .optional()
+      .or(z.literal('')),
+    assignedTrainerId: z.string().uuid('Invalid trainer').optional().or(z.literal('')),
+    packageId: z.string().uuid('Please select a package'),
+    portalPassword: z.union([passwordSchema, z.literal('')]).optional(),
+    confirmPortalPassword: z.string().optional(),
+  })
+  .refine(
+    (data) => !data.portalPassword || data.portalPassword === data.confirmPortalPassword,
+    {
+      message: 'Passwords do not match',
+      path: ['confirmPortalPassword'],
+    },
+  );
 
 export const addStaffPersonSchema = personBaseSchema
   .merge(passwordFieldsSchema)

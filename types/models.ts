@@ -12,9 +12,30 @@ export type SubscriptionStatus =
   | 'CANCELED'
   | 'INCOMPLETE'
   | 'TRIALING';
+export type DietPeriod = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT';
+export type MuscleGroup =
+  | 'CHEST'
+  | 'BACK'
+  | 'LEGS'
+  | 'SHOULDERS'
+  | 'BICEPS'
+  | 'TRICEPS'
+  | 'CORE'
+  | 'CARDIO'
+  | 'FULL_BODY'
+  | 'OTHER';
 export type GoalType = 'GAIN' | 'LOSS';
+export type PrimaryGoal =
+  | 'FAT_LOSS'
+  | 'WEIGHT_GAIN'
+  | 'MUSCLE_GAIN'
+  | 'STRENGTH'
+  | 'ENDURANCE'
+  | 'RECOMPOSITION'
+  | 'GENERAL_FITNESS'
+  | 'OTHER';
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
-export type TenantRole = 'OWNER' | 'ADMIN' | 'STAFF' | 'TRAINER';
+export type TenantRole = 'OWNER' | 'ADMIN' | 'STAFF' | 'TRAINER' | 'MEMBER';
 export type InviteRole = 'ADMIN' | 'STAFF';
 export type DirectCreateRole = 'ADMIN' | 'STAFF' | 'TRAINER';
 
@@ -33,6 +54,7 @@ export interface User {
   lastName: string;
   role: TenantRole | string;
   isActive?: boolean;
+  avatarUrl?: string | null;
 }
 
 export interface Plan {
@@ -77,6 +99,9 @@ export interface Tenant {
   address?: string;
   timezone?: string;
   isActive?: boolean;
+  staffPortalEnabled?: boolean;
+  trainerPortalEnabled?: boolean;
+  memberPortalEnabled?: boolean;
   stripeCustomerId?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -128,6 +153,11 @@ export interface Member {
     id: string;
     user: { firstName: string; lastName: string };
   } | null;
+  todayStatus?: {
+    date: string;
+    workoutTracked: boolean;
+    dietShared: boolean;
+  };
   _count?: { attendances: number };
 }
 
@@ -143,6 +173,7 @@ export interface Trainer {
     email: string;
     role?: string;
     isActive?: boolean;
+    avatarUrl?: string | null;
   };
   _count?: { members: number };
 }
@@ -168,15 +199,25 @@ export interface AttendanceStats {
   lastVisit: string | null;
 }
 
+export interface WeeklyTarget {
+  week: number;
+  targetChangeKg: number;
+  targetWeightKg: number;
+}
+
 export interface MemberGoal {
   id: string;
   memberId: string;
   tenantId: string;
   goalType: GoalType;
+  primaryGoal?: PrimaryGoal;
   currentWeight: number;
   targetWeight: number;
   durationWeeks: number;
-  height: number;
+  height?: number | null;
+  targetDate?: string | null;
+  notes?: string | null;
+  weeklyTargets?: WeeklyTarget[];
   isActive: boolean;
   createdAt: string;
 }

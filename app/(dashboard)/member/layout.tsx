@@ -1,39 +1,33 @@
-'use client';
+'use client'
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth, useToast } from '@/hooks';
-import { LoadingSpinner } from '@/components/common';
-import { ROUTES } from '@/config';
-import { applyAppTheme } from '@/components/theme-sync';
+import React from 'react'
+import { useRouter } from 'next/navigation'
+import { LoadingSpinner } from '@/components/common'
+import { MemberNavbar } from '@/components/member/MemberNavbar'
+import { MemberSidebar } from '@/components/member/MemberSidebar'
+import { ROUTES, getPostLoginRoute } from '@/config'
+import { useAuth } from '@/hooks'
+import { applyAppTheme } from '@/components/theme-sync'
 
-interface MemberLayoutProps {
-  children: React.ReactNode;
-}
+export default function MemberLayout({ children }: { children: React.ReactNode }) {
+  const { user, tenant, isLoading, isInitialized } = useAuth()
+  const router = useRouter()
+  const [mobileOpen, setMobileOpen] = React.useState(false)
 
-export default function MemberLayout({ children }: MemberLayoutProps) {
-  const { user, isLoading, isInitialized } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
+  React.useEffect(() => {
+    applyAppTheme('dark')
+  }, [])
 
-  useEffect(() => {
-    applyAppTheme('dark');
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && isInitialized) {
-      if (!user) {
-        router.replace(ROUTES.UNAUTHORIZED);
-      } else if (user.role !== 'MEMBER' && user.role !== 'CLIENT') {
-        toast({
-          title: 'Access Denied',
-          description: 'This area is for gym members only.',
-          variant: 'destructive',
-        });
-        router.replace(ROUTES.FORBIDDEN);
-      }
+  React.useEffect(() => {
+    if (isLoading || !isInitialized) return
+    if (!user) {
+      router.replace(ROUTES.LOGIN)
+      return
     }
-  }, [isLoading, isInitialized, user, router, toast]);
+    if (user.role !== 'MEMBER' && user.role !== 'CLIENT') {
+      router.replace(getPostLoginRoute(user.role))
+    }
+  }, [isLoading, isInitialized, user, router])
 
   if (
     isLoading ||
@@ -41,12 +35,34 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     !user ||
     (user.role !== 'MEMBER' && user.role !== 'CLIENT')
   ) {
-    return <LoadingSpinner fullScreen />;
+    return <LoadingSpinner fullScreen />
+  }
+
+  if (tenant?.memberPortalEnabled === false) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center p-6">
+        <div className="max-w-md rounded-xl border bg-card p-6 text-center">
+          <h1 className="text-lg font-semibold">Member portal is off</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The gym owner has turned off member self-service. Ask the front desk
+            for help.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto p-6">{children}</main>
+    <div className="flex h-dvh overflow-hidden bg-background text-foreground">
+      <MemberSidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <MemberNavbar onMenuClick={() => setMobileOpen(true)} />
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-5xl p-4 pb-[max(2rem,env(safe-area-inset-bottom))] sm:p-6 lg:p-8">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
-  );
+  )
 }

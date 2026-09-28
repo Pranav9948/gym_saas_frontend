@@ -31,6 +31,7 @@ import {
   editMemberPersonSchema,
   type EditMemberPersonFormData,
 } from '@/schemas/owner-person.schema'
+import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
 import { membersService, packagesService, trainersService, queryKeys } from '@/services'
 import { ApiException } from '@/lib/api/errors'
 import { useToast } from '@/hooks/use-toast'
@@ -61,6 +62,8 @@ export function StaffEditMemberDialog({
       phone: '',
       assignedTrainerId: '',
       packageId: '',
+      portalPassword: '',
+      confirmPortalPassword: '',
     },
   })
 
@@ -99,6 +102,8 @@ export function StaffEditMemberDialog({
       phone: member.phone ?? '',
       assignedTrainerId: member.assignedTrainer?.id ?? '',
       packageId: member.packageId ?? member.membershipPackage?.id ?? '',
+      portalPassword: '',
+      confirmPortalPassword: '',
     })
   }, [open, member, form])
 
@@ -120,6 +125,7 @@ export function StaffEditMemberDialog({
         phone: data.phone || undefined,
         assignedTrainerId: data.assignedTrainerId || null,
         packageId: data.packageId,
+        portalPassword: data.portalPassword || undefined,
       })
       toast({
         title: 'Member updated',
@@ -309,6 +315,13 @@ export function StaffEditMemberDialog({
                 </Select>
               </div>
             )}
+
+            <MemberPortalPasswordFields
+              control={form.control}
+              passwordError={form.formState.errors.portalPassword?.message}
+              confirmError={form.formState.errors.confirmPortalPassword?.message}
+              disabled={isSubmitting}
+            />
           </div>
 
           <DialogFooter className="mx-0 mb-0 w-full shrink-0 [&>button]:w-full sm:[&>button]:w-auto">

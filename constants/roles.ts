@@ -16,6 +16,7 @@ export const ROLE_LABELS: Record<TenantRole, string> = {
   ADMIN: 'Admin',
   STAFF: 'Staff',
   TRAINER: 'Trainer',
+  MEMBER: 'Member',
 } as const;
 
 export const ROLE_DESCRIPTIONS: Record<TenantRole, string> = {
@@ -23,6 +24,7 @@ export const ROLE_DESCRIPTIONS: Record<TenantRole, string> = {
   ADMIN: 'Can manage members, trainers, and attendance',
   STAFF: 'Can manage members and mark attendance',
   TRAINER: 'Can view members and attendance',
+  MEMBER: 'Can view personal training and log workouts',
 } as const;
 
 // Roles that can be invited (OWNER cannot be invited)
@@ -37,6 +39,7 @@ export const DIRECT_CREATABLE_ROLES: TenantRole[] = [
 
 // Role hierarchy (higher index = more permissions)
 export const ROLE_HIERARCHY: TenantRole[] = [
+  'MEMBER',
   'TRAINER',
   'STAFF',
   'ADMIN',

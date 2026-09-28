@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import type { LucideIcon } from 'lucide-react'
+import { Check, type LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/helpers/formatting'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,13 @@ export function localDateIso(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+export function addDaysIso(iso: string, days: number) {
+  const [year, month, day] = iso.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  date.setDate(date.getDate() + days)
+  return localDateIso(date)
 }
 
 export function formatDaysUntilPayment(remainingDays?: number | null) {
@@ -153,6 +160,18 @@ const MODE_ACCENTS = {
     idle: 'border-violet-500/20 bg-violet-500/5 hover:border-violet-500/35',
     kicker: 'text-violet-700 dark:text-violet-400',
   },
+  emerald: {
+    icon: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+    active: 'border-emerald-500/50 bg-emerald-500/10 ring-2 ring-emerald-500/20',
+    idle: 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/35',
+    kicker: 'text-emerald-700 dark:text-emerald-400',
+  },
+  rose: {
+    icon: 'bg-rose-500/15 text-rose-700 dark:text-rose-400',
+    active: 'border-rose-500/50 bg-rose-500/10 ring-2 ring-rose-500/20',
+    idle: 'border-rose-500/20 bg-rose-500/5 hover:border-rose-500/35',
+    kicker: 'text-rose-700 dark:text-rose-400',
+  },
 } as const
 
 export function StaffModeCards<T extends string>({
@@ -169,6 +188,8 @@ export function StaffModeCards<T extends string>({
     icon: LucideIcon
     kicker?: string
     accent?: keyof typeof MODE_ACCENTS
+    done?: boolean
+    doneLabel?: string
   }>
 }) {
   return (
@@ -176,7 +197,13 @@ export function StaffModeCards<T extends string>({
       role="tablist"
       className={cn(
         'grid gap-3',
-        options.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3',
+        options.length <= 2
+          ? 'grid-cols-1 sm:grid-cols-2'
+          : options.length === 3
+            ? 'grid-cols-1 sm:grid-cols-3'
+            : options.length >= 6
+              ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
+              : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-5',
       )}
     >
       {options.map((option) => {
@@ -191,15 +218,27 @@ export function StaffModeCards<T extends string>({
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-xl border p-4 text-left transition-colors',
+              'relative rounded-xl border p-4 text-left transition-colors',
               active ? accent.active : accent.idle,
+              option.done && 'border-emerald-400/50',
             )}
           >
-            <div className="flex items-start gap-3">
+            {option.done ? (
+              <span
+                className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm"
+                title={option.doneLabel ?? 'Done'}
+                aria-label={option.doneLabel ?? 'Done'}
+              >
+                <Check className="size-4" strokeWidth={3} />
+              </span>
+            ) : null}
+            <div className="flex items-start gap-3 pr-8">
               <div
                 className={cn(
                   'flex size-11 shrink-0 items-center justify-center rounded-lg',
-                  accent.icon,
+                  option.done
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                    : accent.icon,
                 )}
               >
                 <Icon className="size-5" />
@@ -209,15 +248,20 @@ export function StaffModeCards<T extends string>({
                   <p
                     className={cn(
                       'mb-0.5 text-[11px] font-semibold uppercase tracking-wider',
-                      accent.kicker,
+                      option.done
+                        ? 'text-emerald-700 dark:text-emerald-300'
+                        : accent.kicker,
                     )}
                   >
                     {option.kicker}
+                    {option.done ? ' · done' : ''}
                   </p>
                 ) : null}
                 <p className="font-semibold text-foreground">{option.title}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {option.description}
+                  {option.done && option.doneLabel
+                    ? option.doneLabel
+                    : option.description}
                 </p>
               </div>
             </div>

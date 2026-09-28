@@ -32,6 +32,7 @@ import {
   type AddMemberPersonFormData,
 } from '@/schemas/owner-person.schema'
 import { membersService, packagesService, trainersService, queryKeys } from '@/services'
+import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
 import { ApiException } from '@/lib/api/errors'
 import { useToast } from '@/hooks/use-toast'
 
@@ -59,6 +60,8 @@ export function StaffAddMemberDialog({
       assignedTrainerId: '',
       packageId: '',
       paymentStatus: 'PENDING',
+      portalPassword: '',
+      confirmPortalPassword: '',
     },
   })
 
@@ -97,6 +100,12 @@ export function StaffAddMemberDialog({
       })
       return
     }
+    if (needsTrainer && !data.portalPassword) {
+      form.setError('portalPassword', {
+        message: 'Set a portal password so this member can log in.',
+      })
+      return
+    }
 
     setIsSubmitting(true)
     try {
@@ -108,6 +117,7 @@ export function StaffAddMemberDialog({
         assignedTrainerId: data.assignedTrainerId || undefined,
         packageId: data.packageId,
         paymentStatus: data.paymentStatus,
+        portalPassword: data.portalPassword || undefined,
       })
       toast({
         title: 'Member created',
@@ -314,6 +324,14 @@ export function StaffAddMemberDialog({
                 </SelectContent>
               </Select>
             </div>
+
+            <MemberPortalPasswordFields
+              control={form.control}
+              passwordError={form.formState.errors.portalPassword?.message}
+              confirmError={form.formState.errors.confirmPortalPassword?.message}
+              disabled={isSubmitting}
+              required={needsTrainer}
+            />
           </div>
 
           <DialogFooter className="mx-0 mb-0 w-full shrink-0 [&>button]:w-full sm:[&>button]:w-auto">

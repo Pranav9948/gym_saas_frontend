@@ -4,15 +4,29 @@
 
 import { toast as sonnerToast } from 'sonner';
 
+const defaults = { duration: 3200 };
+
 export const appToast = {
   success: (message: string, description?: string) =>
-    sonnerToast.success(message, description ? { description } : undefined),
+    sonnerToast.success(message, {
+      ...defaults,
+      ...(description ? { description } : {}),
+    }),
   error: (message: string, description?: string) =>
-    sonnerToast.error(message, description ? { description } : undefined),
+    sonnerToast.error(message, {
+      duration: 5000,
+      ...(description ? { description } : {}),
+    }),
   warning: (message: string, description?: string) =>
-    sonnerToast.warning(message, description ? { description } : undefined),
+    sonnerToast.warning(message, {
+      ...defaults,
+      ...(description ? { description } : {}),
+    }),
   info: (message: string, description?: string) =>
-    sonnerToast.info(message, description ? { description } : undefined),
+    sonnerToast.info(message, {
+      ...defaults,
+      ...(description ? { description } : {}),
+    }),
 };
 
 export { sonnerToast as toast };

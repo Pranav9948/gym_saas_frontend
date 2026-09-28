@@ -7,7 +7,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { revenueTrend } from '@/lib/super-admin-mock'
 
 const chartConfig = {
   revenue: {
@@ -16,10 +15,36 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function RevenueAreaChart() {
+function formatMoney(value: number, currency: string) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+    maximumFractionDigits: 2,
+  }).format(value)
+}
+
+function formatAxis(value: number, currency: string) {
+  if (value >= 1000) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  }
+  return formatMoney(value, currency)
+}
+
+export function RevenueAreaChart({
+  data,
+  currency = 'USD',
+}: {
+  data: Array<{ month: string; revenue: number }>
+  currency?: string
+}) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
-      <AreaChart data={revenueTrend} margin={{ left: 8, right: 8, top: 8 }}>
+      <AreaChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <defs>
           <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.5} />
@@ -39,14 +64,14 @@ export function RevenueAreaChart() {
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          width={44}
-          tickFormatter={(value) => `$${value / 1000}k`}
+          width={56}
+          tickFormatter={(value) => formatAxis(Number(value), currency)}
         />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
-              formatter={(value) => `$${Number(value).toLocaleString()}`}
+              formatter={(value) => formatMoney(Number(value), currency)}
               indicator="line"
             />
           }

@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Dumbbell, LogOut, Menu, X } from 'lucide-react'
+import { Dumbbell, LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { CollapsibleSidebar, SidebarHeaderRow } from '@/components/layout/CollapsibleSidebar'
 import { navGroups } from './nav-items'
 
 function isItemActive(pathname: string, href: string) {
@@ -21,15 +21,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Dumbbell className="size-5" />
+      <SidebarHeaderRow>
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Dumbbell className="size-5" />
+          </div>
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">GymFlow</p>
+            <p className="truncate text-xs text-muted-foreground">Super Admin</p>
+          </div>
         </div>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-sidebar-foreground">GymFlow</p>
-          <p className="text-xs text-muted-foreground">Super Admin</p>
-        </div>
-      </div>
+      </SidebarHeaderRow>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-5">
@@ -82,45 +84,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function SuperAdminSidebar() {
-  const isMobile = useIsMobile()
-  const [isOpen, setIsOpen] = React.useState(false)
-
-  if (isMobile) {
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="icon"
-          className="fixed left-4 top-3 z-50 bg-card"
-          onClick={() => setIsOpen((prev) => !prev)}
-          aria-label={isOpen ? 'Close menu' : 'Open menu'}
-        >
-          {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-        </Button>
-
-        {isOpen ? (
-          <div
-            className="fixed inset-0 z-40 bg-background/70 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
-        ) : null}
-
-        <aside
-          className={cn(
-            'fixed left-0 top-0 z-50 h-dvh w-72 border-r border-sidebar-border bg-sidebar transition-transform duration-200 ease-out',
-            isOpen ? 'translate-x-0' : '-translate-x-full',
-          )}
-        >
-          <SidebarContent onNavigate={() => setIsOpen(false)} />
-        </aside>
-      </>
-    )
-  }
-
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
+    <CollapsibleSidebar>
       <SidebarContent />
-    </aside>
+    </CollapsibleSidebar>
   )
 }

@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { memberGrowth } from '@/lib/super-admin-mock'
+import type { SuperAdminMemberGrowthMonth } from '@/types'
 
 const chartConfig = {
   members: {
@@ -16,10 +16,20 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function MemberGrowthChart() {
+function formatAxis(value: number) {
+  if (value >= 1000) {
+    return new Intl.NumberFormat('en-US', {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  }
+  return String(Math.round(value))
+}
+
+export function MemberGrowthChart({ data }: { data: SuperAdminMemberGrowthMonth[] }) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
-      <LineChart data={memberGrowth} margin={{ left: 8, right: 8, top: 8 }}>
+      <LineChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
         <YAxis
@@ -27,8 +37,9 @@ export function MemberGrowthChart() {
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          width={44}
-          tickFormatter={(value) => `${value / 1000}k`}
+          width={48}
+          allowDecimals={false}
+          tickFormatter={formatAxis}
         />
         <ChartTooltip
           cursor={false}

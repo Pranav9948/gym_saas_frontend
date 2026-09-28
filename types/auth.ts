@@ -45,9 +45,27 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
-  token: string;
+  email: string;
+  code: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface PasswordResetCode {
+  id: string;
+  code: string;
+  requesterRole: string;
+  recipientRole: string;
+  gymName: string;
+  requesterName: string;
+  requesterEmail: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface PasswordResetCodesResponse {
+  success: true;
+  data: PasswordResetCode[];
 }
 
 export interface InviteUserRequest {
@@ -176,6 +194,29 @@ export interface SuperAdminLoginResponse {
       role: string;
     };
   };
+}
+
+export interface SuperAdminProfile {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'SUPER_ADMIN' | string;
+  isActive: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+export interface SuperAdminProfileResponse {
+  success: true;
+  data: SuperAdminProfile;
+  message?: string;
+}
+
+export interface SuperAdminSessionActionResponse {
+  success: true;
+  data: { revokedSessions: number };
+  message?: string;
 }
 
 export interface ApiError {

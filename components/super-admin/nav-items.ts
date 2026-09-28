@@ -6,6 +6,8 @@ import {
   Settings,
   ShoppingCart,
   Building2,
+  KeyRound,
+  Bell,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -45,7 +47,9 @@ export const navGroups: NavGroup[] = [
   {
     label: 'System',
     items: [
+      { href: '/super-admin/notifications', label: 'Notifications', icon: Bell },
       { href: '/super-admin/settings', label: 'Settings', icon: Settings },
+      { href: '/super-admin/reset-codes', label: 'Reset codes', icon: KeyRound },
     ],
   },
 ];

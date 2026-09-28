@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { LogOut, Menu, Settings, User } from 'lucide-react'
+import { LogOut, Settings, User } from 'lucide-react'
 import { GymBrand } from '@/components/owner/GymBrand'
 import { personInitials } from '@/components/staff/staff-ui'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -21,11 +21,7 @@ import { ROLE_LABELS } from '@/constants/roles'
 import { useAuth } from '@/hooks'
 import type { TenantRole } from '@/types'
 
-interface StaffNavbarProps {
-  onMenuClick: () => void
-}
-
-export function StaffNavbar({ onMenuClick }: StaffNavbarProps) {
+export function StaffNavbar() {
   const { user, tenant, logout } = useAuth()
   const roleLabel =
     user?.role && user.role in ROLE_LABELS
@@ -35,16 +31,6 @@ export function StaffNavbar({ onMenuClick }: StaffNavbarProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
       <div className="flex h-14 items-center gap-3 px-4 sm:h-16 md:px-6">
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0"
-          onClick={onMenuClick}
-          aria-label="Open menu"
-        >
-          <Menu className="size-5" />
-        </Button>
-
         <div className="min-w-0 flex-1 md:hidden">
           <GymBrand
             name={tenant?.name}

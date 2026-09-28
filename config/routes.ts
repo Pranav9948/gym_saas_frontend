@@ -25,9 +25,12 @@ export const ROUTES = {
   SUPER_ADMIN_PLANS: '/super-admin/plans',
   SUPER_ADMIN_GYMS: '/super-admin/gyms',
   SUPER_ADMIN_OWNERS: '/super-admin/owners',
+  SUPER_ADMIN_OWNER: (id: string) => `/super-admin/owners/${id}`,
   SUPER_ADMIN_BILLING: '/super-admin/billing',
   SUPER_ADMIN_ANALYTICS: '/super-admin/analytics',
   SUPER_ADMIN_SETTINGS: '/super-admin/settings',
+  SUPER_ADMIN_RESET_CODES: '/super-admin/reset-codes',
+  SUPER_ADMIN_NOTIFICATIONS: '/super-admin/notifications',
   SUPER_ADMIN_LOGIN: '/super-admin/login',
 
   // Trainer portal
@@ -61,6 +64,7 @@ export const ROUTES = {
   SETTINGS_TEAM: '/settings/team',
   SETTINGS_NOTIFICATIONS: '/settings/notifications',
   SETTINGS_ROLES: '/settings/roles',
+  RESET_CODES: '/reset-codes',
 
   BILLING: '/billing',
   BILLING_UPGRADE: '/billing/upgrade',
@@ -80,6 +84,7 @@ export const ROUTES = {
   OWNER_BILLING_CANCEL: '/owner/billing/cancel',
   OWNER_SETTINGS: '/owner/settings',
   OWNER_SETTINGS_ROLES: '/owner/settings/roles',
+  OWNER_RESET_CODES: '/owner/reset-codes',
 
   // Member portal (future — gym member self-service)
   MEMBER_PORTAL: '/member/dashboard',
@@ -206,6 +211,13 @@ export const ROUTE_PERMISSIONS: Record<string, RouteConfig> = {
   [ROUTES.SETTINGS_ROLES]: {
     path: ROUTES.SETTINGS_ROLES,
     permissions: [PERMISSIONS.ROLE.VIEW],
+    requireAuth: true,
+    roles: STAFF_PORTAL_ROLES,
+  },
+
+  [ROUTES.RESET_CODES]: {
+    path: ROUTES.RESET_CODES,
+    permissions: [],
     requireAuth: true,
     roles: STAFF_PORTAL_ROLES,
   },

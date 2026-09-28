@@ -8,7 +8,7 @@ export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: 'You are signed in',
   LOGOUT_SUCCESS: 'You have been signed out',
   REGISTER_SUCCESS: 'Your gym account is ready',
-  PASSWORD_RESET_EMAIL: 'Check your inbox for a reset link',
+  PASSWORD_RESET_EMAIL: 'Ask the person who manages your account for the 6-digit code',
   PASSWORD_RESET_SUCCESS: 'Password updated. You can sign in now.',
 
   // Members

@@ -101,6 +101,7 @@ export const useUIStore = create<UIState>()(
       // Only persist theme and sidebar preferences
       partialize: (state) => ({
         theme: state.theme,
+        sidebarOpen: state.sidebarOpen,
         sidebarCollapsed: state.sidebarCollapsed,
       }),
     },

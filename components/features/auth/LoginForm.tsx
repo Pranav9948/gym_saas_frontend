@@ -157,6 +157,7 @@ export function LoginForm({ loginType }: LoginFormProps) {
         </Link>
       </div>
 
+      {loginType === 'user' ? (
       <div className="text-center text-sm">
         <Link
           href={ROUTES.FORGOT_PASSWORD}
@@ -165,6 +166,7 @@ export function LoginForm({ loginType }: LoginFormProps) {
           Forgot password?
         </Link>
       </div>
+      ) : null}
     </form>
   );
 }

@@ -14,6 +14,7 @@ import type {
   RefreshTokenResponse,
   MeResponse,
   SuperAdminSetupRequest,
+  PasswordResetCodesResponse,
 } from '@/types';
 import { SuperAdminLoginResponse } from '@/types/api';
 
@@ -71,7 +72,7 @@ export const authService = {
   },
 
   /**
-   * Send password reset email
+   * Request a 6-digit reset code (shown to the parent portal)
    */
   forgotPassword: async (
     data: ForgotPasswordRequest,
@@ -80,12 +81,17 @@ export const authService = {
   },
 
   /**
-   * Reset password with token
-   * Note: Backend has a bug here (uses req.user without auth middleware)
+   * Reset password with email + 6-digit code
    */
   resetPassword: async (
     data: ResetPasswordRequest,
   ): Promise<ApiSuccessResponse> => {
     return post<ApiSuccessResponse>(API_ENDPOINTS.AUTH.RESET_PASSWORD, data);
+  },
+
+  listResetCodes: async () => {
+    return get<PasswordResetCodesResponse>(
+      API_ENDPOINTS.AUTH.RESET_CODES,
+    );
   },
 };

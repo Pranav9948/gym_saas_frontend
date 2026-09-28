@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { LogOut, Menu, Settings } from 'lucide-react'
+import { LogOut, Settings } from 'lucide-react'
 import { GymBrand } from '@/components/owner/GymBrand'
 import { personInitials } from '@/components/staff/staff-ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -18,22 +18,12 @@ import {
 import { ROUTES } from '@/config'
 import { useAuth } from '@/hooks'
 
-export function TrainerNavbar({ onMenuClick }: { onMenuClick: () => void }) {
+export function TrainerNavbar() {
   const { user, tenant, logout } = useAuth()
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
       <div className="flex h-14 items-center gap-3 px-4 sm:h-16 md:px-6">
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0"
-          onClick={onMenuClick}
-          aria-label="Open menu"
-        >
-          <Menu className="size-5" />
-        </Button>
-
         <div className="min-w-0 flex-1">
           <div className="md:hidden">
             <GymBrand

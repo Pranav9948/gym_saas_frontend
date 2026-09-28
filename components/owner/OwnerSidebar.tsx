@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { useOwnerTenant } from '@/hooks/useOwnerTenant'
+import { PortalSwitcher } from '@/components/layout/PortalSwitcher'
 import { GymBrand } from '@/components/owner/GymBrand'
 import { ownerNavItems } from './owner-nav-items'
 import { ROUTES } from '@/config'
@@ -63,6 +64,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           })}
         </div>
       </nav>
+
+      <div className="border-t border-sidebar-border p-3">
+        <PortalSwitcher />
+      </div>
 
       <div className="border-t border-sidebar-border p-3">
         <Button

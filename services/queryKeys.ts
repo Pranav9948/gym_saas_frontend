@@ -54,6 +54,51 @@ export const queryKeys = {
       id: string,
       params?: { range?: string; from?: string; to?: string },
     ) => [...queryKeys.trainers.detail(id), 'performance', params] as const,
+    me: () => [...queryKeys.trainers.all, 'me'] as const,
+    myMembers: (params?: { page?: number; limit?: number; date?: string }) =>
+      [...queryKeys.trainers.all, 'me-members', params] as const,
+  },
+
+  portal: {
+    all: ['portal'] as const,
+    me: () => [...queryKeys.portal.all, 'me'] as const,
+    training: (date?: string) =>
+      [...queryKeys.portal.all, 'training', date] as const,
+    history: () => [...queryKeys.portal.all, 'history'] as const,
+    workoutLogs: (filters?: {
+      muscleGroup?: string
+      exercise?: string
+      date?: string
+    }) => [...queryKeys.portal.all, 'workout-logs', filters] as const,
+    workoutCatalog: () => [...queryKeys.portal.all, 'workout-catalog'] as const,
+    workoutPerformance: (muscleGroup?: string, exercise?: string) =>
+      [...queryKeys.portal.all, 'workout-performance', muscleGroup, exercise] as const,
+  },
+
+  workoutLogs: {
+    all: ['workout-logs'] as const,
+    byMember: (
+      memberId: string,
+      filters?: { muscleGroup?: string; exercise?: string; date?: string },
+    ) => [...queryKeys.workoutLogs.all, memberId, filters] as const,
+    catalog: (memberId: string) =>
+      [...queryKeys.workoutLogs.all, memberId, 'catalog'] as const,
+    performance: (memberId: string, muscleGroup?: string, exercise?: string) =>
+      [...queryKeys.workoutLogs.all, memberId, 'performance', muscleGroup, exercise] as const,
+  },
+
+  workouts: {
+    all: ['workouts'] as const,
+    byMember: (memberId: string, date?: string) =>
+      [...queryKeys.workouts.all, memberId, date] as const,
+    lastPerformance: (memberId: string, before?: string) =>
+      [...queryKeys.workouts.all, memberId, 'last-performance', before] as const,
+  },
+
+  diets: {
+    all: ['diets'] as const,
+    byMember: (memberId: string, date?: string) =>
+      [...queryKeys.diets.all, memberId, date] as const,
   },
 
   packages: {

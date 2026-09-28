@@ -2,12 +2,13 @@
 // Goals Service - Member Goals API calls
 // ===========================================
 
-import { get, post } from '@/lib/api/client';
+import { get, patch, post } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   CreateGoalRequest,
   GoalResponse,
   MemberGoalsResponse,
+  WeightLog,
 } from '@/types';
 
 export const goalsService = {
@@ -30,5 +31,24 @@ export const goalsService = {
    */
   getMemberGoals: async (memberId: string): Promise<MemberGoalsResponse> => {
     return get<MemberGoalsResponse>(API_ENDPOINTS.GOALS.LIST(memberId));
+  },
+
+  updateTargets: async (
+    memberId: string,
+    weeklyTargets: Array<{
+      week: number;
+      targetChangeKg: number;
+      targetWeightKg: number;
+    }>,
+  ): Promise<GoalResponse> => {
+    return patch<GoalResponse>(API_ENDPOINTS.GOALS.TARGETS(memberId), {
+      weeklyTargets,
+    });
+  },
+
+  listWeights: async (
+    memberId: string,
+  ): Promise<{ success: true; data: WeightLog[] }> => {
+    return get(API_ENDPOINTS.GOALS.WEIGHTS(memberId));
   },
 };

@@ -30,7 +30,13 @@ export const ROUTES = {
   SUPER_ADMIN_SETTINGS: '/super-admin/settings',
   SUPER_ADMIN_LOGIN: '/super-admin/login',
 
-  // Staff portal (STAFF / ADMIN / TRAINER)
+  // Trainer portal
+  TRAINER: '/trainer/members',
+  TRAINER_MEMBERS: '/trainer/members',
+  TRAINER_MEMBER: (id: string) => `/trainer/members/${id}`,
+  TRAINER_SETTINGS: '/trainer/settings',
+
+  // Staff portal (STAFF / ADMIN)
   DASHBOARD: '/dashboard',
   MEMBERS: '/members',
   MEMBER_NEW: '/members/new',
@@ -77,11 +83,15 @@ export const ROUTES = {
 
   // Member portal (future — gym member self-service)
   MEMBER_PORTAL: '/member/dashboard',
-  MEMBER_PROFILE: '/member/profile',
+  MEMBER_DIET: '/member/diet',
+  MEMBER_WORKOUTS: '/member/workouts',
+  MEMBER_PROFILE: '/member/settings',
+  MEMBER_SETTINGS: '/member/settings',
   MEMBER_ATTENDANCE: '/member/attendance',
 } as const;
 
-export const STAFF_PORTAL_ROLES: TenantRole[] = ['STAFF', 'ADMIN', 'TRAINER'];
+export const STAFF_PORTAL_ROLES: TenantRole[] = ['STAFF', 'ADMIN'];
+export const TRAINER_PORTAL_ROLES: TenantRole[] = ['TRAINER'];
 export const OWNER_PORTAL_ROLES: TenantRole[] = ['OWNER'];
 export const SUPER_ADMIN_ROLES = ['SUPER_ADMIN'] as const;
 
@@ -218,6 +228,21 @@ export const ROUTE_PERMISSIONS: Record<string, RouteConfig> = {
     permissions: [],
     requireAuth: true,
   },
+  [ROUTES.MEMBER_SETTINGS]: {
+    path: ROUTES.MEMBER_SETTINGS,
+    permissions: [],
+    requireAuth: true,
+  },
+  [ROUTES.MEMBER_DIET]: {
+    path: ROUTES.MEMBER_DIET,
+    permissions: [],
+    requireAuth: true,
+  },
+  [ROUTES.MEMBER_WORKOUTS]: {
+    path: ROUTES.MEMBER_WORKOUTS,
+    permissions: [],
+    requireAuth: true,
+  },
 };
 
 export function getRouteConfig(pathname: string): RouteConfig | null {
@@ -314,6 +339,10 @@ export function isMemberPortalRoute(pathname: string): boolean {
   return pathname === '/member' || pathname.startsWith('/member/');
 }
 
+export function isTrainerPortalRoute(pathname: string): boolean {
+  return pathname === '/trainer' || pathname.startsWith('/trainer/');
+}
+
 export function getPostLoginRoute(role?: string): string {
   switch (role) {
     case 'SUPER_ADMIN':
@@ -321,7 +350,7 @@ export function getPostLoginRoute(role?: string): string {
     case 'OWNER':
       return ROUTES.OWNER_DASHBOARD;
     case 'TRAINER':
-      return ROUTES.ATTENDANCE;
+      return ROUTES.TRAINER_MEMBERS;
     case 'ADMIN':
     case 'STAFF':
       return ROUTES.DASHBOARD;
@@ -338,6 +367,7 @@ export function getForbiddenRedirect(role?: string): string {
   if (role === 'SUPER_ADMIN') return ROUTES.SUPER_ADMIN;
   if (role === 'OWNER') return ROUTES.OWNER_DASHBOARD;
   if (role === 'MEMBER' || role === 'CLIENT') return ROUTES.MEMBER_PORTAL;
+  if (role === 'TRAINER') return ROUTES.TRAINER_MEMBERS;
   if (STAFF_PORTAL_ROLES.includes(role as TenantRole)) return ROUTES.DASHBOARD;
   return ROUTES.FORBIDDEN;
 }

@@ -5,11 +5,11 @@
 // Success messages
 export const SUCCESS_MESSAGES = {
   // Auth
-  LOGIN_SUCCESS: 'Welcome back!',
-  LOGOUT_SUCCESS: 'You have been logged out.',
-  REGISTER_SUCCESS: 'Account created successfully!',
-  PASSWORD_RESET_EMAIL: 'Password reset email sent. Check your inbox.',
-  PASSWORD_RESET_SUCCESS: 'Password reset successfully. Please log in.',
+  LOGIN_SUCCESS: 'You are signed in',
+  LOGOUT_SUCCESS: 'You have been signed out',
+  REGISTER_SUCCESS: 'Your gym account is ready',
+  PASSWORD_RESET_EMAIL: 'Check your inbox for a reset link',
+  PASSWORD_RESET_SUCCESS: 'Password updated. You can sign in now.',
 
   // Members
   MEMBER_CREATED: 'Member added successfully.',

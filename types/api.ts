@@ -8,10 +8,13 @@ import type {
   Attendance,
   AttendanceStats,
   MemberGoal,
+  MembershipPackage,
   Tenant,
   Plan,
   OwnerWithGym,
   GoalType,
+  DietPeriod,
+  MuscleGroup,
   BillingInterval,
   InviteRole,
   DirectCreateRole,
@@ -44,6 +47,7 @@ export interface CreateMemberRequest {
   assignedTrainerId?: string | null;
   packageId: string;
   paymentStatus?: 'PAID' | 'PENDING';
+  portalPassword?: string;
 }
 
 export interface UpdateMemberRequest {
@@ -55,6 +59,7 @@ export interface UpdateMemberRequest {
   assignedTrainerId?: string | null;
   packageId?: string;
   paymentStatus?: 'PAID' | 'PENDING';
+  portalPassword?: string;
 }
 
 export interface PaginatedMembersResponse {
@@ -130,11 +135,145 @@ export interface AttendanceStatsResponse {
 
 // Goals
 export interface CreateGoalRequest {
-  goalType: GoalType;
+  primaryGoal: import('./models').PrimaryGoal;
   currentWeight: number;
   targetWeight: number;
-  durationWeeks: number;
-  height: number;
+  durationWeeks?: number;
+  targetDate?: string;
+  height?: number;
+  notes?: string;
+}
+
+export interface WorkoutSessionSet {
+  id?: string;
+  setNumber: number;
+  targetReps: number;
+  targetWeight: number;
+  actualReps?: number | null;
+  actualWeight?: number | null;
+  notes?: string | null;
+}
+
+export interface WorkoutSessionExercise {
+  id?: string;
+  name: string;
+  notes?: string | null;
+  sets: WorkoutSessionSet[];
+}
+
+export interface WorkoutReview {
+  score: number;
+  repetitionCompletion: string;
+  weightProgression: string;
+  setCompletion: string;
+  consistency: string;
+  exerciseBreakdown: Array<{ name: string; score: number; note: string }>;
+  strengths: string[];
+  improvements: string[];
+  suggestion: string;
+  previousScore: number | null;
+  scoreDelta: number | null;
+}
+
+export interface WorkoutSession {
+  id: string;
+  memberId: string;
+  date: string;
+  notes?: string | null;
+  score?: number | null;
+  review?: WorkoutReview | null;
+  exercises: WorkoutSessionExercise[];
+}
+
+export interface LastWorkoutSet {
+  setNumber: number;
+  reps: number;
+  weight: number;
+}
+
+export interface LastWorkoutExercise {
+  name: string;
+  date: string;
+  sets: LastWorkoutSet[];
+}
+
+export interface LastWorkoutPerformance {
+  before: string | null;
+  exercises: LastWorkoutExercise[];
+}
+
+export interface DietPlanMeal {
+  id?: string;
+  period: DietPeriod;
+  name: string;
+  quantity: string;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  notes?: string | null;
+  sortOrder?: number;
+}
+
+export interface DietPlan {
+  id: string;
+  memberId: string;
+  date: string;
+  notes?: string | null;
+  publishedAt?: string | null;
+  meals: DietPlanMeal[];
+}
+
+export interface MemberWorkoutSet {
+  id?: string;
+  setNumber: number;
+  reps: number;
+  weight: number;
+}
+
+export interface MemberWorkoutExercise {
+  id?: string;
+  muscleGroup: MuscleGroup;
+  name: string;
+  sortOrder?: number;
+  sets: MemberWorkoutSet[];
+}
+
+export interface MemberWorkoutSession {
+  id: string;
+  memberId: string;
+  date: string;
+  notes?: string | null;
+  createdAt?: string;
+  exercises: MemberWorkoutExercise[];
+}
+
+export interface WorkoutLogCatalog {
+  muscleGroups: MuscleGroup[];
+  exercises: Array<{ muscleGroup: MuscleGroup; name: string }>;
+}
+
+export interface WorkoutPerformanceEntry {
+  sessionId: string;
+  date: string;
+  createdAt: string;
+  muscleGroup: MuscleGroup;
+  name: string;
+  sets: MemberWorkoutSet[];
+}
+
+export interface WorkoutPerformance {
+  muscleGroup: MuscleGroup;
+  exercise: string;
+  latest: WorkoutPerformanceEntry | null;
+  history: WorkoutPerformanceEntry[];
+}
+
+export interface WeightLog {
+  id: string;
+  memberId: string;
+  weight: number;
+  date: string;
 }
 
 export interface GoalResponse {
@@ -157,6 +296,9 @@ export interface UpdateTenantRequest {
   state?: string;
   country?: string;
   isActive?: boolean;
+  staffPortalEnabled?: boolean;
+  trainerPortalEnabled?: boolean;
+  memberPortalEnabled?: boolean;
 }
 
 export interface TenantResponse {
@@ -329,4 +471,95 @@ export interface StaffMetrics {
 export interface StaffMetricsResponse {
   success: true;
   data: StaffMetrics;
+}
+
+export interface MemberPortalProfile {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string | null;
+  };
+  member: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+    status?: string;
+    membershipPackage?: MembershipPackage | null;
+    assignedTrainer?: {
+      id: string;
+      specialization?: string | null;
+      user: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string | null;
+      };
+    } | null;
+  };
+  hasPersonalTraining: boolean;
+}
+
+export interface MemberWeeklyProgress {
+  week: number | null;
+  durationWeeks: number;
+  currentWeight: number | null;
+  thisWeekTargetKg: number | null;
+  thisWeekChangeKg: number | null;
+  finalTargetKg: number | null;
+  percentToTarget: number;
+  targetDate?: string | null;
+}
+
+export interface MemberTraining {
+  date: string;
+  user: MemberPortalProfile['user'];
+  member: MemberPortalProfile['member'];
+  hasPersonalTraining: boolean;
+  hasDietPlan?: boolean;
+  dietNotification?: { message: string; date: string } | null;
+  todayDiet?: DietPlan | null;
+  tomorrowDiet?: DietPlan | null;
+  goal: MemberGoal | null;
+  weeklyProgress: MemberWeeklyProgress | null;
+  today: WorkoutSession | null;
+}
+
+export interface MemberPortalProfileResponse {
+  success: true;
+  data: MemberPortalProfile;
+}
+
+export interface MemberTrainingResponse {
+  success: true;
+  data: MemberTraining;
+}
+
+export interface PortalUserResponse {
+  success: true;
+  data: MemberPortalProfile['user'];
+}
+
+export interface PortalWorkoutResponse {
+  success: true;
+  data: WorkoutSession;
+}
+
+export interface MemberHistory {
+  workouts: Array<{
+    id: string;
+    date: string;
+    score?: number | null;
+    notes?: string | null;
+  }>;
+  diets: DietPlan[];
+  weights: WeightLog[];
+  goals: MemberGoal[];
+}
+
+export interface MemberHistoryResponse {
+  success: true;
+  data: MemberHistory;
 }

@@ -88,6 +88,7 @@ async function initializeAuthSession(): Promise<void> {
           firstName: meResponse.data.firstName,
           lastName: meResponse.data.lastName,
           role: meResponse.data.role,
+          avatarUrl: meResponse.data.avatarUrl,
         },
         tenant,
         accessToken,

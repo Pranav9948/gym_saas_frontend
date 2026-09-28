@@ -2,7 +2,7 @@
 // Trainers Service - Trainer API calls
 // ===========================================
 
-import { get, post, patch, del } from '@/lib/api/client';
+import { get, post, patch, del, uploadFile } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   PaginationParams,
@@ -85,6 +85,36 @@ export const trainersService = {
     return get<TrainerMembersResponse>(
       API_ENDPOINTS.TRAINERS.MEMBERS(id),
       params as Record<string, unknown>,
+    );
+  },
+
+  getMe: async (): Promise<TrainerResponse> => {
+    return get<TrainerResponse>(API_ENDPOINTS.TRAINERS.ME);
+  },
+
+  getMyMembers: async (
+    params?: PaginationParams & { date?: string },
+  ): Promise<TrainerMembersResponse> => {
+    return get<TrainerMembersResponse>(
+      API_ENDPOINTS.TRAINERS.ME_MEMBERS,
+      params as Record<string, unknown>,
+    );
+  },
+
+  updateMe: async (data: {
+    firstName?: string;
+    lastName?: string;
+    specialization?: string;
+    bio?: string;
+  }): Promise<TrainerResponse> => {
+    return patch<TrainerResponse>(API_ENDPOINTS.TRAINERS.ME, data);
+  },
+
+  uploadMyAvatar: async (file: File): Promise<TrainerResponse> => {
+    return uploadFile<TrainerResponse>(
+      API_ENDPOINTS.TRAINERS.ME_AVATAR,
+      file,
+      'avatar',
     );
   },
 

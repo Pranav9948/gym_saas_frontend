@@ -100,9 +100,8 @@ export function LoginForm({ loginType }: LoginFormProps) {
       await whenSessionCookieSynced();
 
       toast({
-        title: 'Success',
-        description: 'Logged in successfully',
-        duration: 3000,
+        title: 'You are signed in',
+        description: 'Opening your workspace…',
       });
 
       const nextPath = getSafeInternalPath(searchParams.get('next'));

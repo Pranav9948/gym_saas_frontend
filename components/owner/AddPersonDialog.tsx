@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { FormField, LoadingSpinner } from '@/components/common'
+import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
 import {
   addAdminPersonSchema,
   addMemberPersonSchema,
@@ -85,6 +86,8 @@ export function AddPersonDialog({
       assignedTrainerId: '',
       packageId: '',
       paymentStatus: 'PAID',
+      portalPassword: '',
+      confirmPortalPassword: '',
     },
   })
 
@@ -144,6 +147,20 @@ export function AddPersonDialog({
   }
 
   const handleMemberSubmit = memberForm.handleSubmit(async (data) => {
+    const selected = packagesQuery.data?.data?.find((pkg) => pkg.id === data.packageId)
+    const needsTrainer = Boolean(selected?.features?.includes('personal_training'))
+    if (needsTrainer && !data.assignedTrainerId) {
+      memberForm.setError('assignedTrainerId', {
+        message: 'Assign a trainer for personal training packages.',
+      })
+      return
+    }
+    if (needsTrainer && !data.portalPassword) {
+      memberForm.setError('portalPassword', {
+        message: 'Set a portal password so this member can log in.',
+      })
+      return
+    }
     setIsSubmitting(true)
     try {
       await membersService.createMember({
@@ -154,6 +171,7 @@ export function AddPersonDialog({
         assignedTrainerId: data.assignedTrainerId || undefined,
         packageId: data.packageId,
         paymentStatus: data.paymentStatus,
+        portalPassword: data.portalPassword || undefined,
       })
       toast({
         title: 'Member added',
@@ -280,6 +298,10 @@ export function AddPersonDialog({
   const assignedTrainerId = memberForm.watch('assignedTrainerId')
   const selectedPackageId = memberForm.watch('packageId')
   const selectedPaymentStatus = memberForm.watch('paymentStatus')
+  const selectedPackage = packages.find((pkg) => pkg.id === selectedPackageId)
+  const needsTrainer = Boolean(
+    selectedPackage?.features?.includes('personal_training'),
+  )
 
   const submitLabel =
     personType === 'member'
@@ -448,6 +470,15 @@ export function AddPersonDialog({
                     </p>
                   ) : null}
                 </div>
+                <MemberPortalPasswordFields
+                  control={memberForm.control}
+                  passwordError={memberForm.formState.errors.portalPassword?.message}
+                  confirmError={
+                    memberForm.formState.errors.confirmPortalPassword?.message
+                  }
+                  disabled={isSubmitting}
+                  required={needsTrainer}
+                />
               </TabsContent>
 
               <TabsContent value="staff" className="mt-4 space-y-3 pb-2">

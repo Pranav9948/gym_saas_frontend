@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { useOwnerTenant } from '@/hooks/useOwnerTenant'
 import { PortalSwitcher } from '@/components/layout/PortalSwitcher'
+import { CollapsibleSidebar, SidebarHeaderRow } from '@/components/layout/CollapsibleSidebar'
 import { GymBrand } from '@/components/owner/GymBrand'
 import { ownerNavItems } from './owner-nav-items'
 import { ROUTES } from '@/config'
@@ -28,13 +28,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
+      <SidebarHeaderRow>
         <GymBrand
           name={tenant?.name}
           logoUrl={tenant?.logoUrl}
           subtitle="Owner Portal"
         />
-      </div>
+      </SidebarHeaderRow>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
@@ -83,24 +83,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-interface OwnerSidebarProps {
-  mobileOpen: boolean
-  onMobileOpenChange: (open: boolean) => void
-}
-
-export function OwnerSidebar({ mobileOpen, onMobileOpenChange }: OwnerSidebarProps) {
+export function OwnerSidebar() {
   return (
-    <>
-      <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
-        <SidebarContent />
-      </aside>
-
-      <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
-        <SheetContent side="left" className="w-72 bg-sidebar p-0">
-          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
-          <SidebarContent onNavigate={() => onMobileOpenChange(false)} />
-        </SheetContent>
-      </Sheet>
-    </>
+    <CollapsibleSidebar>
+      <SidebarContent />
+    </CollapsibleSidebar>
   )
 }

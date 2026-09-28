@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { Dumbbell } from 'lucide-react';
 import { LoginForm } from '@/components/features/auth';
+import { ROUTES } from '@/config';
 
 export default function LoginPage() {
 
@@ -101,14 +102,16 @@ export default function LoginPage() {
 
             {/* Footer links */}
             <div className="mt-6 space-y-2 text-center text-xs md:text-sm">
+            {loginType === 'user' ? (
               <div>
                 <Link
-                  href="/auth/forgot-password"
+                  href={ROUTES.FORGOT_PASSWORD}
                   className="text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Forgot your password?
                 </Link>
               </div>
+            ) : null}
               <div className="text-muted-foreground">
                 By signing in, you agree to our{' '}
                 <Link href="/terms" className="text-primary hover:text-primary/80 transition-colors">

@@ -11,6 +11,7 @@ import {
   Settings,
   CreditCard,
   BarChart3,
+  KeyRound,
 } from 'lucide-react';
 import { ROUTES } from './routes';
 import { PERMISSIONS } from './permissions';
@@ -62,6 +63,11 @@ export const STAFF_NAV_ITEMS: NavItem[] = [
     href: ROUTES.SETTINGS,
     label: 'Settings',
     icon: Settings,
+  },
+  {
+    href: ROUTES.RESET_CODES,
+    label: 'Reset codes',
+    icon: KeyRound,
   },
 ];
 

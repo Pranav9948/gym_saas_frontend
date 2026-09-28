@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Menu, Search, Plus, UserPlus, ArrowUpCircle, User, Settings } from 'lucide-react'
+import { Search, Plus, UserPlus, ArrowUpCircle, User, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { useOwnerTenant } from '@/hooks/useOwnerTenant'
 import { Button } from '@/components/ui/button'
@@ -20,11 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ROUTES } from '@/config'
 
-interface OwnerNavbarProps {
-  onMenuClick: () => void
-}
-
-export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
+export function OwnerNavbar() {
   const { user, logout } = useAuth()
   const { tenant } = useOwnerTenant()
 
@@ -39,17 +35,7 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
       <div className="flex h-16 items-center gap-3 px-4 md:px-6">
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0"
-          onClick={onMenuClick}
-          aria-label="Open menu"
-        >
-          <Menu className="size-5" />
-        </Button>
-
-        <div className="hidden shrink-0 md:flex">
+        <div className="hidden shrink-0 sm:flex">
           <GymBrand
             name={tenant?.name}
             logoUrl={tenant?.logoUrl}

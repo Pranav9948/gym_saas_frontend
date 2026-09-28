@@ -12,7 +12,6 @@ import { applyAppTheme } from '@/components/theme-sync'
 export default function MemberLayout({ children }: { children: React.ReactNode }) {
   const { user, tenant, isLoading, isInitialized } = useAuth()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = React.useState(false)
 
   React.useEffect(() => {
     applyAppTheme('dark')
@@ -54,9 +53,9 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
-      <MemberSidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} />
+      <MemberSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <MemberNavbar onMenuClick={() => setMobileOpen(true)} />
+        <MemberNavbar />
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-5xl p-4 pb-[max(2rem,env(safe-area-inset-bottom))] sm:p-6 lg:p-8">
             {children}

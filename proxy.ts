@@ -8,7 +8,7 @@ import {
   withNextParam,
 } from '@/lib/auth/protected-routes';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (!isProtectedPath(pathname)) {
@@ -55,6 +55,7 @@ export const config = {
     '/analytics/:path*',
     '/settings/:path*',
     '/billing/:path*',
+    '/reset-codes',
     '/super-admin/:path*',
     '/dashboard',
     '/owner',

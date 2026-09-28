@@ -12,6 +12,13 @@ import type {
   Tenant,
   Plan,
   OwnerWithGym,
+  SuperAdminGym,
+  SuperAdminOwner,
+  SuperAdminBilling,
+  SuperAdminAnalytics,
+  SuperAdminDashboard,
+  SuperAdminNotification,
+  SuperAdminNotificationInbox,
   GoalType,
   DietPeriod,
   MuscleGroup,
@@ -367,6 +374,63 @@ export interface PaginatedOwnersResponse {
   success: true;
   data: OwnerWithGym[];
   meta: PaginatedMeta;
+}
+
+export interface PaginatedGymsResponse {
+  success: true;
+  data: SuperAdminGym[];
+  meta: PaginatedMeta;
+  summary: {
+    totalGyms: number;
+    activeGyms: number;
+    totalMembers: number;
+  };
+}
+
+export interface SuperAdminGymResponse {
+  success: true;
+  data: { id: string; name: string; isActive: boolean };
+  message?: string;
+}
+
+export interface PaginatedSuperAdminOwnersResponse {
+  success: true;
+  data: SuperAdminOwner[];
+  meta: PaginatedMeta;
+  summary: {
+    totalOwners: number;
+    activeSubscriptions: number;
+  };
+}
+
+export interface SuperAdminOwnerResponse {
+  success: true;
+  data: SuperAdminOwner;
+}
+
+export interface SuperAdminBillingResponse {
+  success: true;
+  data: SuperAdminBilling;
+}
+
+export interface SuperAdminAnalyticsResponse {
+  success: true;
+  data: SuperAdminAnalytics;
+}
+
+export interface SuperAdminDashboardResponse {
+  success: true;
+  data: SuperAdminDashboard;
+}
+
+export interface SuperAdminNotificationsResponse {
+  success: true;
+  data: SuperAdminNotificationInbox;
+}
+
+export interface SuperAdminNotificationResponse {
+  success: true;
+  data: SuperAdminNotification;
 }
 
 export interface CreatePlanRequest {

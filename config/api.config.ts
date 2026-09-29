@@ -23,17 +23,32 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/generate-new-tokens',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+    RESET_CODES: '/auth/reset-codes',
   },
 
   SUPER_ADMIN: {
     SETUP: '/super-admin/setup',
     LOGIN: '/super-admin/login',
     ME: '/super-admin/me',
-    UPDATE_PASSWORD: '/super-admin/me/password',
-    OWNERS: '/super-admin/get-all-owners-with-gyms',
+    CHANGE_PASSWORD: '/super-admin/me/change-password',
+    LOGOUT_OTHER_SESSIONS: '/super-admin/me/logout-other-sessions',
     REFRESH: '/super-admin/rotate-refresh-token',
     LOGOUT: '/super-admin/logout',
     DASHBOARD: '/super-admin/dashboard',
+    GYMS: {
+      LIST: '/super-admin/gyms',
+      UPDATE: (id: string) => `/super-admin/gyms/${id}`,
+    },
+    OWNERS: {
+      LIST: '/super-admin/owners',
+      GET: (id: string) => `/super-admin/owners/${id}`,
+    },
+    BILLING: '/super-admin/billing',
+    ANALYTICS: '/super-admin/analytics',
+    RESET_CODES: '/super-admin/reset-codes',
+    NOTIFICATIONS: '/super-admin/notifications',
+    NOTIFICATIONS_READ_ALL: '/super-admin/notifications/read-all',
+    NOTIFICATION_READ: (id: string) => `/super-admin/notifications/${id}/read`,
     PLANS: {
       LIST: '/super-admin/plan/get-all-plans',
       CREATE: '/super-admin/plan/create-plan',
@@ -60,6 +75,7 @@ export const API_ENDPOINTS = {
     CREATE: '/packages',
     UPDATE: (id: string) => `/packages/${id}`,
     DELETE: (id: string) => `/packages/${id}`,
+    IMAGE: (id: string) => `/packages/${id}/image`,
   },
 
   // Trainers
@@ -75,6 +91,7 @@ export const API_ENDPOINTS = {
     ME: '/trainers/me',
     ME_MEMBERS: '/trainers/me/members',
     ME_AVATAR: '/trainers/me/avatar',
+    AVATAR: (id: string) => `/trainers/${id}/avatar`,
   },
 
   WORKOUTS: {

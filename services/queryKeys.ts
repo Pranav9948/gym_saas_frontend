@@ -10,6 +10,7 @@ export const queryKeys = {
   auth: {
     all: ['auth'] as const,
     me: () => [...queryKeys.auth.all, 'me'] as const,
+    resetCodes: () => [...queryKeys.auth.all, 'reset-codes'] as const,
   },
 
   // Tenant
@@ -170,10 +171,32 @@ export const queryKeys = {
       detail: (id: string) =>
         [...queryKeys.superAdmin.plans.details(), id] as const,
     },
-    dashboard: () => [...queryKeys.superAdmin.all, 'dashboard'] as const,
+    gyms: {
+      all: () => [...queryKeys.superAdmin.all, 'gyms'] as const,
+      list: (filters?: {
+        page?: number
+        limit?: number
+        q?: string
+        status?: string
+      }) => [...queryKeys.superAdmin.gyms.all(), 'list', filters] as const,
+    },
+    owners: {
+      all: () => [...queryKeys.superAdmin.all, 'owners'] as const,
+      list: (filters?: {
+        page?: number
+        limit?: number
+        q?: string
+        status?: string
+      }) => [...queryKeys.superAdmin.owners.all(), 'list', filters] as const,
+      detail: (id: string) =>
+        [...queryKeys.superAdmin.owners.all(), 'detail', id] as const,
+    },
     me: () => [...queryKeys.superAdmin.all, 'me'] as const,
-    owners: (params?: { page?: number; limit?: number }) =>
-      [...queryKeys.superAdmin.all, 'owners', params ?? {}] as const,
+    billing: () => [...queryKeys.superAdmin.all, 'billing'] as const,
+    analytics: () => [...queryKeys.superAdmin.all, 'analytics'] as const,
+    dashboard: () => [...queryKeys.superAdmin.all, 'dashboard'] as const,
+    resetCodes: () => [...queryKeys.superAdmin.all, 'reset-codes'] as const,
+    notifications: () => [...queryKeys.superAdmin.all, 'notifications'] as const,
   },
 } as const;
 

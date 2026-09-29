@@ -122,6 +122,7 @@ export interface MembershipPackage {
   memberCount?: number;
   features?: string[];
   featureLimits?: Record<string, number>;
+  imageUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -238,6 +239,196 @@ export interface OwnerSubscriptionSummary {
   status: SubscriptionStatus;
   currentPeriodEnd: string | null;
   daysRemaining: number;
+}
+
+export interface SuperAdminGym {
+  id: string;
+  name: string;
+  slug: string;
+  location: string;
+  city: string;
+  state: string;
+  country: string;
+  logoUrl: string | null;
+  contactEmail: string;
+  contactPhone: string;
+  isActive: boolean;
+  createdAt: string;
+  owner: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
+  plan: PlanName | null;
+  planInterval: BillingInterval | null;
+  members: number;
+  revenue: number;
+  currency: string;
+  status: StatusType;
+  currentPeriodEnd: string | null;
+  daysRemaining: number | null;
+  subscriptionEnded: boolean;
+}
+
+export interface SuperAdminOwner {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatarUrl: string | null;
+  isUserActive: boolean;
+  joinedAt: string;
+  gym: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    location: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    contactEmail: string;
+    contactPhone: string;
+    isActive: boolean;
+    createdAt: string;
+    members: number;
+  };
+  plan: PlanName | null;
+  planInterval: BillingInterval | null;
+  revenue: number;
+  currency: string;
+  status: StatusType;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  daysRemaining: number | null;
+  daysSubscribed: number | null;
+  daysOnPlatform: number;
+  subscriptionEnded: boolean;
+}
+
+export type SuperAdminBillingStatus =
+  | 'active'
+  | 'trial'
+  | 'overdue'
+  | 'pending'
+  | 'canceled';
+
+export interface SuperAdminBillingSummary {
+  mrr: number;
+  outstanding: number;
+  overdue: number;
+  overdueCount: number;
+  renewingThisMonth: number;
+  renewingCount: number;
+  activePaidCount: number;
+  currency: string;
+}
+
+export interface SuperAdminBillingMonth {
+  month: string;
+  revenue: number;
+}
+
+export interface SuperAdminBillingSubscription {
+  id: string;
+  gymId: string;
+  gymName: string;
+  plan: PlanName;
+  interval: BillingInterval;
+  amount: number;
+  currency: string;
+  status: SuperAdminBillingStatus;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+}
+
+export interface SuperAdminBilling {
+  summary: SuperAdminBillingSummary;
+  monthly: SuperAdminBillingMonth[];
+  subscriptions: SuperAdminBillingSubscription[];
+}
+
+export type SuperAdminPlanMixName = PlanName | 'NONE';
+
+export interface SuperAdminAnalyticsSummary {
+  memberGrowthPercent: number | null;
+  newSignupsThisMonth: number;
+  newSignupsLastMonth: number;
+  newSignupsChangePercent: number | null;
+  retentionRate: number;
+  churnRate: number;
+  activeMembers: number;
+  totalMembers: number;
+  currency: string;
+}
+
+export interface SuperAdminMemberGrowthMonth {
+  month: string;
+  members: number;
+}
+
+export interface SuperAdminTopGym {
+  id: string;
+  name: string;
+  members: number;
+}
+
+export interface SuperAdminPlanMix {
+  plan: SuperAdminPlanMixName;
+  gyms: number;
+}
+
+export interface SuperAdminAnalytics {
+  summary: SuperAdminAnalyticsSummary;
+  revenue: SuperAdminBillingMonth[];
+  members: SuperAdminMemberGrowthMonth[];
+  topGyms: SuperAdminTopGym[];
+  planMix: SuperAdminPlanMix[];
+}
+
+export interface SuperAdminDashboardSummary {
+  totalGyms: number;
+  activeGyms: number;
+  gymGrowthPercent: number | null;
+  gymsThisMonth: number;
+  activeMembers: number;
+  memberGrowthPercent: number | null;
+  mrr: number;
+  currency: string;
+  activeSubscriptions: number;
+}
+
+export interface SuperAdminDashboard {
+  summary: SuperAdminDashboardSummary;
+  revenue: SuperAdminBillingMonth[];
+  planMix: SuperAdminPlanMix[];
+  recentGyms: SuperAdminGym[];
+}
+
+export type SuperAdminNotificationType =
+  | 'GYM_JOINED'
+  | 'PAYMENT_JOINED'
+  | 'SUBSCRIPTION_RENEWED'
+  | 'PASSWORD_RESET'
+  | 'PASSWORD_UPDATED';
+
+export interface SuperAdminNotification {
+  id: string;
+  type: SuperAdminNotificationType;
+  title: string;
+  message: string;
+  href: string | null;
+  tenantId: string | null;
+  gymName: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface SuperAdminNotificationInbox {
+  unreadCount: number;
+  notifications: SuperAdminNotification[];
 }
 
 export interface OwnerWithGym {

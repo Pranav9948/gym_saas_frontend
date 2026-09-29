@@ -1,27 +1,38 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader, LoadingSpinner } from '@/components/common'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { FormField, LoadingSpinner, PageHeader } from '@/components/common'
-import { useAuth, useToast } from '@/hooks'
-import { useAuthStore } from '@/store/authStore'
-import { superAdminAuthService } from '@/services/super-admin'
-import { queryKeys } from '@/services/queryKeys'
+import { useAuth } from '@/hooks'
+import { useToast } from '@/hooks/use-toast'
 import { ApiException } from '@/lib/api/errors'
-import { formatDateTime, formatInitials } from '@/lib/helpers/formatting'
-import {
-  updateSuperAdminPasswordSchema,
-  updateSuperAdminProfileSchema,
-  type UpdateSuperAdminPasswordFormData,
-  type UpdateSuperAdminProfileFormData,
-} from '@/schemas/settings.schema'
+import { queryKeys } from '@/services'
+import { superAdminAuthService } from '@/services/super-admin'
+import { useAuthStore } from '@/store/authStore'
+
+function formatDateTime(value?: string | null) {
+  if (!value) return 'Never'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
 
 export default function SuperAdminSettingsPage() {
   const { user } = useAuth()
@@ -35,39 +46,26 @@ export default function SuperAdminSettingsPage() {
   })
 
   const profile = meQuery.data?.data
-  const firstName = profile?.firstName ?? user?.firstName ?? ''
-  const lastName = profile?.lastName ?? user?.lastName ?? ''
-  const email = profile?.email ?? user?.email ?? ''
-  const initials = formatInitials(firstName, lastName)
-
-  const profileForm = useForm<UpdateSuperAdminProfileFormData>({
-    resolver: zodResolver(updateSuperAdminProfileSchema),
-    defaultValues: {
-      firstName,
-      lastName,
-    },
-  })
-  const resetProfileForm = profileForm.reset
+  const [firstName, setFirstName] = React.useState('')
+  const [lastName, setLastName] = React.useState('')
+  const [currentPassword, setCurrentPassword] = React.useState('')
+  const [newPassword, setNewPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
 
   React.useEffect(() => {
-    resetProfileForm({
-      firstName,
-      lastName,
-    })
-  }, [firstName, lastName, resetProfileForm])
+    if (!profile) return
+    setFirstName(profile.firstName)
+    setLastName(profile.lastName)
+  }, [profile])
 
-  const passwordForm = useForm<UpdateSuperAdminPasswordFormData>({
-    resolver: zodResolver(updateSuperAdminPasswordSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
-  })
+  const initials = `${(profile?.firstName ?? user?.firstName ?? 'S')[0]}${(profile?.lastName ?? user?.lastName ?? 'A')[0]}`.toUpperCase()
 
   const saveProfile = useMutation({
-    mutationFn: (data: UpdateSuperAdminProfileFormData) =>
-      superAdminAuthService.updateProfile(data),
+    mutationFn: () =>
+      superAdminAuthService.updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      }),
     onSuccess: (response) => {
       if (user) {
         setUser({
@@ -79,7 +77,7 @@ export default function SuperAdminSettingsPage() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.superAdmin.me() })
       toast({
         title: 'Profile updated',
-        description: 'Your name was saved.',
+        description: 'Your name is saved.',
       })
     },
     onError: (error) => {
@@ -93,21 +91,26 @@ export default function SuperAdminSettingsPage() {
   })
 
   const savePassword = useMutation({
-    mutationFn: (data: UpdateSuperAdminPasswordFormData) =>
-      superAdminAuthService.updatePassword({
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
+    mutationFn: () =>
+      superAdminAuthService.changePassword({
+        currentPassword,
+        newPassword,
       }),
-    onSuccess: () => {
-      passwordForm.reset()
+    onSuccess: (response) => {
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
       toast({
         title: 'Password updated',
-        description: 'Use your new password the next time you sign in.',
+        description:
+          response.data.revokedSessions > 0
+            ? `Other sessions were signed out (${response.data.revokedSessions}).`
+            : 'Use this password the next time you sign in.',
       })
     },
     onError: (error) => {
       toast({
-        title: 'Could not update password',
+        title: 'Could not change password',
         description:
           error instanceof ApiException ? error.getUserMessage() : 'Try again.',
         variant: 'destructive',
@@ -115,98 +118,139 @@ export default function SuperAdminSettingsPage() {
     },
   })
 
-  if (meQuery.isLoading && !profile && !user) {
-    return <LoadingSpinner fullScreen />
+  const logoutOthers = useMutation({
+    mutationFn: () => superAdminAuthService.logoutOtherSessions(),
+    onSuccess: (response) => {
+      toast({
+        title: 'Sessions updated',
+        description:
+          response.message ??
+          (response.data.revokedSessions
+            ? `Signed out ${response.data.revokedSessions} other session(s).`
+            : 'No other sessions were signed in.'),
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: 'Could not sign out other sessions',
+        description:
+          error instanceof ApiException ? error.getUserMessage() : 'Try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const profileChanged =
+    firstName.trim() !== (profile?.firstName ?? '') ||
+    lastName.trim() !== (profile?.lastName ?? '')
+
+  function onSavePassword(event: React.FormEvent) {
+    event.preventDefault()
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Passwords do not match',
+        description: 'Re-enter the new password in both fields.',
+        variant: 'destructive',
+      })
+      return
+    }
+    savePassword.mutate()
+  }
+
+  if (meQuery.isLoading) {
+    return (
+      <div className="flex min-h-80 items-center justify-center">
+        <LoadingSpinner label="Loading settings…" />
+      </div>
+    )
+  }
+
+  if (meQuery.isError || !profile) {
+    return (
+      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+        Could not load your account. Refresh and try again.
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Settings"
-        description="Manage your super admin profile and password."
+        description="Your super-admin profile and account security."
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>Your signed-in super admin details.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="size-14">
-              <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-base font-semibold text-foreground">
-                {firstName} {lastName}
-              </p>
-              <p className="text-sm text-muted-foreground">{email}</p>
-            </div>
-          </div>
-
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border border-border p-4">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Role
-              </dt>
-              <dd className="mt-1 text-sm font-medium text-foreground">
-                Super Admin
-              </dd>
-            </div>
-            <div className="rounded-lg border border-border p-4">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Last login
-              </dt>
-              <dd className="mt-1 text-sm font-medium text-foreground">
-                {formatDateTime(profile?.lastLoginAt)}
-              </dd>
-            </div>
-            <div className="rounded-lg border border-border p-4">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Status
-              </dt>
-              <dd className="mt-1 text-sm font-medium text-foreground">
-                {profile?.isActive === false ? 'Inactive' : 'Active'}
-              </dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Profile</CardTitle>
-          <CardDescription>Update the name shown across the admin console.</CardDescription>
+          <CardDescription>
+            Name is editable. Email is your login and cannot be changed here.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
-            className="space-y-4"
-            onSubmit={profileForm.handleSubmit((values) => saveProfile.mutate(values))}
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              saveProfile.mutate()
+            }}
           >
+            <div className="flex items-center gap-4">
+              <Avatar className="size-14">
+                <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">
+                  {profile.firstName} {profile.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">{profile.email}</p>
+              </div>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                name="firstName"
-                control={profileForm.control}
-                label="First name"
-                error={profileForm.formState.errors.firstName?.message}
-              />
-              <FormField
-                name="lastName"
-                control={profileForm.control}
-                label="Last name"
-                error={profileForm.formState.errors.lastName?.message}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  autoComplete="given-name"
+                  required
+                  minLength={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  autoComplete="family-name"
+                  required
+                  minLength={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" value={profile.email} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Input id="role" value="Super admin" disabled />
+              </div>
+              <div className="space-y-2">
+                <Label>Last login</Label>
+                <Input value={formatDateTime(profile.lastLoginAt)} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label>Account created</Label>
+                <Input value={formatDateTime(profile.createdAt)} disabled />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="super-admin-email">Email</Label>
-              <Input id="super-admin-email" value={email} disabled />
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed from this screen.
-              </p>
-            </div>
-            <Button type="submit" disabled={saveProfile.isPending}>
+
+            <Button type="submit" disabled={saveProfile.isPending || !profileChanged}>
               {saveProfile.isPending ? 'Saving…' : 'Save profile'}
             </Button>
           </form>
@@ -215,41 +259,76 @@ export default function SuperAdminSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Password</CardTitle>
+          <CardTitle>Security</CardTitle>
           <CardDescription>
-            Use at least 8 characters with upper, lower, number, and a special character.
+            Change your password and sign out sessions on other devices.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={passwordForm.handleSubmit((values) => savePassword.mutate(values))}
-          >
-            <FormField
-              name="currentPassword"
-              control={passwordForm.control}
-              label="Current password"
-              type="password"
-              error={passwordForm.formState.errors.currentPassword?.message}
-            />
-            <FormField
-              name="newPassword"
-              control={passwordForm.control}
-              label="New password"
-              type="password"
-              error={passwordForm.formState.errors.newPassword?.message}
-            />
-            <FormField
-              name="confirmPassword"
-              control={passwordForm.control}
-              label="Confirm new password"
-              type="password"
-              error={passwordForm.formState.errors.confirmPassword?.message}
-            />
+        <CardContent className="space-y-8">
+          <form className="space-y-4" onSubmit={onSavePassword}>
+            <div className="space-y-2 sm:max-w-md">
+              <Label htmlFor="currentPassword">Current password</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+            <div className="grid gap-4 sm:max-w-md sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground sm:max-w-md">
+              At least 8 characters, with upper and lower case, a number, and a
+              special character. No spaces.
+            </p>
             <Button type="submit" disabled={savePassword.isPending}>
               {savePassword.isPending ? 'Updating…' : 'Update password'}
             </Button>
           </form>
+
+          <div className="rounded-xl border p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+            <div>
+              <p className="font-medium">Other sessions</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Stay signed in here and sign out every other browser or device.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3 sm:mt-0"
+              disabled={logoutOthers.isPending}
+              onClick={() => logoutOthers.mutate()}
+            >
+              {logoutOthers.isPending ? 'Signing out…' : 'Sign out other sessions'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

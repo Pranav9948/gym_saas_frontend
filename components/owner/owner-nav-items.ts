@@ -6,6 +6,7 @@ import {
   Package,
   Dumbbell,
   ClipboardCheck,
+  KeyRound,
   type LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/config';
@@ -22,6 +23,7 @@ export const ownerNavItems: OwnerNavItem[] = [
   { label: 'Packages', href: ROUTES.OWNER_PACKAGES, icon: Package },
   { label: 'Trainers', href: ROUTES.OWNER_TRAINERS, icon: Dumbbell },
   { label: 'Staff', href: ROUTES.OWNER_STAFF, icon: ClipboardCheck },
+  { label: 'Reset codes', href: ROUTES.OWNER_RESET_CODES, icon: KeyRound },
   { label: 'Billing', href: ROUTES.OWNER_BILLING, icon: CreditCard },
   { label: 'Settings', href: ROUTES.OWNER_SETTINGS, icon: Settings },
 ];

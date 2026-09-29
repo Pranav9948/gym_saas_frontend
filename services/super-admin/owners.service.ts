@@ -1,15 +1,24 @@
-import { get } from '@/lib/api/client';
-import { API_ENDPOINTS } from '@/config/api.config';
-import type { PaginatedOwnersResponse } from '@/types';
+import { get } from '@/lib/api/client'
+import { API_ENDPOINTS } from '@/config/api.config'
+import type {
+  PaginatedSuperAdminOwnersResponse,
+  SuperAdminOwnerResponse,
+} from '@/types'
 
-export const superAdminOwnersService = {
-  getOwners: async (
-    page = 1,
-    limit = 10,
-  ): Promise<PaginatedOwnersResponse> => {
-    return get<PaginatedOwnersResponse>(API_ENDPOINTS.SUPER_ADMIN.OWNERS, {
-      page,
-      limit,
-    });
+export const ownersService = {
+  list: async (params?: {
+    page?: number
+    limit?: number
+    q?: string
+    status?: string
+  }) => {
+    return get<PaginatedSuperAdminOwnersResponse>(
+      API_ENDPOINTS.SUPER_ADMIN.OWNERS.LIST,
+      params as Record<string, unknown>,
+    )
   },
-};
+
+  getById: async (id: string) => {
+    return get<SuperAdminOwnerResponse>(API_ENDPOINTS.SUPER_ADMIN.OWNERS.GET(id))
+  },
+}

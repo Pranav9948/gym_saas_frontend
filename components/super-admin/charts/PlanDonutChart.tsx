@@ -8,19 +8,18 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 
-const chartConfig = {
-  gyms: { label: 'Gyms' },
-  FREE: { label: 'FREE', color: 'var(--color-chart-1)' },
-  BASIC: { label: 'BASIC', color: 'var(--color-chart-2)' },
-  PRO: { label: 'PRO', color: 'var(--color-chart-4)' },
-} satisfies ChartConfig
-
-interface PlanDonutChartProps {
+export function PlanDonutChart({
+  data,
+}: {
   data: Array<{ plan: string; gyms: number; fill: string }>
-}
-
-export function PlanDonutChart({ data }: PlanDonutChartProps) {
+}) {
   const total = data.reduce((sum, item) => sum + item.gyms, 0)
+  const chartConfig = {
+    gyms: { label: 'Gyms' },
+    ...Object.fromEntries(
+      data.map((item) => [item.plan, { label: item.plan, color: item.fill }]),
+    ),
+  } as ChartConfig
 
   return (
     <ChartContainer config={chartConfig} className="mx-auto aspect-square h-56">

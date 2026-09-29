@@ -155,10 +155,16 @@ export function useAuth() {
 
   // Reset password handler
   const resetPassword = useCallback(
-    async (token: string, password: string, confirmPassword: string) => {
+    async (
+      email: string,
+      code: string,
+      password: string,
+      confirmPassword: string,
+    ) => {
       try {
         const response = await authService.resetPassword({
-          token,
+          email,
+          code,
           password,
           confirmPassword,
         });

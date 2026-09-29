@@ -2,11 +2,13 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Bell, Search, User } from 'lucide-react'
+import { Search, User } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { SuperAdminNotificationsBell } from '@/components/super-admin/SuperAdminNotificationsBell'
+import { ROUTES } from '@/config'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +24,7 @@ export function SuperAdminNavbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
-      <div className="flex h-16 items-center justify-between gap-3 px-4 pl-16 md:px-6 md:pl-6">
+      <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-foreground">
             Welcome back, {user?.firstName || 'Super Admin'}
@@ -43,10 +45,7 @@ export function SuperAdminNavbar() {
             />
           </div>
 
-          <Button variant="outline" size="icon" className="relative" aria-label="Notifications">
-            <Bell className="size-4.5" />
-            <span className="absolute right-2 top-2 size-2 rounded-full bg-primary ring-2 ring-background" />
-          </Button>
+          <SuperAdminNotificationsBell />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -75,7 +74,7 @@ export function SuperAdminNavbar() {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem asChild>
-                <Link href="/super-admin/settings">
+                <Link href={ROUTES.SUPER_ADMIN_SETTINGS}>
                   <User className="size-4" />
                   <span>Profile</span>
                 </Link>

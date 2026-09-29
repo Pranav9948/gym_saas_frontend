@@ -7,6 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
+import type { SuperAdminMemberGrowthMonth } from '@/types'
 
 const chartConfig = {
   members: {
@@ -15,11 +16,17 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-interface MemberGrowthChartProps {
-  data: Array<{ month: string; members: number }>
+function formatAxis(value: number) {
+  if (value >= 1000) {
+    return new Intl.NumberFormat('en-US', {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  }
+  return String(Math.round(value))
 }
 
-export function MemberGrowthChart({ data }: MemberGrowthChartProps) {
+export function MemberGrowthChart({ data }: { data: SuperAdminMemberGrowthMonth[] }) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
       <LineChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
@@ -30,8 +37,9 @@ export function MemberGrowthChart({ data }: MemberGrowthChartProps) {
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          width={44}
-          tickFormatter={(value) => Number(value).toLocaleString('en-IN')}
+          width={48}
+          allowDecimals={false}
+          tickFormatter={formatAxis}
         />
         <ChartTooltip
           cursor={false}

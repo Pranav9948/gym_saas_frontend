@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { GymBrand } from '@/components/owner/GymBrand'
+import { CollapsibleSidebar, SidebarHeaderRow } from '@/components/layout/CollapsibleSidebar'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { TRAINER_NAV_ITEMS } from '@/config/trainer-nav'
 import { ROUTES } from '@/config'
 import { useAuth } from '@/hooks'
@@ -25,13 +25,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
+      <SidebarHeaderRow>
         <GymBrand
           name={tenant?.name}
           logoUrl={tenant?.logoUrl}
           subtitle="Trainer portal"
         />
-      </div>
+      </SidebarHeaderRow>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
@@ -76,24 +76,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-export function TrainerSidebar({
-  mobileOpen,
-  onMobileOpenChange,
-}: {
-  mobileOpen: boolean
-  onMobileOpenChange: (open: boolean) => void
-}) {
+export function TrainerSidebar() {
   return (
-    <>
-      <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar md:block">
-        <SidebarContent />
-      </aside>
-      <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
-        <SheetContent side="left" className="w-72 gap-0 bg-sidebar p-0">
-          <SheetTitle className="sr-only">Trainer menu</SheetTitle>
-          <SidebarContent onNavigate={() => onMobileOpenChange(false)} />
-        </SheetContent>
-      </Sheet>
-    </>
+    <CollapsibleSidebar>
+      <SidebarContent />
+    </CollapsibleSidebar>
   )
 }

@@ -10,13 +10,11 @@ interface OwnerDashboardLayoutProps {
 }
 
 export function OwnerDashboardLayout({ children }: OwnerDashboardLayoutProps) {
-  const [mobileOpen, setMobileOpen] = React.useState(false)
-
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
-      <OwnerSidebar mobileOpen={mobileOpen} onMobileOpenChange={setMobileOpen} />
+      <OwnerSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <OwnerNavbar onMenuClick={() => setMobileOpen(true)} />
+        <OwnerNavbar />
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl p-4 md:p-6 lg:p-8">{children}</div>
         </main>

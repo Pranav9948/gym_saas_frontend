@@ -118,6 +118,14 @@ export const trainersService = {
     );
   },
 
+  uploadAvatar: async (id: string, file: File): Promise<TrainerResponse> => {
+    return uploadFile<TrainerResponse>(
+      API_ENDPOINTS.TRAINERS.AVATAR(id),
+      file,
+      'avatar',
+    );
+  },
+
   getOverview: async (): Promise<TrainerOverviewResponse> => {
     return get<TrainerOverviewResponse>(API_ENDPOINTS.TRAINERS.OVERVIEW);
   },

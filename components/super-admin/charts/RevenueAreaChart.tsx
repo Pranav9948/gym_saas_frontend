@@ -7,7 +7,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { formatInr, formatInrCompact } from '@/lib/money'
 
 const chartConfig = {
   revenue: {
@@ -16,11 +15,33 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-interface RevenueAreaChartProps {
-  data: Array<{ month: string; revenue: number }>
+function formatMoney(value: number, currency: string) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
-export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
+function formatAxis(value: number, currency: string) {
+  if (value >= 1000) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+  }
+  return formatMoney(value, currency)
+}
+
+export function RevenueAreaChart({
+  data,
+  currency = 'USD',
+}: {
+  data: Array<{ month: string; revenue: number }>
+  currency?: string
+}) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
       <AreaChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
@@ -43,14 +64,14 @@ export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          width={52}
-          tickFormatter={(value) => formatInrCompact(Number(value), 'INR')}
+          width={56}
+          tickFormatter={(value) => formatAxis(Number(value), currency)}
         />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
-              formatter={(value) => formatInr(Number(value), 'INR')}
+              formatter={(value) => formatMoney(Number(value), currency)}
               indicator="line"
             />
           }

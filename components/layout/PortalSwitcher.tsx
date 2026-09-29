@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, ChevronDown, Dumbbell, Shield, Users } from 'lucide-react'
+import { Building2, ChevronDown, Dumbbell, LayoutGrid, Shield, Users } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import {
   Collapsible,
@@ -106,6 +106,7 @@ export function PortalSwitcher() {
   const { user, tenant } = useAuth()
   const setTenant = useAuthStore((state) => state.setTenant)
   const { toast } = useToast()
+  const [open, setOpen] = React.useState(false)
   const [pending, setPending] = React.useState<PortalId | null>(null)
   const [open, setOpen] = React.useState(false)
   const active = currentPortal(pathname)
@@ -149,28 +150,30 @@ export function PortalSwitcher() {
   }
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="space-y-2">
+    <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
-        type="button"
-        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent"
+        className={cn(
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          open
+            ? 'bg-accent text-foreground'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+        )}
+        aria-label={open ? 'Hide portals' : 'Show portals'}
       >
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Portals
-          </p>
-          <p className="text-[11px] text-muted-foreground">
-            {enabledCount}/{portals.length} available
-          </p>
-        </div>
+        <LayoutGrid className="size-4.5 shrink-0" />
+        <span className="min-w-0 flex-1 text-left">Portals</span>
+        <span className="text-[11px] font-normal text-muted-foreground">
+          {enabledCount}/{portals.length}
+        </span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            'size-4 shrink-0 text-muted-foreground transition-transform',
             open && 'rotate-180',
           )}
         />
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="space-y-1.5">
+      <CollapsibleContent className="mt-1 space-y-0.5 pl-2">
         {portals.map((portal) => {
           const Icon = portal.icon
           const enabled = isPortalEnabled(portal, tenant)
@@ -181,39 +184,34 @@ export function PortalSwitcher() {
             <div
               key={portal.id}
               className={cn(
-                'rounded-lg border px-2.5 py-2',
-                isCurrent
-                  ? 'border-primary/30 bg-primary/8'
-                  : 'border-border/70 bg-background/40',
+                'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm',
+                isCurrent ? 'bg-primary/10 text-primary' : 'text-muted-foreground',
               )}
             >
-              <div className="flex items-start gap-2">
-                <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                <div className="min-w-0 flex-1">
-                  {canEnter ? (
-                    <Link
-                      href={portal.href}
-                      className="block text-sm font-medium text-foreground hover:underline"
-                    >
-                      {portal.label}
-                    </Link>
-                  ) : (
-                    <p className="text-sm font-medium text-foreground">{portal.label}</p>
-                  )}
-                  <p className="text-[11px] text-muted-foreground">{portal.description}</p>
-                </div>
-                {portal.flag ? (
-                  <Switch
-                    size="sm"
-                    checked={enabled}
-                    disabled={pending === portal.id}
-                    onCheckedChange={(checked) =>
-                      void togglePortal(portal.flag!, checked, portal.id)
-                    }
-                    aria-label={`${enabled ? 'Disable' : 'Enable'} ${portal.label} portal`}
-                  />
-                ) : null}
-              </div>
+              <Icon className="size-4 shrink-0" />
+              {canEnter ? (
+                <Link
+                  href={portal.href}
+                  className="min-w-0 flex-1 truncate font-medium text-foreground hover:underline"
+                >
+                  {portal.label}
+                </Link>
+              ) : (
+                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                  {portal.label}
+                </span>
+              )}
+              {portal.flag ? (
+                <Switch
+                  size="sm"
+                  checked={enabled}
+                  disabled={pending === portal.id}
+                  onCheckedChange={(checked) =>
+                    void togglePortal(portal.flag!, checked, portal.id)
+                  }
+                  aria-label={`${enabled ? 'Disable' : 'Enable'} ${portal.label} portal`}
+                />
+              ) : null}
             </div>
           )
         })}

@@ -229,6 +229,16 @@ export interface SuperAdmin {
   firstName: string;
   lastName: string;
   role: 'SUPER_ADMIN';
+  isActive?: boolean;
+  lastLoginAt?: string | null;
+}
+
+export interface OwnerSubscriptionSummary {
+  planName: PlanName;
+  interval: BillingInterval;
+  status: SubscriptionStatus;
+  currentPeriodEnd: string | null;
+  daysRemaining: number;
 }
 
 export interface SuperAdminGym {
@@ -425,6 +435,7 @@ export interface OwnerWithGym {
   id: string;
   role: string;
   createdAt: string;
+  presentSinceDays: number;
   user: User & { createdAt: string };
   tenant: Pick<
     Tenant,
@@ -440,4 +451,5 @@ export interface OwnerWithGym {
     | 'isActive'
     | 'createdAt'
   >;
+  subscription: OwnerSubscriptionSummary | null;
 }

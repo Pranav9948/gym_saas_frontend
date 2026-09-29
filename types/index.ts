@@ -45,6 +45,8 @@ export {
   type MemberHistoryResponse,
   type UpdateTenantRequest,
   type TenantResponse,
+  type OwnerDashboardResponse,
+  type OwnerDashboardAttendanceDay,
   type InviteUserRequest,
   type DirectCreateUserRequest,
   type UpgradePlanRequest,

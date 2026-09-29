@@ -65,7 +65,7 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
     defaultValues: {
       name: initialData?.name ?? undefined,
       price: initialData?.price ?? undefined,
-      currency: initialData?.currency ?? '',
+      currency: initialData?.currency ?? 'INR',
       interval: initialData?.interval ?? undefined,
       stripePriceId: initialData?.stripePriceId ?? '',
       features: getNormalizedFeatures(),
@@ -173,9 +173,9 @@ export function PlanForm({ initialData, onSubmit, isLoading = false }: PlanFormP
               <FormItem>
                 <FormLabel>Currency</FormLabel>
                 <FormControl>
-                  <Input placeholder="USD" {...field} />
+                  <Input placeholder="INR" {...field} />
                 </FormControl>
-                <FormDescription>Currency code (e.g., USD, EUR, GBP)</FormDescription>
+                <FormDescription>Currency code. Use INR to show rupees in the app.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

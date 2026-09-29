@@ -142,3 +142,35 @@ export const upgradePlanSchema = z.object({
 });
 
 export type UpgradePlanFormData = z.infer<typeof upgradePlanSchema>;
+
+export const updateSuperAdminProfileSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name cannot exceed 50 characters'),
+  lastName: z
+    .string()
+    .trim()
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name cannot exceed 50 characters'),
+});
+
+export type UpdateSuperAdminProfileFormData = z.infer<
+  typeof updateSuperAdminProfileSchema
+>;
+
+export const updateSuperAdminPasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: passwordSchema,
+    confirmPassword: z.string().min(1, 'Confirm password is required'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type UpdateSuperAdminPasswordFormData = z.infer<
+  typeof updateSuperAdminPasswordSchema
+>;

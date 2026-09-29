@@ -44,7 +44,7 @@ export function MemberGrowthChart({ data }: { data: SuperAdminMemberGrowthMonth[
         <ChartTooltip
           cursor={false}
           content={
-            <ChartTooltipContent formatter={(value) => Number(value).toLocaleString()} />
+            <ChartTooltipContent formatter={(value) => Number(value).toLocaleString('en-IN')} />
           }
         />
         <Line

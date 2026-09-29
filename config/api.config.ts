@@ -150,6 +150,7 @@ export const API_ENDPOINTS = {
   // Tenant
   TENANT: {
     GET: '/tenant',
+    DASHBOARD: '/tenant/dashboard',
     UPDATE: '/tenant',
     UPLOAD_LOGO: '/tenant/logo',
     LIST_USERS: '/tenant/users',
@@ -184,6 +185,8 @@ export const API_ENDPOINTS = {
     PAYMENT_HISTORY: '/billing/payment-history',
     CHECKOUT_SESSION: '/billing/checkout-session',
     CREATE_CHECKOUT_SESSION: '/billing/create-checkout-session',
+    SYNC_CHECKOUT_SESSION: '/billing/sync-checkout-session',
+    RECONCILE_SUBSCRIPTION: '/billing/reconcile-subscription',
     CUSTOMER_PORTAL: '/billing/customer-portal',
     CREATE_PORTAL_SESSION: '/billing/create-portal-session',
   },

@@ -313,6 +313,49 @@ export interface TenantResponse {
   data: Tenant;
 }
 
+export interface OwnerDashboardSummary {
+  checkinsToday: number;
+  checkinsYesterday: number;
+  checkinsTrendPct: number;
+  totalMembers: number;
+  activeMembers: number;
+  newThisMonth: number;
+  monthStart: string;
+}
+
+export interface OwnerDashboardAttendanceDay {
+  day: string;
+  date: string;
+  checkins: number;
+  today: boolean;
+}
+
+export interface OwnerDashboardCheckin {
+  id: string;
+  name: string;
+  checkIn: string;
+}
+
+export interface OwnerDashboardMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  createdAt: string;
+}
+
+export interface OwnerDashboard {
+  gymName: string;
+  summary: OwnerDashboardSummary;
+  attendanceTrend: OwnerDashboardAttendanceDay[];
+  recentCheckins: OwnerDashboardCheckin[];
+  latestMembers: OwnerDashboardMember[];
+}
+
+export interface OwnerDashboardResponse {
+  success: true;
+  data: OwnerDashboard;
+}
+
 export interface InviteUserRequest {
   email: string;
   firstName: string;

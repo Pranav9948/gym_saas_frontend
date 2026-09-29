@@ -5,10 +5,9 @@ import Link from 'next/link'
 import {
   Building2,
   Users,
-  DollarSign,
+  IndianRupee,
   CreditCard,
   ArrowRight,
-  Download,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

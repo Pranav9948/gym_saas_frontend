@@ -108,6 +108,7 @@ export function PortalSwitcher() {
   const { toast } = useToast()
   const [open, setOpen] = React.useState(false)
   const [pending, setPending] = React.useState<PortalId | null>(null)
+  const [open, setOpen] = React.useState(false)
   const active = currentPortal(pathname)
 
   if (user?.role !== 'OWNER') {

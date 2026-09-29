@@ -89,7 +89,15 @@ function gymInitials(name: string) {
     .toUpperCase()
 }
 
+const statusMap: Record<SuperAdminGymStatus, StatusType> = {
+  active: 'ACTIVE',
+  trial: 'PENDING',
+  suspended: 'BANNED',
+  pending: 'PENDING',
+}
+
 export default function SuperAdminGymsPage() {
+  const { data, isLoading, isError, refetch } = useSuperAdminDashboard()
   const [query, setQuery] = React.useState('')
   const [status, setStatus] = React.useState<'all' | StatusType>('all')
   const [page, setPage] = React.useState(1)

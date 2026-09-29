@@ -1,16 +1,10 @@
 import type { BillingSubscriptionHealth } from '@/types/billing';
 import type { BillingInterval, SubscriptionStatus } from '@/types/models';
 
-export function formatCurrency(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-    }).format(amount);
-  } catch {
-    return `${currency.toUpperCase()} ${amount}`;
-  }
+import { formatInr } from '@/lib/money';
+
+export function formatCurrency(amount: number, currency?: string | null): string {
+  return formatInr(amount, currency);
 }
 
 export function formatBillingDate(iso: string | null | undefined): string {

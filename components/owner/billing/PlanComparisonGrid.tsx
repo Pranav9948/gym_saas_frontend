@@ -17,7 +17,9 @@ import {
 } from '@/lib/billing/format';
 import {
   canUpgradeToPlan,
+  currentPlanName,
   filterPlansByInterval,
+  isPlanDowngrade,
   isRecommendedPlan,
 } from '@/lib/billing/plans';
 import { resetBillingTrace, billingTrace } from '@/lib/billing/trace';
@@ -25,10 +27,22 @@ import { BillingSectionError } from './BillingSectionError';
 
 export function PlanComparisonGrid() {
   const [interval, setInterval] = React.useState<'monthly' | 'yearly'>('monthly');
+  const intervalSynced = React.useRef(false);
   const { data, isLoading, isError, refetch } = useBillingPlans();
   const checkout = useCheckoutSession();
   const [upgradingPlanId, setUpgradingPlanId] = React.useState<string | null>(null);
 
+  const currentPlan = data?.data.plans.find((plan) => plan.current);
+
+  React.useEffect(() => {
+    if (intervalSynced.current || !currentPlan) {
+      return;
+    }
+    intervalSynced.current = true;
+    setInterval(currentPlan.interval === 'YEARLY' ? 'yearly' : 'monthly');
+  }, [currentPlan]);
+
+  const currentName = currentPlanName(data?.data.plans ?? []);
   const plans = filterPlansByInterval(
     data?.data.plans ?? [],
     toggleToBillingInterval(interval),
@@ -67,7 +81,9 @@ export function PlanComparisonGrid() {
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Compare plans</h2>
-          <p className="text-sm text-muted-foreground">Upgrade or downgrade at any time.</p>
+          <p className="text-sm text-muted-foreground">
+            Upgrade at any time. Downgrades to a lower plan are not available.
+          </p>
         </div>
 
         <div className="inline-flex items-center rounded-lg border border-border bg-muted/50 p-1">
@@ -92,8 +108,9 @@ export function PlanComparisonGrid() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {plans.map((plan) => {
           const isCurrent = plan.current;
-          const recommended = isRecommendedPlan(plan);
-          const upgradable = canUpgradeToPlan(plan);
+          const recommended = isRecommendedPlan(plan, currentName);
+          const upgradable = canUpgradeToPlan(plan, currentName);
+          const downgrade = isPlanDowngrade(plan, currentName);
           const isLoadingCheckout = checkout.isPending && upgradingPlanId === plan.id;
 
           return (
@@ -180,6 +197,10 @@ export function PlanComparisonGrid() {
                     </>
                   ) : plan.name === 'FREE' ? (
                     'Included'
+                  ) : downgrade ? (
+                    'Cannot downgrade'
+                  ) : plan.name === currentName ? (
+                    `Already on ${plan.name}`
                   ) : (
                     `Upgrade to ${plan.name}`
                   )}

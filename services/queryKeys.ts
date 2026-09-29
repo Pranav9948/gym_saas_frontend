@@ -16,6 +16,7 @@ export const queryKeys = {
   tenant: {
     all: ['tenant'] as const,
     current: () => [...queryKeys.tenant.all, 'current'] as const,
+    dashboard: () => [...queryKeys.tenant.all, 'dashboard'] as const,
     team: () => [...queryKeys.tenant.all, 'team'] as const,
     invites: () => [...queryKeys.tenant.all, 'invites'] as const,
   },
@@ -169,6 +170,10 @@ export const queryKeys = {
       detail: (id: string) =>
         [...queryKeys.superAdmin.plans.details(), id] as const,
     },
+    dashboard: () => [...queryKeys.superAdmin.all, 'dashboard'] as const,
+    me: () => [...queryKeys.superAdmin.all, 'me'] as const,
+    owners: (params?: { page?: number; limit?: number }) =>
+      [...queryKeys.superAdmin.all, 'owners', params ?? {}] as const,
   },
 } as const;
 

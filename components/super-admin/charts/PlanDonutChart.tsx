@@ -7,24 +7,27 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { planDistribution } from '@/lib/super-admin-mock'
 
 const chartConfig = {
   gyms: { label: 'Gyms' },
-  Starter: { label: 'Starter', color: 'var(--color-chart-1)' },
-  Growth: { label: 'Growth', color: 'var(--color-chart-2)' },
-  Enterprise: { label: 'Enterprise', color: 'var(--color-chart-4)' },
+  FREE: { label: 'FREE', color: 'var(--color-chart-1)' },
+  BASIC: { label: 'BASIC', color: 'var(--color-chart-2)' },
+  PRO: { label: 'PRO', color: 'var(--color-chart-4)' },
 } satisfies ChartConfig
 
-export function PlanDonutChart() {
-  const total = planDistribution.reduce((sum, item) => sum + item.gyms, 0)
+interface PlanDonutChartProps {
+  data: Array<{ plan: string; gyms: number; fill: string }>
+}
+
+export function PlanDonutChart({ data }: PlanDonutChartProps) {
+  const total = data.reduce((sum, item) => sum + item.gyms, 0)
 
   return (
     <ChartContainer config={chartConfig} className="mx-auto aspect-square h-56">
       <PieChart>
         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
         <Pie
-          data={planDistribution}
+          data={data}
           dataKey="gyms"
           nameKey="plan"
           innerRadius={62}

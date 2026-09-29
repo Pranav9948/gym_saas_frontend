@@ -1,12 +1,22 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/services/queryKeys';
 import { billingTrace } from '@/lib/billing/trace';
+import type { BillingSummaryResponse } from '@/types/billing';
 
 export function invalidateBillingQueries(queryClient: QueryClient): Promise<void> {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: queryKeys.billing.all }),
     queryClient.invalidateQueries({ queryKey: queryKeys.tenant.current() }),
   ]).then(() => undefined);
+}
+
+export function hasPaidBillingPlan(queryClient: QueryClient): boolean {
+  const cached = queryClient.getQueryData<BillingSummaryResponse>(
+    queryKeys.billing.summary(),
+  );
+  const planName = cached?.data?.plan.name;
+
+  return Boolean(cached?.data?.isPaid && planName && planName !== 'FREE');
 }
 
 export async function refetchBillingQueries(

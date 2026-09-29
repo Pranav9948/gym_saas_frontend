@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { DeletePlanDialog } from './DeletePlanDialog';
 import { Plan } from '@/types';
+import { formatInr } from '@/lib/money';
 
 interface PlansTableProps {
   plans: Plan[];
@@ -62,8 +63,8 @@ export function PlansTable({ plans, onDelete, isDeleting = false }: PlansTablePr
                 <TableCell>
                   <Badge variant="outline">{plan.interval}</Badge>
                 </TableCell>
-                <TableCell>{plan.price.toFixed(2)}</TableCell>
-                <TableCell>{plan.currency}</TableCell>
+                <TableCell>{formatInr(plan.price, plan.currency)}</TableCell>
+                <TableCell>INR</TableCell>
                 <TableCell className="text-xs">
                   {plan.stripePriceId ? (
                     <code className="bg-muted px-2 py-1 rounded">{plan.stripePriceId}</code>

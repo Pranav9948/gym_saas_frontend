@@ -7,7 +7,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { memberGrowth } from '@/lib/super-admin-mock'
 
 const chartConfig = {
   members: {
@@ -16,10 +15,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function MemberGrowthChart() {
+interface MemberGrowthChartProps {
+  data: Array<{ month: string; members: number }>
+}
+
+export function MemberGrowthChart({ data }: MemberGrowthChartProps) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
-      <LineChart data={memberGrowth} margin={{ left: 8, right: 8, top: 8 }}>
+      <LineChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
         <YAxis
@@ -28,12 +31,12 @@ export function MemberGrowthChart() {
           tickMargin={8}
           fontSize={12}
           width={44}
-          tickFormatter={(value) => `${value / 1000}k`}
+          tickFormatter={(value) => Number(value).toLocaleString('en-IN')}
         />
         <ChartTooltip
           cursor={false}
           content={
-            <ChartTooltipContent formatter={(value) => Number(value).toLocaleString()} />
+            <ChartTooltipContent formatter={(value) => Number(value).toLocaleString('en-IN')} />
           }
         />
         <Line

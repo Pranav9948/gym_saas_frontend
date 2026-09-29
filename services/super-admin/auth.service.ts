@@ -7,9 +7,10 @@ import {
   SuperAdminLoginResponse,
   SuperAdminSetupRequest,
   SuperAdminSetupResponse,
+  SuperAdmin,
 } from '@/types';
 import { API_ENDPOINTS } from '@/config/api.config';
-import { post } from '@/lib/api/client';
+import { get, patch, post } from '@/lib/api/client';
 import { setAccessToken } from '@/lib/api/client';
 
 export const superAdminAuthService = {
@@ -35,5 +36,29 @@ export const superAdminAuthService = {
     }
 
     return response;
+  },
+
+  async getMe(): Promise<{ success: true; data: SuperAdmin }> {
+    return get<{ success: true; data: SuperAdmin }>(API_ENDPOINTS.SUPER_ADMIN.ME);
+  },
+
+  async updateProfile(data: {
+    firstName: string;
+    lastName: string;
+  }): Promise<{ success: true; data: SuperAdmin }> {
+    return patch<{ success: true; data: SuperAdmin }>(
+      API_ENDPOINTS.SUPER_ADMIN.ME,
+      data,
+    );
+  },
+
+  async updatePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ success: true; message: string }> {
+    return patch<{ success: true; message: string }>(
+      API_ENDPOINTS.SUPER_ADMIN.UPDATE_PASSWORD,
+      data,
+    );
   },
 };

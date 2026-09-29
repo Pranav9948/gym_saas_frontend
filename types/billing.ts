@@ -155,6 +155,10 @@ export interface CheckoutSessionRequest {
   priceId?: string;
 }
 
+export interface SyncCheckoutSessionRequest {
+  sessionId: string;
+}
+
 export interface PaymentHistoryParams {
   limit?: number;
   starting_after?: string;

@@ -1,11 +1,15 @@
 'use client';
 
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBillingSummary } from '@/hooks/billing';
+import { billingService } from '@/services/billing.service';
+import { queryKeys } from '@/services/queryKeys';
+import { refetchBillingQueries } from '@/lib/billing/query-utils';
 import {
-  formatBillingDate,
   formatCurrency,
   formatIntervalLabel,
   getHealthBadgeClass,
@@ -14,10 +18,31 @@ import {
 } from '@/lib/billing/format';
 import { BillingSectionError } from './BillingSectionError';
 import { ManageBillingButton } from './ManageBillingButton';
+import { SubscriptionRenewalHighlight } from './SubscriptionRenewalHighlight';
 
 export function CurrentPlanCard() {
   const { data, isLoading, isError, refetch } = useBillingSummary();
+  const queryClient = useQueryClient();
   const summary = data?.data;
+  const reconciled = React.useRef(false);
+
+  React.useEffect(() => {
+    if (reconciled.current || !summary || summary.isPaid) {
+      return;
+    }
+
+    reconciled.current = true;
+
+    void billingService
+      .reconcileSubscription()
+      .then(async (response) => {
+        queryClient.setQueryData(queryKeys.billing.summary(), response);
+        if (response.data.isPaid) {
+          await refetchBillingQueries(queryClient);
+        }
+      })
+      .catch(() => undefined);
+  }, [summary, queryClient]);
 
   if (isLoading) {
     return (
@@ -42,16 +67,11 @@ export function CurrentPlanCard() {
   }
 
   const isActive = summary.status === 'ACTIVE' || summary.status === 'TRIALING';
-  const renewalText = summary.nextRenewal
-    ? `Renews on ${formatBillingDate(summary.nextRenewal)} · in ${summary.daysRemaining} days`
-    : summary.isPaid
-      ? 'Renewal date unavailable'
-      : 'No renewal scheduled';
 
   return (
     <Card className="overflow-hidden">
       <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Current plan
           </p>
@@ -77,13 +97,12 @@ export function CurrentPlanCard() {
             </Badge>
           </div>
 
-          <p className="text-sm text-muted-foreground">{renewalText}</p>
-
-          {summary.cancelAtPeriodEnd ? (
-            <p className="text-sm font-medium text-warning">
-              Your subscription will cancel at the end of the current billing period.
-            </p>
-          ) : null}
+          <SubscriptionRenewalHighlight
+            nextRenewal={summary.nextRenewal}
+            daysRemaining={summary.daysRemaining}
+            isPaid={summary.isPaid}
+            cancelAtPeriodEnd={summary.cancelAtPeriodEnd}
+          />
 
           <p className="font-mono text-3xl font-bold tracking-tight text-foreground">
             {formatCurrency(summary.plan.price, summary.plan.currency)}

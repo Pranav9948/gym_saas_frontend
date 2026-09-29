@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Menu, Search, Plus, UserPlus, ArrowUpCircle, User, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { useOwnerTenant } from '@/hooks/useOwnerTenant'
+import { useBillingSummary } from '@/hooks/billing'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -26,6 +27,7 @@ interface OwnerNavbarProps {
 
 export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
   const { user, logout } = useAuth()
+  const { data: billingSummary } = useBillingSummary()
   const { tenant } = useOwnerTenant()
 
   const initials = user
@@ -33,8 +35,10 @@ export function OwnerNavbar({ onMenuClick }: OwnerNavbarProps) {
     : 'OW'
 
   const activePlan =
+    billingSummary?.data?.plan.name ??
     tenant?.subscriptions?.find((subscription) => subscription.status === 'ACTIVE')
-      ?.plan?.name ?? 'FREE'
+      ?.plan?.name ??
+    'FREE'
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">

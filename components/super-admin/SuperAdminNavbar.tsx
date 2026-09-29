@@ -75,7 +75,7 @@ export function SuperAdminNavbar() {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem asChild>
-                <Link href="/settings/profile">
+                <Link href="/super-admin/settings">
                   <User className="size-4" />
                   <span>Profile</span>
                 </Link>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Plan } from '@/types';
+import { formatInr } from '@/lib/money';
 
 interface PlanCardProps {
   plan: Plan;
@@ -32,7 +32,7 @@ export function PlanCard({ plan, onDelete, isDeleting = false }: PlanCardProps) 
         {/* Price */}
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold">
-            {plan.currency} {plan.price.toFixed(2)}
+            {formatInr(plan.price, plan.currency)}
           </span>
           <span className="text-sm text-muted-foreground">/{plan.interval.toLowerCase()}</span>
         </div>

@@ -6,3 +6,4 @@ export { FeatureUsageSection } from './FeatureUsageSection';
 export { ManageBillingButton } from './ManageBillingButton';
 export { PaymentHistorySection } from './PaymentHistorySection';
 export { PlanComparisonGrid } from './PlanComparisonGrid';
+export { SubscriptionRenewalHighlight } from './SubscriptionRenewalHighlight';

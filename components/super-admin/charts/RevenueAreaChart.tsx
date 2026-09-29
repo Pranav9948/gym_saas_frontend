@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { revenueTrend } from '@/lib/super-admin-mock'
+import { formatInr, formatInrCompact } from '@/lib/money'
 
 const chartConfig = {
   revenue: {
@@ -16,10 +16,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function RevenueAreaChart() {
+interface RevenueAreaChartProps {
+  data: Array<{ month: string; revenue: number }>
+}
+
+export function RevenueAreaChart({ data }: RevenueAreaChartProps) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
-      <AreaChart data={revenueTrend} margin={{ left: 8, right: 8, top: 8 }}>
+      <AreaChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <defs>
           <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.5} />
@@ -39,14 +43,14 @@ export function RevenueAreaChart() {
           axisLine={false}
           tickMargin={8}
           fontSize={12}
-          width={44}
-          tickFormatter={(value) => `$${value / 1000}k`}
+          width={52}
+          tickFormatter={(value) => formatInrCompact(Number(value), 'INR')}
         />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
-              formatter={(value) => `$${Number(value).toLocaleString()}`}
+              formatter={(value) => formatInr(Number(value), 'INR')}
               indicator="line"
             />
           }

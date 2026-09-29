@@ -3,8 +3,13 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, Dumbbell, Shield, Users } from 'lucide-react'
+import { Building2, ChevronDown, Dumbbell, Shield, Users } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { ROUTES } from '@/config'
 import { useAuth } from '@/hooks'
 import { useToast } from '@/hooks/use-toast'
@@ -102,11 +107,17 @@ export function PortalSwitcher() {
   const setTenant = useAuthStore((state) => state.setTenant)
   const { toast } = useToast()
   const [pending, setPending] = React.useState<PortalId | null>(null)
+  const [open, setOpen] = React.useState(false)
   const active = currentPortal(pathname)
 
   if (user?.role !== 'OWNER') {
     return null
   }
+
+  const portals = PORTALS.filter(
+    (portal) => portal.id !== 'super-admin' || user?.role === 'SUPER_ADMIN',
+  )
+  const enabledCount = portals.filter((portal) => isPortalEnabled(portal, tenant)).length
 
   const togglePortal = async (
     flag: NonNullable<(typeof PORTALS)[number]['flag']>,
@@ -138,60 +149,75 @@ export function PortalSwitcher() {
   }
 
   return (
-    <div className="space-y-2">
-      <p className="px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        Portals
-      </p>
-      <div className="space-y-1.5">
-        {PORTALS.filter((portal) => portal.id !== 'super-admin' || user?.role === 'SUPER_ADMIN').map(
-          (portal) => {
-            const Icon = portal.icon
-            const enabled = isPortalEnabled(portal, tenant)
-            const canEnter = portal.roles.includes(user?.role ?? '') && enabled
-            const isCurrent = active === portal.id
+    <Collapsible open={open} onOpenChange={setOpen} className="space-y-2">
+      <CollapsibleTrigger
+        type="button"
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Portals
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            {enabledCount}/{portals.length} available
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            open && 'rotate-180',
+          )}
+        />
+      </CollapsibleTrigger>
 
-            return (
-              <div
-                key={portal.id}
-                className={cn(
-                  'rounded-lg border px-2.5 py-2',
-                  isCurrent
-                    ? 'border-primary/30 bg-primary/8'
-                    : 'border-border/70 bg-background/40',
-                )}
-              >
-                <div className="flex items-start gap-2">
-                  <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    {canEnter ? (
-                      <Link
-                        href={portal.href}
-                        className="block text-sm font-medium text-foreground hover:underline"
-                      >
-                        {portal.label}
-                      </Link>
-                    ) : (
-                      <p className="text-sm font-medium text-foreground">{portal.label}</p>
-                    )}
-                    <p className="text-[11px] text-muted-foreground">{portal.description}</p>
-                  </div>
-                  {portal.flag ? (
-                    <Switch
-                      size="sm"
-                      checked={enabled}
-                      disabled={pending === portal.id}
-                      onCheckedChange={(checked) =>
-                        void togglePortal(portal.flag!, checked, portal.id)
-                      }
-                      aria-label={`${enabled ? 'Disable' : 'Enable'} ${portal.label} portal`}
-                    />
-                  ) : null}
+      <CollapsibleContent className="space-y-1.5">
+        {portals.map((portal) => {
+          const Icon = portal.icon
+          const enabled = isPortalEnabled(portal, tenant)
+          const canEnter = portal.roles.includes(user?.role ?? '') && enabled
+          const isCurrent = active === portal.id
+
+          return (
+            <div
+              key={portal.id}
+              className={cn(
+                'rounded-lg border px-2.5 py-2',
+                isCurrent
+                  ? 'border-primary/30 bg-primary/8'
+                  : 'border-border/70 bg-background/40',
+              )}
+            >
+              <div className="flex items-start gap-2">
+                <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  {canEnter ? (
+                    <Link
+                      href={portal.href}
+                      className="block text-sm font-medium text-foreground hover:underline"
+                    >
+                      {portal.label}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-medium text-foreground">{portal.label}</p>
+                  )}
+                  <p className="text-[11px] text-muted-foreground">{portal.description}</p>
                 </div>
+                {portal.flag ? (
+                  <Switch
+                    size="sm"
+                    checked={enabled}
+                    disabled={pending === portal.id}
+                    onCheckedChange={(checked) =>
+                      void togglePortal(portal.flag!, checked, portal.id)
+                    }
+                    aria-label={`${enabled ? 'Disable' : 'Enable'} ${portal.label} portal`}
+                  />
+                ) : null}
               </div>
-            )
-          },
-        )}
-      </div>
-    </div>
+            </div>
+          )
+        })}
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import {
   AlertTriangle,
   ArrowUpCircle,
-  CalendarClock,
   CheckCircle2,
   CreditCard,
   Sparkles,
@@ -16,11 +15,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UsageMeter } from '@/components/owner/UsageMeter';
-import { ManageBillingButton } from '@/components/owner/billing';
+import { ManageBillingButton, SubscriptionRenewalHighlight } from '@/components/owner/billing';
 import { ROUTES } from '@/config';
 import { useBillingSummary, useBillingUsage } from '@/hooks/billing';
 import {
-  formatBillingDate,
   formatCurrency,
   formatIntervalLabel,
   getHealthLabel,
@@ -48,12 +46,14 @@ export function OwnerDashboardBillingHeaderActions() {
           {summary ? `${summary.plan.name} · ${summary.status}` : 'Loading…'}
         </Badge>
       )}
-      <Button asChild>
-        <Link href={ROUTES.OWNER_BILLING}>
-          <ArrowUpCircle className="size-4" />
-          Upgrade
-        </Link>
-      </Button>
+      {summary?.plan.name === 'PRO' ? null : (
+        <Button asChild>
+          <Link href={ROUTES.OWNER_BILLING}>
+            <ArrowUpCircle className="size-4" />
+            Upgrade
+          </Link>
+        </Button>
+      )}
     </div>
   );
 }
@@ -152,21 +152,13 @@ export function OwnerDashboardBillingKpis() {
         </p>
       </Card>
 
-      <Card className="gap-0 p-5">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">Renewal Date</p>
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <CalendarClock className="size-4.5" />
-          </div>
-        </div>
-        <p className="mt-3 text-2xl font-bold tracking-tight text-foreground">
-          {summary.nextRenewal ? formatBillingDate(summary.nextRenewal) : '—'}
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {summary.isPaid
-            ? `Renews in ${summary.daysRemaining} days`
-            : 'No renewal scheduled'}
-        </p>
+      <Card className="gap-0 overflow-hidden p-0">
+        <SubscriptionRenewalHighlight
+          nextRenewal={summary.nextRenewal}
+          daysRemaining={summary.daysRemaining}
+          isPaid={summary.isPaid}
+          cancelAtPeriodEnd={summary.cancelAtPeriodEnd}
+        />
       </Card>
 
       <Card className="gap-0 p-5">
@@ -278,6 +270,13 @@ export function OwnerDashboardPlanSummaryCard() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground">{summary.plan.description}</p>
         </div>
+
+        <SubscriptionRenewalHighlight
+          nextRenewal={summary.nextRenewal}
+          daysRemaining={summary.daysRemaining}
+          isPaid={summary.isPaid}
+          cancelAtPeriodEnd={summary.cancelAtPeriodEnd}
+        />
 
         <div className="space-y-3">
           <UsageMeter

@@ -66,20 +66,17 @@ export function formatRelativeDate(
 }
 
 // Currency formatting
+import { formatInr } from '@/lib/money';
+
 export function formatCurrency(
   amount: number,
-  currency = 'USD',
-  locale = 'en-US',
+  currency = 'INR',
+  _locale = 'en-IN',
 ): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  return formatInr(amount, currency);
 }
 
-export function formatCents(cents: number, currency = 'USD'): string {
+export function formatCents(cents: number, currency = 'INR'): string {
   return formatCurrency(cents / 100, currency);
 }
 

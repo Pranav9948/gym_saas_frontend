@@ -181,4 +181,53 @@ export const billingService = {
 
     throw new Error('Failed to open billing portal');
   },
+
+  syncCheckoutSession: async (
+    sessionId: string,
+  ): Promise<BillingSummaryResponse> => {
+    const api = API_ENDPOINTS.BILLING.SYNC_CHECKOUT_SESSION;
+    billingTrace('POST /billing/sync-checkout-session (start)', {
+      api,
+      method: 'POST',
+      in: { sessionId },
+    });
+    try {
+      const out = await post<BillingSummaryResponse>(api, { sessionId });
+      billingTrace('POST /billing/sync-checkout-session (success)', {
+        api,
+        method: 'POST',
+        in: { sessionId },
+        out: out.data,
+      });
+      return out;
+    } catch (error) {
+      billingTrace('POST /billing/sync-checkout-session (failed)', {
+        api,
+        method: 'POST',
+        in: { sessionId },
+        error,
+      });
+      throw error;
+    }
+  },
+
+  reconcileSubscription: async (): Promise<BillingSummaryResponse> => {
+    const api = API_ENDPOINTS.BILLING.RECONCILE_SUBSCRIPTION;
+    try {
+      const out = await post<BillingSummaryResponse>(api);
+      billingTrace('POST /billing/reconcile-subscription', {
+        api,
+        method: 'POST',
+        out: out.data,
+      });
+      return out;
+    } catch (error) {
+      billingTrace('POST /billing/reconcile-subscription', {
+        api,
+        method: 'POST',
+        error,
+      });
+      throw error;
+    }
+  },
 };

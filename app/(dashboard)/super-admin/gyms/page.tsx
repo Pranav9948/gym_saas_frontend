@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Building2, Building2Icon, BuildingIcon, MapPin, Plus, Search, Users } from 'lucide-react'
+import { Building2, Building2Icon, MapPin, Search, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,17 +15,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { EmptyState, PageHeader, StatusBadge } from '@/components/common'
-import { gyms } from '@/lib/super-admin-mock'
+import { EmptyState, LoadingSpinner, PageHeader, StatusBadge } from '@/components/common'
 import { StatusType } from '@/types'
 import { StatCard } from '@/components/common/StatCard'
-
-const currency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value)
+import { useSuperAdminDashboard } from '@/hooks/super-admin'
+import { formatInr } from '@/lib/money'
+import type { SuperAdminGymStatus } from '@/types/super-admin-dashboard'
 
 const filters = [
   { value: 'all', label: 'All' },
@@ -35,10 +30,33 @@ const filters = [
   { value: 'suspended', label: 'Suspended' },
 ]
 
+const statusMap: Record<SuperAdminGymStatus, StatusType> = {
+  active: 'ACTIVE',
+  trial: 'PENDING',
+  suspended: 'BANNED',
+  pending: 'PENDING',
+}
+
 export default function SuperAdminGymsPage() {
+  const { data, isLoading, isError, refetch } = useSuperAdminDashboard()
   const [query, setQuery] = React.useState('')
   const [status, setStatus] = React.useState('all')
 
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />
+  }
+
+  if (isError || !data?.data) {
+    return (
+      <EmptyState
+        title="Unable to load gyms"
+        description="Could not load gyms from the database."
+        action={<Button onClick={() => refetch()}>Retry</Button>}
+      />
+    )
+  }
+
+  const gyms = data.data.gyms
   const filtered = gyms.filter((gym) => {
     const matchesStatus = status === 'all' || gym.status === status
     const matchesQuery =
@@ -48,17 +66,6 @@ export default function SuperAdminGymsPage() {
     return matchesStatus && matchesQuery
   })
 
-  const statusMap: Record<
-    "active" | "trial" | "suspended" | "pending",
-    StatusType
-  > = {
-    active: "ACTIVE",
-    trial: "PENDING",       // or ACTIVE/INACTIVE, whichever makes sense
-    suspended: "BANNED",    // or INACTIVE
-    pending: "PENDING",
-  };
-
-
   const totalMembers = gyms.reduce((sum, gym) => sum + gym.members, 0)
   const activeGyms = gyms.filter((gym) => gym.status === 'active').length
 
@@ -66,19 +73,13 @@ export default function SuperAdminGymsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Gyms"
-        description="Manage every gym operating on your platform."
-        actions={
-          <Button className="gap-2">
-            <Plus className="size-4" />
-            <span className="hidden sm:inline">Add gym</span>
-          </Button>
-        }
+        description="Every gym currently registered on the platform."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total Gyms" value={gyms.length.toString()} icon={Building2} />
         <StatCard label="Active Gyms" value={activeGyms.toString()} icon={Building2} />
-        <StatCard label="Total Members" value={totalMembers.toLocaleString()} icon={Users} />
+        <StatCard label="Total Members" value={totalMembers.toLocaleString('en-IN')} icon={Users} />
       </div>
 
       <Card>
@@ -110,7 +111,7 @@ export default function SuperAdminGymsPage() {
             <EmptyState
               icon={<Building2Icon className="h-8 w-8" />}
               title="No gyms found"
-              description="Try adjusting your search or filter to find what you are looking for."
+              description="Try adjusting your search or filter."
             />
           ) : (
             <div className="overflow-x-auto">
@@ -121,7 +122,7 @@ export default function SuperAdminGymsPage() {
                     <TableHead>Owner</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead className="text-right">Members</TableHead>
-                    <TableHead className="text-right">Revenue</TableHead>
+                    <TableHead className="text-right">Monthly (INR)</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -151,10 +152,10 @@ export default function SuperAdminGymsPage() {
                       <TableCell className="text-muted-foreground">{gym.owner}</TableCell>
                       <TableCell>{gym.plan}</TableCell>
                       <TableCell className="text-right font-mono">
-                        {gym.members.toLocaleString()}
+                        {gym.members.toLocaleString('en-IN')}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {gym.revenue ? currency(gym.revenue) : '—'}
+                        {gym.revenue ? formatInr(gym.revenue, 'INR') : '—'}
                       </TableCell>
                       <TableCell>
                         <StatusBadge

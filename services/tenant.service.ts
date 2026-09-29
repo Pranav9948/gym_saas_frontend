@@ -6,6 +6,7 @@ import { get, post, patch, uploadFile, del } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   TenantResponse,
+  OwnerDashboardResponse,
   UpdateTenantRequest,
   InviteUserRequest,
   DirectCreateUserRequest,
@@ -43,6 +44,10 @@ export const tenantService = {
    */
   getTenant: async (): Promise<TenantResponse> => {
     return get<TenantResponse>(API_ENDPOINTS.TENANT.GET);
+  },
+
+  getDashboard: async (): Promise<OwnerDashboardResponse> => {
+    return get<OwnerDashboardResponse>(API_ENDPOINTS.TENANT.DASHBOARD);
   },
 
   /**

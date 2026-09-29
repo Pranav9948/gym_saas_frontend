@@ -477,6 +477,7 @@ export interface TrainerOverview {
     lastName: string;
     email: string;
     isActive: boolean;
+    avatarUrl?: string | null;
   };
   members: TrainerOverviewMember[];
 }
@@ -497,6 +498,7 @@ export interface TrainerPerformance {
       lastName: string;
       email: string;
       isActive: boolean;
+      avatarUrl?: string | null;
     };
   };
   from: string;

@@ -14,6 +14,7 @@ export { Pagination } from './Pagination';
 export { StatusBadge } from './StatusBadge';
 export { RoleBadge } from './RoleBadge';
 export { PageHeader } from './PageHeader';
+export { PersonPhotoPicker } from './PersonPhotoPicker';
 export { StatCard } from './StatCard';
 export { KpiCard } from './KpiCard';
 export { ChartWrapper } from './ChartWrapper';

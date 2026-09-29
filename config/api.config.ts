@@ -75,6 +75,7 @@ export const API_ENDPOINTS = {
     CREATE: '/packages',
     UPDATE: (id: string) => `/packages/${id}`,
     DELETE: (id: string) => `/packages/${id}`,
+    IMAGE: (id: string) => `/packages/${id}/image`,
   },
 
   // Trainers
@@ -90,6 +91,7 @@ export const API_ENDPOINTS = {
     ME: '/trainers/me',
     ME_MEMBERS: '/trainers/me/members',
     ME_AVATAR: '/trainers/me/avatar',
+    AVATAR: (id: string) => `/trainers/${id}/avatar`,
   },
 
   WORKOUTS: {

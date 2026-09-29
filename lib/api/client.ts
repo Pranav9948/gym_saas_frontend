@@ -172,6 +172,9 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      config.headers.delete("Content-Type");
+    }
     return config;
   },
   (error) => {
@@ -311,10 +314,7 @@ export async function uploadFile<T>(
   formData.append(fieldName, file);
 
   const response = await apiClient.post<T>(url, formData, {
-    headers: {
-      // Let browser set Content-Type with boundary
-      "Content-Type": "multipart/form-data",
-    },
+    timeout: TIMEOUTS.UPLOAD,
   });
   return response.data;
 }

@@ -1,4 +1,4 @@
-import { del, get, patch, post } from '@/lib/api/client';
+import { del, get, patch, post, uploadFile } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/api.config';
 import type {
   MembershipPackage,
@@ -39,6 +39,18 @@ export const packagesService = {
     }>,
   ): Promise<PackageResponse> => {
     return patch<PackageResponse>(API_ENDPOINTS.PACKAGES.UPDATE(id), data);
+  },
+
+  uploadImage: async (id: string, file: File): Promise<PackageResponse> => {
+    return uploadFile<PackageResponse>(
+      API_ENDPOINTS.PACKAGES.IMAGE(id),
+      file,
+      'image',
+    );
+  },
+
+  removeImage: async (id: string): Promise<PackageResponse> => {
+    return del<PackageResponse>(API_ENDPOINTS.PACKAGES.IMAGE(id));
   },
 
   remove: async (id: string): Promise<{ success: true; message?: string }> => {

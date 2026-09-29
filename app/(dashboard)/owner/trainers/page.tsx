@@ -2,19 +2,21 @@
 
 import React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Dumbbell, Users } from 'lucide-react'
-import { PageHeader, EmptyState, LoadingSpinner } from '@/components/common'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  Dumbbell,
+  Plus,
+  Search,
+  UserCheck,
+  Users,
+} from 'lucide-react'
+import { EmptyState, LoadingSpinner, PageHeader } from '@/components/common'
+import { StatCard } from '@/components/common/StatCard'
+import { AddPersonDialog } from '@/components/owner/AddPersonDialog'
+import { TrainerCard } from '@/components/owner/trainers/TrainerCard'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -22,6 +24,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -29,11 +33,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { trainersService, staffAttendanceService } from '@/services'
 import { queryKeys } from '@/services/queryKeys'
 import { ApiException } from '@/lib/api/errors'
+import { resolveMediaUrl } from '@/lib/helpers/media'
 import { useToast } from '@/hooks/use-toast'
 import type { TrainerOverview } from '@/types'
 
@@ -41,6 +44,8 @@ export default function OwnerTrainersPage() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
+  const [addOpen, setAddOpen] = React.useState(false)
+  const [query, setQuery] = React.useState('')
   const [range, setRange] = React.useState<'this_month' | 'last_month' | 'custom'>(
     'this_month',
   )
@@ -65,6 +70,22 @@ export default function OwnerTrainersPage() {
 
   const trainers = overviewQuery.data?.data ?? []
   const performance = performanceQuery.data?.data
+  const search = query.trim().toLowerCase()
+  const visible = search
+    ? trainers.filter((trainer) => {
+        const name = `${trainer.user.firstName} ${trainer.user.lastName}`.toLowerCase()
+        return (
+          name.includes(search) ||
+          trainer.user.email.toLowerCase().includes(search) ||
+          (trainer.specialization ?? '').toLowerCase().includes(search)
+        )
+      })
+    : trainers
+  const membersCoached = trainers.reduce(
+    (sum, trainer) => sum + trainer.assignedMemberCount,
+    0,
+  )
+  const activeTrainers = trainers.filter((trainer) => trainer.user.isActive).length
 
   const markMutation = useMutation({
     mutationFn: () => {
@@ -94,64 +115,94 @@ export default function OwnerTrainersPage() {
     <div className="space-y-6">
       <PageHeader
         title="Trainers"
-        description="See who each trainer coaches, then open performance and attendance for a date range."
+        description="Photos, assigned members, and attendance for every coach in your gym."
+        actions={
+          <Button className="gap-2" onClick={() => setAddOpen(true)}>
+            <Plus className="size-4" />
+            Add trainer
+          </Button>
+        }
       />
 
-      <Card>
-        <CardContent className="pt-6">
-          {overviewQuery.isLoading ? (
-            <LoadingSpinner />
-          ) : overviewQuery.isError ? (
-            <EmptyState
-              icon={<Dumbbell className="size-8 text-muted-foreground" />}
-              title="Could not load trainers"
-              description="Check your connection and try again."
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Trainers"
+          value={String(trainers.length)}
+          icon={Dumbbell}
+          hint="Coaches on this gym"
+        />
+        <StatCard
+          label="Active"
+          value={String(activeTrainers)}
+          icon={UserCheck}
+          hint="Can log in and take members"
+        />
+        <StatCard
+          label="Members coached"
+          value={String(membersCoached)}
+          icon={Users}
+          hint="Assigned across every trainer"
+        />
+      </div>
+
+      <div className="relative max-w-md">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search trainers…"
+          className="h-10 pl-9"
+          aria-label="Search trainers"
+        />
+      </div>
+
+      {overviewQuery.isLoading ? (
+        <div className="flex min-h-64 items-center justify-center">
+          <LoadingSpinner label="Loading trainers…" />
+        </div>
+      ) : overviewQuery.isError ? (
+        <EmptyState
+          icon={<Dumbbell className="size-8 text-muted-foreground" />}
+          title="Could not load trainers"
+          description="Check your connection and try again."
+        />
+      ) : trainers.length === 0 ? (
+        <EmptyState
+          icon={<Dumbbell className="size-8 text-muted-foreground" />}
+          title="No trainers yet"
+          description="Add a trainer with a photo, specialization, and login so you can assign members to them."
+          action={
+            <Button className="gap-2" onClick={() => setAddOpen(true)}>
+              <Plus className="size-4" />
+              Add trainer
+            </Button>
+          }
+        />
+      ) : visible.length === 0 ? (
+        <EmptyState
+          title="No matching trainers"
+          description="Try a different name, email, or specialization."
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {visible.map((trainer) => (
+            <TrainerCard
+              key={trainer.id}
+              trainer={trainer}
+              onOpen={() => setSelectedId(trainer.id)}
             />
-          ) : trainers.length === 0 ? (
-            <EmptyState
-              icon={<Dumbbell className="size-8 text-muted-foreground" />}
-              title="No trainers yet"
-              description="Create a trainer from People, then assign members to them."
-            />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Trainer</TableHead>
-                  <TableHead>Specialization</TableHead>
-                  <TableHead>Assigned members</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {trainers.map((trainer) => (
-                  <TableRow key={trainer.id}>
-                    <TableCell>
-                      <div className="font-medium">
-                        {trainer.user.firstName} {trainer.user.lastName}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{trainer.user.email}</p>
-                    </TableCell>
-                    <TableCell>{trainer.specialization ?? '—'}</TableCell>
-                    <TableCell>
-                      {trainer.assignedMemberCount === 0
-                        ? 'None assigned'
-                        : trainer.members
-                            .map((member) => `${member.firstName} ${member.lastName}`)
-                            .join(', ')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" onClick={() => setSelectedId(trainer.id)}>
-                        Performance
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
+
+      <AddPersonDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        defaultType="trainer"
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.trainers.all })
+        }}
+      />
 
       <TrainerPerformanceDialog
         open={Boolean(selectedId)}
@@ -215,18 +266,30 @@ function TrainerPerformanceDialog({
     }>
   }
 }) {
+  const name = trainer
+    ? `${trainer.user.firstName} ${trainer.user.lastName}`.trim()
+    : 'Trainer'
+  const photo = resolveMediaUrl(trainer?.user.avatarUrl)
+  const initials = `${trainer?.user.firstName?.[0] ?? ''}${trainer?.user.lastName?.[0] ?? ''}`.toUpperCase()
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {trainer
-              ? `${trainer.user.firstName} ${trainer.user.lastName}`
-              : 'Trainer performance'}
-          </DialogTitle>
-          <DialogDescription>
-            Attendance days present and currently assigned members.
-          </DialogDescription>
+          <div className="flex items-center gap-3 pr-6">
+            <Avatar className="size-12">
+              {photo ? <AvatarImage src={photo} alt="" /> : null}
+              <AvatarFallback className="bg-primary/15 font-semibold text-primary">
+                {initials || 'TR'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <DialogTitle className="truncate">{name}</DialogTitle>
+              <DialogDescription>
+                {trainer?.specialization || 'Attendance and assigned members'}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="grid gap-3 sm:grid-cols-3">
@@ -292,34 +355,30 @@ function TrainerPerformanceDialog({
               {performance.assignedMembers.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No members assigned.</p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Member</TableHead>
-                      <TableHead>Package</TableHead>
-                      <TableHead>Training</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {performance.assignedMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {performance.assignedMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/20 p-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
                           {member.firstName} {member.lastName}
-                        </TableCell>
-                        <TableCell>{member.membershipPackage?.name ?? '—'}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              member.trainingStatus === 'ACTIVE' ? 'secondary' : 'outline'
-                            }
-                          >
-                            {member.trainingStatus === 'ACTIVE' ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {member.membershipPackage?.name ?? 'No package'}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          member.trainingStatus === 'ACTIVE' ? 'secondary' : 'outline'
+                        }
+                      >
+                        {member.trainingStatus === 'ACTIVE' ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

@@ -12,12 +12,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { FormField } from '@/components/common'
+import { FormField, PersonPhotoPicker } from '@/components/common'
 import {
   addTrainerPersonSchema,
   type AddTrainerPersonFormData,
 } from '@/schemas/owner-person.schema'
-import { tenantService } from '@/services'
+import { tenantService, trainersService } from '@/services'
 import { ApiException } from '@/lib/api/errors'
 import { useToast } from '@/hooks/use-toast'
 
@@ -34,6 +34,17 @@ export function StaffAddTrainerDialog({
 }: StaffAddTrainerDialogProps) {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [photoFile, setPhotoFile] = React.useState<File | null>(null)
+  const photoPreview = React.useMemo(
+    () => (photoFile ? URL.createObjectURL(photoFile) : null),
+    [photoFile],
+  )
+
+  React.useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
+    }
+  }, [photoPreview])
 
   const form = useForm<AddTrainerPersonFormData>({
     resolver: zodResolver(addTrainerPersonSchema),
@@ -51,13 +62,14 @@ export function StaffAddTrainerDialog({
   React.useEffect(() => {
     if (!open) {
       form.reset()
+      setPhotoFile(null)
     }
   }, [open, form])
 
   const handleSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true)
     try {
-      await tenantService.createUser({
+      const created = await tenantService.createUser({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -66,6 +78,20 @@ export function StaffAddTrainerDialog({
         specialization: data.specialization.trim(),
         bio: data.bio?.trim() || undefined,
       })
+      if (photoFile && created.data.trainerId) {
+        try {
+          await trainersService.uploadAvatar(created.data.trainerId, photoFile)
+        } catch {
+          toast({
+            title: 'Trainer created, photo not saved',
+            description: 'You can add a photo later from trainer settings.',
+            variant: 'destructive',
+          })
+          onOpenChange(false)
+          onSuccess?.()
+          return
+        }
+      }
       toast({
         title: 'Trainer created',
         description: `${data.firstName} ${data.lastName} can now be assigned to members.`,
@@ -98,6 +124,12 @@ export function StaffAddTrainerDialog({
         </DialogHeader>
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-6">
+            <PersonPhotoPicker
+              label="Trainer photo"
+              previewUrl={photoPreview}
+              disabled={isSubmitting}
+              onFileChange={setPhotoFile}
+            />
             <div className="grid gap-3 sm:grid-cols-2">
               <FormField
                 name="firstName"

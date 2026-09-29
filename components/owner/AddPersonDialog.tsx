@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { FormField, LoadingSpinner } from '@/components/common'
+import { FormField, LoadingSpinner, PersonPhotoPicker } from '@/components/common'
 import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
 import {
   addAdminPersonSchema,
@@ -44,8 +44,13 @@ import {
   trainersService,
 } from '@/services'
 import { ApiException } from '@/lib/api/errors'
+import { formatCurrency } from '@/lib/helpers/formatting'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import {
+  formatDuration,
+  resolvePackageImageUrl,
+} from '@/components/owner/packages'
 
 interface AddPersonDialogProps {
   open: boolean
@@ -63,6 +68,17 @@ export function AddPersonDialog({
   const { toast } = useToast()
   const [personType, setPersonType] = React.useState<PersonType>(defaultType)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [trainerPhoto, setTrainerPhoto] = React.useState<File | null>(null)
+  const trainerPhotoPreview = React.useMemo(
+    () => (trainerPhoto ? URL.createObjectURL(trainerPhoto) : null),
+    [trainerPhoto],
+  )
+
+  React.useEffect(() => {
+    return () => {
+      if (trainerPhotoPreview) URL.revokeObjectURL(trainerPhotoPreview)
+    }
+  }, [trainerPhotoPreview])
 
   const trainersQuery = useQuery({
     queryKey: queryKeys.trainers.list({ limit: 100 }),
@@ -137,6 +153,7 @@ export function AddPersonDialog({
     staffForm.reset()
     adminForm.reset()
     trainerForm.reset()
+    setTrainerPhoto(null)
   }
 
   const handleClose = (nextOpen: boolean) => {
@@ -256,7 +273,7 @@ export function AddPersonDialog({
   const handleTrainerSubmit = trainerForm.handleSubmit(async (data) => {
     setIsSubmitting(true)
     try {
-      await tenantService.createUser({
+      const created = await tenantService.createUser({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -265,6 +282,20 @@ export function AddPersonDialog({
         specialization: data.specialization.trim(),
         bio: data.bio?.trim() || undefined,
       })
+      if (trainerPhoto && created.data.trainerId) {
+        try {
+          await trainersService.uploadAvatar(created.data.trainerId, trainerPhoto)
+        } catch {
+          toast({
+            title: 'Trainer created, photo not saved',
+            description: 'You can add a photo later from trainer settings.',
+            variant: 'destructive',
+          })
+          handleClose(false)
+          onSuccess?.('trainer')
+          return
+        }
+      }
       toast({
         title: 'Trainer created',
         description: `${data.firstName} ${data.lastName} was added as a trainer.`,
@@ -379,30 +410,62 @@ export function AddPersonDialog({
                   disabled={isSubmitting}
                 />
                 <div className="space-y-2">
-                  <Label htmlFor="memberPackage">Package *</Label>
+                  <Label>Package *</Label>
                   {packagesQuery.isLoading ? (
                     <LoadingSpinner label="Loading packages…" />
+                  ) : packages.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Create a membership package first.
+                    </p>
                   ) : (
-                    <Select
-                      value={selectedPackageId || undefined}
-                      onValueChange={(value) =>
-                        memberForm.setValue('packageId', value, {
-                          shouldValidate: true,
-                        })
-                      }
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger id="memberPackage" className="w-full">
-                        <SelectValue placeholder="Select a package" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packages.map((pkg) => (
-                          <SelectItem key={pkg.id} value={pkg.id}>
-                            {pkg.name} · {pkg.durationDays} days
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="grid grid-cols-2 gap-2">
+                      {packages.map((pkg) => {
+                        const selected = selectedPackageId === pkg.id
+                        const imageUrl = resolvePackageImageUrl(pkg.imageUrl)
+                        return (
+                          <button
+                            key={pkg.id}
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={() =>
+                              memberForm.setValue('packageId', pkg.id, {
+                                shouldValidate: true,
+                              })
+                            }
+                            className={cn(
+                              'overflow-hidden rounded-xl border text-left transition-all',
+                              selected
+                                ? 'border-primary ring-2 ring-primary/40'
+                                : 'border-border hover:border-primary/40',
+                            )}
+                          >
+                            <div className="relative h-16 bg-muted">
+                              {imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={imageUrl}
+                                  alt=""
+                                  className="size-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex size-full items-center justify-center bg-primary/10 text-primary">
+                                  <Dumbbell className="size-5" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-0.5 p-2">
+                              <p className="truncate text-sm font-medium">
+                                {pkg.name}
+                              </p>
+                              <p className="text-[11px] text-muted-foreground">
+                                {formatDuration(pkg.durationDays)} ·{' '}
+                                {formatCurrency(pkg.price, pkg.currency)}
+                              </p>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
                   )}
                   {memberForm.formState.errors.packageId?.message ? (
                     <p className="text-xs text-destructive">
@@ -573,6 +636,12 @@ export function AddPersonDialog({
                 <p className="text-sm text-muted-foreground">
                   Trainers get a login and can be assigned to gym members.
                 </p>
+                <PersonPhotoPicker
+                  label="Trainer photo"
+                  previewUrl={trainerPhotoPreview}
+                  disabled={isSubmitting}
+                  onFileChange={setTrainerPhoto}
+                />
                 <FormField
                   name="firstName"
                   control={trainerForm.control}

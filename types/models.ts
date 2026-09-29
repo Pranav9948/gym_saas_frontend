@@ -122,6 +122,7 @@ export interface MembershipPackage {
   memberCount?: number;
   features?: string[];
   featureLimits?: Record<string, number>;
+  imageUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

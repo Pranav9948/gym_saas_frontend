@@ -28,6 +28,7 @@ const PROTECTED_PREFIXES = [
   '/analytics',
   '/settings',
   '/billing',
+  '/packages',
   '/reset-codes',
   '/super-admin',
 ] as const;

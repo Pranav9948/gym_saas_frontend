@@ -148,6 +148,15 @@ export const useAuthStore = create<AuthState>()(
           isInitialized: true,
         }),
 
+        merge: (persistedState, currentState) => {
+          const persisted = (persistedState as Partial<AuthState> | undefined) ?? {}
+          const next = { ...currentState, ...persisted }
+          if (next.user && next.user.role !== 'SUPER_ADMIN') {
+            next.permissions = getPermissionsForRole(next.user.role as TenantRole)
+          }
+          return next
+        },
+
         onRehydrateStorage: () => (state) => {
           if (state?.user) {
             setAuthType(state.authType ?? 'user');

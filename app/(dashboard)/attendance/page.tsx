@@ -10,6 +10,7 @@ import {
   localDateIso,
   personInitials,
 } from '@/components/staff/staff-ui'
+import { TrainerChip } from '@/components/trainers/TrainerPhoto'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -390,19 +391,10 @@ function TrainerAttendanceRow({
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
-        <Avatar className="size-9">
-          <AvatarFallback className="bg-amber-500/15 text-xs font-semibold text-amber-700 dark:text-amber-400">
-            {personInitials(trainer.user.firstName, trainer.user.lastName)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
-          <p className="truncate font-medium">
-            {trainer.user.firstName} {trainer.user.lastName}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {trainer.specialization || trainer.user.email}
-          </p>
-        </div>
+        <TrainerChip
+          user={trainer.user}
+          subtitle={trainer.specialization || trainer.user.email}
+        />
       </div>
       <div className="flex items-center justify-end gap-2">
         {present ? (

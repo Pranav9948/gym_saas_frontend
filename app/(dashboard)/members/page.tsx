@@ -18,6 +18,7 @@ import {
   monthlyPackagePrice,
   personInitials,
 } from "@/components/staff/staff-ui";
+import { TrainerChip } from "@/components/trainers/TrainerPhoto";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -289,10 +290,11 @@ export default function StaffMembersPage() {
                               remainingDays={member.remainingDays}
                             />
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {member.assignedTrainer
-                              ? `${member.assignedTrainer.user.firstName} ${member.assignedTrainer.user.lastName}`
-                              : "—"}
+                          <TableCell>
+                            <TrainerChip
+                              user={member.assignedTrainer?.user}
+                              photoSize="sm"
+                            />
                           </TableCell>
                           {canUpdate ? (
                             <TableCell className="text-right">
@@ -450,10 +452,11 @@ function MemberMobileCard({
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Trainer</dt>
-              <dd className="truncate">
-                {member.assignedTrainer
-                  ? `${member.assignedTrainer.user.firstName} ${member.assignedTrainer.user.lastName}`
-                  : "—"}
+              <dd className="mt-1">
+                <TrainerChip
+                  user={member.assignedTrainer?.user}
+                  photoSize="sm"
+                />
               </dd>
             </div>
             <div className="col-span-2">

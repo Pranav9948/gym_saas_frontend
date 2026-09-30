@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Activity, Dumbbell, Flag, NotebookPen, Salad, Target } from 'lucide-react'
 import { EmptyState, LoadingSpinner } from '@/components/common'
-import { StaffPageHeader, localDateIso, personInitials } from '@/components/staff/staff-ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { StaffPageHeader, localDateIso } from '@/components/staff/staff-ui'
+import { TrainerPhoto } from '@/components/trainers/TrainerPhoto'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -209,14 +209,7 @@ export default function MemberDashboardPage() {
       {trainer ? (
         <Card>
           <CardContent className="flex items-center gap-3 px-4 py-4 sm:px-6">
-            <Avatar className="size-11">
-              {trainer.user.avatarUrl ? (
-                <AvatarImage src={trainer.user.avatarUrl} alt="" />
-              ) : null}
-              <AvatarFallback className="bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                {personInitials(trainer.user.firstName, trainer.user.lastName)}
-              </AvatarFallback>
-            </Avatar>
+            <TrainerPhoto user={trainer.user} size="lg" />
             <div className="min-w-0">
               <p className="text-sm font-medium">
                 {trainer.user.firstName} {trainer.user.lastName}

@@ -32,6 +32,7 @@ import {
   type EditMemberPersonFormData,
 } from '@/schemas/owner-person.schema'
 import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
+import { TrainerSelectLabel } from '@/components/trainers/TrainerPhoto'
 import { membersService, packagesService, trainersService, queryKeys } from '@/services'
 import { ApiException } from '@/lib/api/errors'
 import { useToast } from '@/hooks/use-toast'
@@ -269,8 +270,15 @@ export function StaffEditMemberDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {trainers.map((trainer) => (
-                        <SelectItem key={trainer.id} value={trainer.id}>
-                          {trainer.user.firstName} {trainer.user.lastName}
+                        <SelectItem
+                          key={trainer.id}
+                          value={trainer.id}
+                          textValue={`${trainer.user.firstName} ${trainer.user.lastName}`}
+                        >
+                          <TrainerSelectLabel
+                            user={trainer.user}
+                            specialization={trainer.specialization}
+                          />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -307,8 +315,15 @@ export function StaffEditMemberDialog({
                   <SelectContent>
                     <SelectItem value="none">No trainer</SelectItem>
                     {trainers.map((trainer) => (
-                      <SelectItem key={trainer.id} value={trainer.id}>
-                        {trainer.user.firstName} {trainer.user.lastName}
+                      <SelectItem
+                        key={trainer.id}
+                        value={trainer.id}
+                        textValue={`${trainer.user.firstName} ${trainer.user.lastName}`}
+                      >
+                        <TrainerSelectLabel
+                          user={trainer.user}
+                          specialization={trainer.specialization}
+                        />
                       </SelectItem>
                     ))}
                   </SelectContent>

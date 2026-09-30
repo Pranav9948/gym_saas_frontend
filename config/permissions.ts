@@ -41,6 +41,11 @@ export const PERMISSIONS = {
     UPDATE: 'role:update',
     DELETE: 'role:delete',
   },
+  PACKAGE: {
+    CREATE: 'package:create',
+    UPDATE: 'package:update',
+    DELETE: 'package:delete',
+  },
 } as const;
 
 // All permissions as flat array
@@ -66,6 +71,9 @@ export const ALL_PERMISSIONS = [
   PERMISSIONS.ROLE.VIEW,
   PERMISSIONS.ROLE.UPDATE,
   PERMISSIONS.ROLE.DELETE,
+  PERMISSIONS.PACKAGE.CREATE,
+  PERMISSIONS.PACKAGE.UPDATE,
+  PERMISSIONS.PACKAGE.DELETE,
 ] as const;
 
 // Role to permissions mapping (from backend seed)
@@ -85,6 +93,9 @@ export const ROLE_PERMISSIONS: Record<TenantRole, string[]> = {
     PERMISSIONS.USER.INVITE,
     PERMISSIONS.ATTENDANCE.MARK,
     PERMISSIONS.ATTENDANCE.VIEW,
+    PERMISSIONS.PACKAGE.CREATE,
+    PERMISSIONS.PACKAGE.UPDATE,
+    PERMISSIONS.PACKAGE.DELETE,
   ],
   TRAINER: [
     PERMISSIONS.MEMBER.VIEW,

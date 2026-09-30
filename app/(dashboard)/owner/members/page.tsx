@@ -8,6 +8,7 @@ import {
 } from "@/components/common";
 import { StatCard } from "@/components/common/StatCard";
 import { AddPersonDialog } from "@/components/owner/AddPersonDialog";
+import { TrainerChip } from "@/components/trainers/TrainerPhoto";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -424,10 +425,11 @@ export default function OwnerMembersPage() {
                                   ? `${Math.abs(m.remainingDays)} overdue`
                                   : m.remainingDays}
                             </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {m.assignedTrainer
-                                ? `${m.assignedTrainer.user.firstName} ${m.assignedTrainer.user.lastName}`
-                                : "—"}
+                            <TableCell>
+                              <TrainerChip
+                                user={m.assignedTrainer?.user}
+                                photoSize="sm"
+                              />
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center justify-end gap-1">

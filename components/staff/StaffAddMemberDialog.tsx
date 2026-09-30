@@ -27,6 +27,9 @@ import {
   formatMoney,
   monthlyPackagePrice,
 } from '@/components/staff/staff-ui'
+import { TrainerSelectLabel } from '@/components/trainers/TrainerPhoto'
+import { ROUTES } from '@/config'
+import Link from 'next/link'
 import {
   addMemberPersonSchema,
   type AddMemberPersonFormData,
@@ -189,8 +192,15 @@ export function StaffAddMemberDialog({
                 <LoadingSpinner size="sm" label="Loading packages…" />
               ) : packages.length === 0 ? (
                 <p className="rounded-lg bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
-                  No packages are available yet. Ask the gym owner to create one
-                  before adding members.
+                  No packages yet.{' '}
+                  <Link
+                    href={ROUTES.PACKAGES}
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Create a package
+                  </Link>{' '}
+                  first, then add members.
                 </p>
               ) : (
                 <Select
@@ -258,8 +268,15 @@ export function StaffAddMemberDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {trainers.map((trainer) => (
-                        <SelectItem key={trainer.id} value={trainer.id}>
-                          {trainer.user.firstName} {trainer.user.lastName}
+                        <SelectItem
+                          key={trainer.id}
+                          value={trainer.id}
+                          textValue={`${trainer.user.firstName} ${trainer.user.lastName}`}
+                        >
+                          <TrainerSelectLabel
+                            user={trainer.user}
+                            specialization={trainer.specialization}
+                          />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -295,8 +312,15 @@ export function StaffAddMemberDialog({
                   <SelectContent>
                     <SelectItem value="none">No trainer</SelectItem>
                     {trainers.map((trainer) => (
-                      <SelectItem key={trainer.id} value={trainer.id}>
-                        {trainer.user.firstName} {trainer.user.lastName}
+                      <SelectItem
+                        key={trainer.id}
+                        value={trainer.id}
+                        textValue={`${trainer.user.firstName} ${trainer.user.lastName}`}
+                      >
+                        <TrainerSelectLabel
+                          user={trainer.user}
+                          specialization={trainer.specialization}
+                        />
                       </SelectItem>
                     ))}
                   </SelectContent>

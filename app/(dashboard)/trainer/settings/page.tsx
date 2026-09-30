@@ -2,8 +2,8 @@
 
 import React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { StaffPageHeader, personInitials } from '@/components/staff/staff-ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { StaffPageHeader } from '@/components/staff/staff-ui'
+import { TrainerPhoto } from '@/components/trainers/TrainerPhoto'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -106,12 +106,14 @@ export default function TrainerSettingsPage() {
       <Card>
         <CardContent className="space-y-5 px-4 pt-5 sm:px-6">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <Avatar className="size-20">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-              <AvatarFallback className="bg-amber-500/15 text-lg font-semibold text-amber-700 dark:text-amber-400">
-                {personInitials(firstName, lastName)}
-              </AvatarFallback>
-            </Avatar>
+            <TrainerPhoto
+              user={{
+                firstName,
+                lastName,
+                avatarUrl,
+              }}
+              size="xl"
+            />
             <div>
               <Label htmlFor="trainer-photo">Profile photo</Label>
               <Input

@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { FormField, LoadingSpinner, PersonPhotoPicker } from '@/components/common'
+import { TrainerSelectLabel } from '@/components/trainers/TrainerPhoto'
 import { MemberPortalPasswordFields } from '@/components/staff/MemberPortalPasswordFields'
 import {
   addAdminPersonSchema,
@@ -517,11 +518,15 @@ export function AddPersonDialog({
                       <SelectContent>
                         <SelectItem value="none">No trainer</SelectItem>
                         {trainers.map((trainer) => (
-                          <SelectItem key={trainer.id} value={trainer.id}>
-                            {trainer.user.firstName} {trainer.user.lastName}
-                            {trainer.specialization
-                              ? ` · ${trainer.specialization}`
-                              : ''}
+                          <SelectItem
+                            key={trainer.id}
+                            value={trainer.id}
+                            textValue={`${trainer.user.firstName} ${trainer.user.lastName}`}
+                          >
+                            <TrainerSelectLabel
+                              user={trainer.user}
+                              specialization={trainer.specialization}
+                            />
                           </SelectItem>
                         ))}
                       </SelectContent>

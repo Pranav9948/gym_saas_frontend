@@ -50,6 +50,7 @@ export const ROUTES = {
   TRAINER_NEW: '/trainers/new',
   TRAINER_DETAIL: (id: string) => `/trainers/${id}`,
   TRAINER_EDIT: (id: string) => `/trainers/${id}/edit`,
+  PACKAGES: '/packages',
 
   ATTENDANCE: '/attendance',
   ATTENDANCE_REPORTS: '/attendance/reports',
@@ -160,6 +161,12 @@ export const ROUTE_PERMISSIONS: Record<string, RouteConfig> = {
   [ROUTES.TRAINER_NEW]: {
     path: ROUTES.TRAINER_NEW,
     permissions: [PERMISSIONS.TRAINER.CREATE],
+    requireAuth: true,
+    roles: STAFF_PORTAL_ROLES,
+  },
+  [ROUTES.PACKAGES]: {
+    path: ROUTES.PACKAGES,
+    permissions: [PERMISSIONS.PACKAGE.CREATE],
     requireAuth: true,
     roles: STAFF_PORTAL_ROLES,
   },
@@ -325,10 +332,12 @@ export function isStaffPortalRoute(pathname: string): boolean {
     ROUTES.DASHBOARD,
     ROUTES.MEMBERS,
     ROUTES.TRAINERS,
+    ROUTES.PACKAGES,
     ROUTES.ATTENDANCE,
     ROUTES.ANALYTICS,
     ROUTES.SETTINGS,
     ROUTES.BILLING,
+    ROUTES.RESET_CODES,
   ];
 
   return staffPrefixes.some(

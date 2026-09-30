@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { LogOut, Settings } from 'lucide-react'
 import { GymBrand } from '@/components/owner/GymBrand'
+import { resolveMediaUrl } from '@/lib/helpers/media'
 import { personInitials } from '@/components/staff/staff-ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ import { useAuth } from '@/hooks'
 
 export function TrainerNavbar() {
   const { user, tenant, logout } = useAuth()
+  const photo = resolveMediaUrl(user?.avatarUrl)
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
@@ -43,7 +45,7 @@ export function TrainerNavbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:pr-2.5">
               <Avatar className="size-7">
-                {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
+                {photo ? <AvatarImage src={photo} alt="" /> : null}
                 <AvatarFallback className="bg-amber-500/15 text-xs font-semibold text-amber-700 dark:text-amber-400">
                   {personInitials(user?.firstName, user?.lastName)}
                 </AvatarFallback>

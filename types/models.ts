@@ -152,7 +152,11 @@ export interface Member {
   } | null;
   assignedTrainer?: {
     id: string;
-    user: { firstName: string; lastName: string };
+    user: {
+      firstName: string;
+      lastName: string;
+      avatarUrl?: string | null;
+    };
   } | null;
   todayStatus?: {
     date: string;

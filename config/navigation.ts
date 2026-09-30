@@ -12,6 +12,7 @@ import {
   CreditCard,
   BarChart3,
   KeyRound,
+  Package,
 } from 'lucide-react';
 import { ROUTES } from './routes';
 import { PERMISSIONS } from './permissions';
@@ -34,6 +35,12 @@ export const STAFF_NAV_ITEMS: NavItem[] = [
     label: 'Members',
     icon: Users,
     permissions: [PERMISSIONS.MEMBER.VIEW],
+  },
+  {
+    href: ROUTES.PACKAGES,
+    label: 'Packages',
+    icon: Package,
+    permissions: [PERMISSIONS.PACKAGE.CREATE],
   },
   {
     href: ROUTES.TRAINERS,

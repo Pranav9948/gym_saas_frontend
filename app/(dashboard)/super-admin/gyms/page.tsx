@@ -1,17 +1,23 @@
-'use client'
+"use client";
 
-import React from 'react'
 import {
-  Building2,
-  MapPin,
-  MoreHorizontal,
-  Search,
-  Users,
-} from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+  EmptyState,
+  LoadingSpinner,
+  PageHeader,
+  Pagination,
+  StatusBadge,
+} from "@/components/common";
+import { StatCard } from "@/components/common/StatCard";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,103 +25,86 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  EmptyState,
-  LoadingSpinner,
-  PageHeader,
-  Pagination,
-  StatusBadge,
-} from '@/components/common'
-import { StatCard } from '@/components/common/StatCard'
-import { useGyms } from '@/hooks/super-admin'
-import { useDebounce } from '@/hooks'
-import type { StatusType, SuperAdminGym } from '@/types'
+} from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDebounce } from "@/hooks";
+import { useGyms } from "@/hooks/super-admin";
+import type { StatusType, SuperAdminGym } from "@/types";
+import { Building2, MapPin, MoreHorizontal, Search, Users } from "lucide-react";
+import React from "react";
 
-const filters: Array<{ value: 'all' | StatusType; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'TRIAL', label: 'Trial' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'INACTIVE', label: 'Inactive' },
-]
+const filters: Array<{ value: "all" | StatusType; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "TRIAL", label: "Trial" },
+  { value: "PENDING", label: "Pending" },
+  { value: "SUSPENDED", label: "Suspended" },
+  { value: "INACTIVE", label: "Inactive" },
+];
 
-function currency(value: number, code = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: code || 'USD',
+function currency(value: number, code = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: code || "USD",
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 }
 
 function planLabel(gym: SuperAdminGym) {
-  if (!gym.plan) return 'No plan'
-  const name = gym.plan.charAt(0) + gym.plan.slice(1).toLowerCase()
-  if (!gym.planInterval) return name
-  return `${name} · ${gym.planInterval.toLowerCase()}`
+  if (!gym.plan) return "No plan";
+  const name = gym.plan.charAt(0) + gym.plan.slice(1).toLowerCase();
+  if (!gym.planInterval) return name;
+  return `${name} · ${gym.planInterval.toLowerCase()}`;
 }
 
 function subscriptionLabel(gym: SuperAdminGym) {
   if (!gym.plan && gym.daysRemaining == null && !gym.subscriptionEnded) {
-    return 'No subscription'
+    return "No subscription";
   }
-  if (gym.subscriptionEnded) return 'Subscription ended'
-  if (gym.daysRemaining == null) return 'No end date'
-  if (gym.daysRemaining === 0) return 'Ends today'
-  if (gym.daysRemaining === 1) return '1 day left'
-  return `${gym.daysRemaining} days left`
+  if (gym.subscriptionEnded) return "Subscription ended";
+  if (gym.daysRemaining == null) return "No end date";
+  if (gym.daysRemaining === 0) return "Ends today";
+  if (gym.daysRemaining === 1) return "1 day left";
+  return `${gym.daysRemaining} days left`;
 }
 
 function ownerName(gym: SuperAdminGym) {
-  if (!gym.owner) return 'No owner'
-  return `${gym.owner.firstName} ${gym.owner.lastName}`.trim()
+  if (!gym.owner) return "No owner";
+  return `${gym.owner.firstName} ${gym.owner.lastName}`.trim();
 }
 
 function gymInitials(name: string) {
   return name
-    .split(' ')
+    .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((word) => word[0])
-    .join('')
-    .toUpperCase()
-}
-
-const statusMap: Record<SuperAdminGymStatus, StatusType> = {
-  active: 'ACTIVE',
-  trial: 'PENDING',
-  suspended: 'BANNED',
-  pending: 'PENDING',
+    .join("")
+    .toUpperCase();
 }
 
 export default function SuperAdminGymsPage() {
-  const { data, isLoading, isError, refetch } = useSuperAdminDashboard()
-  const [query, setQuery] = React.useState('')
-  const [status, setStatus] = React.useState<'all' | StatusType>('all')
-  const [page, setPage] = React.useState(1)
-  const search = useDebounce(query, 300)
+  const [query, setQuery] = React.useState("");
+  const [status, setStatus] = React.useState<"all" | StatusType>("all");
+  const [page, setPage] = React.useState(1);
+  const search = useDebounce(query, 300);
 
-  React.useEffect(() => {
-    setPage(1)
-  }, [search, status])
+  const {
+    gyms,
+    meta,
+    summary,
+    isLoading: gymsLoading,
+    error,
+    setGymActive,
+    isUpdating,
+  } = useGyms({
+    page,
+    limit: 20,
+    q: search.trim() || undefined,
+    status: status === "all" ? undefined : status,
+  });
 
-  const { gyms, meta, summary, isLoading, error, setGymActive, isUpdating } =
-    useGyms({
-      page,
-      limit: 20,
-      q: search.trim() || undefined,
-      status: status === 'all' ? undefined : status,
-    })
-
-  const totalPages = meta?.totalPages ?? 1
+  const totalPages = meta?.totalPages ?? 1;
 
   return (
     <div className="space-y-6">
@@ -158,7 +147,7 @@ export default function SuperAdminGymsPage() {
 
             <Tabs
               value={status}
-              onValueChange={(value) => setStatus(value as 'all' | StatusType)}
+              onValueChange={(value) => setStatus(value as "all" | StatusType)}
               className="w-full lg:w-auto"
             >
               <TabsList className="w-full justify-start overflow-x-auto lg:w-auto">
@@ -171,7 +160,7 @@ export default function SuperAdminGymsPage() {
             </Tabs>
           </div>
 
-          {isLoading ? (
+          {gymsLoading ? (
             <div className="flex min-h-48 items-center justify-center">
               <LoadingSpinner label="Loading gyms…" />
             </div>
@@ -179,17 +168,19 @@ export default function SuperAdminGymsPage() {
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
               <p className="font-medium">Could not load gyms</p>
               <p className="text-destructive/80">
-                {error instanceof Error ? error.message : 'Please try again.'}
+                {error instanceof Error ? error.message : "Please try again."}
               </p>
             </div>
           ) : gyms.length === 0 ? (
             <EmptyState
               icon={<Building2 className="h-8 w-8" />}
-              title={search || status !== 'all' ? 'No gyms found' : 'No gyms yet'}
+              title={
+                search || status !== "all" ? "No gyms found" : "No gyms yet"
+              }
               description={
-                search || status !== 'all'
-                  ? 'Try adjusting your search or filter.'
-                  : 'Gyms appear here after owners register on the platform.'
+                search || status !== "all"
+                  ? "Try adjusting your search or filter."
+                  : "Gyms appear here after owners register on the platform."
               }
             />
           ) : (
@@ -251,8 +242,8 @@ export default function SuperAdminGymsPage() {
                           <p
                             className={
                               gym.subscriptionEnded
-                                ? 'font-medium text-destructive'
-                                : 'text-foreground'
+                                ? "font-medium text-destructive"
+                                : "text-foreground"
                             }
                           >
                             {subscriptionLabel(gym)}
@@ -262,7 +253,9 @@ export default function SuperAdminGymsPage() {
                           {gym.members.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {gym.revenue ? currency(gym.revenue, gym.currency) : '—'}
+                          {gym.revenue
+                            ? currency(gym.revenue, gym.currency)
+                            : "—"}
                         </TableCell>
                         <TableCell>
                           <StatusBadge
@@ -330,5 +323,5 @@ export default function SuperAdminGymsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

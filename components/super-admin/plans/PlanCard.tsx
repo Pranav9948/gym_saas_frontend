@@ -7,6 +7,7 @@ import { Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { formatInr } from '@/lib/money';
+import type { Plan } from '@/types';
 
 interface PlanCardProps {
   plan: Plan;

@@ -1,16 +1,22 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
 import {
-  Building2,
-  Users,
-  IndianRupee,
-  CreditCard,
-  ArrowRight,
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+  EmptyState,
+  LoadingSpinner,
+  PageHeader,
+  StatusBadge,
+} from "@/components/common";
+import { StatCard } from "@/components/common/StatCard";
+import { PlanDonutChart } from "@/components/super-admin/charts/PlanDonutChart";
+import { RevenueAreaChart } from "@/components/super-admin/charts/RevenueAreaChart";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,70 +24,73 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
+import { ROUTES } from "@/config";
+import { useDashboard } from "@/hooks/super-admin";
+import { ApiException } from "@/lib/api/errors";
+import type { SuperAdminGym, SuperAdminPlanMixName } from "@/types";
 import {
-  EmptyState,
-  LoadingSpinner,
-  PageHeader,
-  StatusBadge,
-} from '@/components/common'
-import { RevenueAreaChart } from '@/components/super-admin/charts/RevenueAreaChart'
-import { PlanDonutChart } from '@/components/super-admin/charts/PlanDonutChart'
-import { StatCard } from '@/components/common/StatCard'
-import { ROUTES } from '@/config'
-import { useDashboard } from '@/hooks/super-admin'
-import { ApiException } from '@/lib/api/errors'
-import type { SuperAdminGym, SuperAdminPlanMixName } from '@/types'
+  ArrowRight,
+  Building2,
+  CreditCard,
+  DollarSign,
+  Download,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
 
-const planStyles: Record<SuperAdminPlanMixName, { label: string; fill: string }> = {
-  FREE: { label: 'Free', fill: 'var(--color-chart-4)' },
-  BASIC: { label: 'Basic', fill: 'var(--color-chart-1)' },
-  PRO: { label: 'Pro', fill: 'var(--color-chart-2)' },
-  NONE: { label: 'No plan', fill: 'var(--color-muted-foreground)' },
-}
+const planStyles: Record<
+  SuperAdminPlanMixName,
+  { label: string; fill: string }
+> = {
+  FREE: { label: "Free", fill: "var(--color-chart-4)" },
+  BASIC: { label: "Basic", fill: "var(--color-chart-1)" },
+  PRO: { label: "Pro", fill: "var(--color-chart-2)" },
+  NONE: { label: "No plan", fill: "var(--color-muted-foreground)" },
+};
 
-function currency(value: number, code = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: code || 'USD',
+function currency(value: number, code = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: code || "USD",
     maximumFractionDigits: 2,
-  }).format(value)
+  }).format(value);
 }
 
 function signedPercent(value: number | null) {
-  if (value == null) return '—'
-  const sign = value > 0 ? '+' : ''
-  return `${sign}${value.toFixed(1)}%`
+  if (value == null) return "—";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(1)}%`;
 }
 
 function titleCase(value: string) {
-  return value.charAt(0) + value.slice(1).toLowerCase()
+  return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
 function planLabel(gym: SuperAdminGym) {
-  if (!gym.plan) return 'No plan'
-  const name = titleCase(gym.plan)
-  if (!gym.planInterval) return name
-  return `${name} · ${gym.planInterval.toLowerCase()}`
+  if (!gym.plan) return "No plan";
+  const name = titleCase(gym.plan);
+  if (!gym.planInterval) return name;
+  return `${name} · ${gym.planInterval.toLowerCase()}`;
 }
 
 function ownerName(gym: SuperAdminGym) {
-  if (!gym.owner) return 'No owner'
-  return `${gym.owner.firstName} ${gym.owner.lastName}`.trim()
+  if (!gym.owner) return "No owner";
+  return `${gym.owner.firstName} ${gym.owner.lastName}`.trim();
 }
 
 function csvCell(value: string | number) {
-  const text = String(value)
+  const text = String(value);
   if (/[",\n]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`
+    return `"${text.replace(/"/g, '""')}"`;
   }
-  return text
+  return text;
 }
 
 function exportRecentGyms(rows: SuperAdminGym[]) {
-  const header = ['Gym', 'Location', 'Owner', 'Plan', 'Members', 'Status']
+  const header = ["Gym", "Location", "Owner", "Plan", "Members", "Status"];
   const lines = [
-    header.join(','),
+    header.join(","),
     ...rows.map((gym) =>
       [
         csvCell(gym.name),
@@ -90,38 +99,40 @@ function exportRecentGyms(rows: SuperAdminGym[]) {
         csvCell(planLabel(gym)),
         csvCell(gym.members),
         csvCell(titleCase(gym.status)),
-      ].join(','),
+      ].join(","),
     ),
-  ]
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `platform-dashboard-${new Date().toISOString().slice(0, 10)}.csv`
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
+  ];
+  const blob = new Blob([lines.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `platform-dashboard-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function trendFromPercent(value: number | null) {
-  if (value == null) return undefined
+  if (value == null) return undefined;
   return {
     value: signedPercent(value),
-    direction: (value < 0 ? 'down' : 'up') as 'up' | 'down',
-  }
+    direction: (value < 0 ? "down" : "up") as "up" | "down",
+  };
 }
 
 export default function SuperAdminDashboardPage() {
-  const { dashboard, isLoading, error } = useDashboard()
-  const summary = dashboard?.summary
-  const code = summary?.currency ?? 'USD'
-  const recentGyms = dashboard?.recentGyms ?? []
+  const { dashboard, isLoading, error } = useDashboard();
+  const summary = dashboard?.summary;
+  const code = summary?.currency ?? "USD";
+  const recentGyms = dashboard?.recentGyms ?? [];
   const planMix = (dashboard?.planMix ?? []).map((item) => ({
     plan: planStyles[item.plan].label,
     gyms: item.gyms,
     fill: planStyles[item.plan].fill,
-  }))
+  }));
 
   return (
     <div className="space-y-6">
@@ -153,7 +164,7 @@ export default function SuperAdminDashboardPage() {
               ? error.getUserMessage()
               : error instanceof Error
                 ? error.message
-                : 'Please try again.'}
+                : "Please try again."}
           </p>
         </div>
       ) : (
@@ -200,7 +211,10 @@ export default function SuperAdminDashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RevenueAreaChart data={dashboard?.revenue ?? []} currency={code} />
+                <RevenueAreaChart
+                  data={dashboard?.revenue ?? []}
+                  currency={code}
+                />
               </CardContent>
             </Card>
 
@@ -232,7 +246,9 @@ export default function SuperAdminDashboardPage() {
                             />
                             {item.plan}
                           </span>
-                          <span className="font-medium text-foreground">{item.gyms}</span>
+                          <span className="font-medium text-foreground">
+                            {item.gyms}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -246,7 +262,9 @@ export default function SuperAdminDashboardPage() {
             <CardHeader className="flex-row items-center justify-between">
               <div className="space-y-1.5">
                 <CardTitle>Recent gyms</CardTitle>
-                <CardDescription>Latest gyms onboarded to the platform</CardDescription>
+                <CardDescription>
+                  Latest gyms onboarded to the platform
+                </CardDescription>
               </div>
               <Button variant="ghost" size="sm" className="gap-1" asChild>
                 <Link href={ROUTES.SUPER_ADMIN_GYMS}>
@@ -278,8 +296,12 @@ export default function SuperAdminDashboardPage() {
                       {recentGyms.map((gym) => (
                         <TableRow key={gym.id}>
                           <TableCell className="pl-4 sm:pl-0">
-                            <div className="font-medium text-foreground">{gym.name}</div>
-                            <div className="text-xs text-muted-foreground">{gym.location}</div>
+                            <div className="font-medium text-foreground">
+                              {gym.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {gym.location}
+                            </div>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {ownerName(gym)}
@@ -305,5 +327,5 @@ export default function SuperAdminDashboardPage() {
         </>
       )}
     </div>
-  )
+  );
 }

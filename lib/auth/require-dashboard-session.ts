@@ -42,8 +42,13 @@ export async function requireDashboardSession(): Promise<void> {
   const pathname = (await headers()).get('x-pathname') || '/dashboard';
   const nextTarget = pathname.startsWith('/') ? pathname : '/dashboard';
 
+  // No access token cookie at all. The cookie is intentionally long-lived
+  // (see /api/auth/session), so a missing cookie generally means the user
+  // has been logged out for a while. Still, try /auth/resume first — it can
+  // recover the session via the backend refresh-token cookie (7 days) and
+  // only falls back to /login when refresh fails.
   if (!token) {
-    redirect(withNextParam(LOGIN_PATH, nextTarget));
+    redirect(withNextParam(RESUME_PATH, nextTarget));
   }
 
   if (isJwtExpired(token)) {
@@ -52,6 +57,6 @@ export async function requireDashboardSession(): Promise<void> {
 
   const valid = await verifyAccessTokenWithApi(token);
   if (!valid) {
-    redirect(withNextParam(LOGIN_PATH, nextTarget));
+    redirect(withNextParam(RESUME_PATH, nextTarget));
   }
 }

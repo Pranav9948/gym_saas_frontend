@@ -1,13 +1,14 @@
-'use client';
-import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { Controller, FieldValues, Path, UseControllerProps } from 'react-hook-form';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+"use client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
 
-interface FormFieldProps<TFieldValues extends FieldValues = FieldValues>
-  extends Omit<UseControllerProps<TFieldValues>, 'render'> {
+interface FormFieldProps<
+  TFieldValues extends FieldValues = FieldValues,
+> extends Omit<UseControllerProps<TFieldValues>, "render"> {
   label?: string;
   placeholder?: string;
   error?: string;
@@ -23,22 +24,16 @@ export function FormField<TFieldValues extends FieldValues = FieldValues>({
   label,
   placeholder,
   error,
-  type = 'text',
+  type = "text",
   disabled,
   className,
   description,
   ...rest
 }: FormFieldProps<TFieldValues>) {
-
   const [showPassword, setShowPassword] = useState(false);
 
   const inputType =
-    type === 'password'
-      ? showPassword
-        ? 'text'
-        : 'password'
-      : type;
-
+    type === "password" ? (showPassword ? "text" : "password") : type;
 
   return (
     <Controller
@@ -46,11 +41,13 @@ export function FormField<TFieldValues extends FieldValues = FieldValues>({
       control={control}
       {...rest}
       render={({ field }) => (
-        <div className={cn('space-y-2', className)}>
+        <div className={cn("space-y-2", className)}>
           {label && (
             <Label htmlFor={name}>
               {label}
-              {rest.rules?.required && <span className="text-destructive">*</span>}
+              {rest.rules?.required && (
+                <span className="text-destructive">*</span>
+              )}
             </Label>
           )}
 
@@ -64,12 +61,14 @@ export function FormField<TFieldValues extends FieldValues = FieldValues>({
               aria-invalid={!!error}
               aria-describedby={error ? `${name}-error` : undefined}
               className={cn(
-                error && 'border-destructive',
-                type === 'password' && 'pr-10'
+                "border-border bg-background shadow-sm ring-1 ring-border/40 placeholder:text-muted-foreground/70",
+                "focus-visible:ring-2 focus-visible:ring-primary",
+                error && "border-destructive ring-destructive/30",
+                type === "password" && "pr-10",
               )}
             />
 
-            {type === 'password' && (
+            {type === "password" && (
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}

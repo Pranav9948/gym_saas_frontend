@@ -3,6 +3,7 @@
 import React from 'react'
 import { Dumbbell } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { resolveMediaUrl } from '@/lib/helpers/media'
 
 interface GymBrandProps {
   name?: string
@@ -19,6 +20,8 @@ export function GymBrand({
   className,
   iconClassName,
 }: GymBrandProps) {
+  const resolvedLogo = resolveMediaUrl(logoUrl)
+
   return (
     <div className={cn('flex items-center gap-2.5', className)}>
       <div
@@ -27,9 +30,9 @@ export function GymBrand({
           iconClassName,
         )}
       >
-        {logoUrl ? (
+        {resolvedLogo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt={`${name} logo`} className="size-full object-cover" />
+          <img src={resolvedLogo} alt={`${name} logo`} className="size-full object-cover" />
         ) : (
           <Dumbbell className="size-5" />
         )}

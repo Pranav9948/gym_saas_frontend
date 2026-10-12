@@ -1,7 +1,12 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 15 * 60;
+// Keep the cookie alive much longer than the JWT itself (15m). This way,
+// when the JWT expires the cookie is still present, requireDashboardSession
+// can detect the expired token and redirect to /auth/resume (which refreshes
+// using the backend refresh-token cookie) instead of bouncing straight to
+// /login. Matches the 7-day refresh token lifetime.
+const ACCESS_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 function isProduction(): boolean {
   return process.env.NODE_ENV === 'production';

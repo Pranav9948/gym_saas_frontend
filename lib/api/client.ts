@@ -23,8 +23,15 @@ let accessToken: string | null = null;
 export type AuthType = "user" | "superAdmin";
 
 let authType: AuthType = "user";
+// Tracks whether setAuthType has been called in this page lifecycle.
+// When true, getAuthType returns the in-memory value instead of trusting
+// potentially stale localStorage (e.g. right after a role switch at login).
+let authTypeExplicitlySet = false;
 
 export function getAuthType(): AuthType {
+  if (authTypeExplicitlySet) {
+    return authType;
+  }
   if (typeof window !== "undefined") {
     try {
       const raw = localStorage.getItem("gym-auth-storage");
@@ -50,6 +57,7 @@ export function getAuthType(): AuthType {
 
 export function setAuthType(type: AuthType): void {
   authType = type;
+  authTypeExplicitlySet = true;
 }
 
 let sessionEpoch = 0;

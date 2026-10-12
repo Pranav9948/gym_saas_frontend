@@ -27,6 +27,7 @@ import {
   type LocationCodes,
   type LocationNames,
 } from '@/lib/location'
+import { resolveMediaUrl } from '@/lib/helpers/media'
 import type { Tenant } from '@/types'
 
 interface GymProfileFormBodyProps {
@@ -70,7 +71,7 @@ function GymProfileFormBody({ tenant }: GymProfileFormBodyProps) {
   )
 
   const [logoPreview, setLogoPreview] = React.useState<string | null>(
-    tenant.logoUrl,
+    resolveMediaUrl(tenant.logoUrl),
   )
 
   const form = useForm<UpdateTenantFormData>({
@@ -115,7 +116,7 @@ function GymProfileFormBody({ tenant }: GymProfileFormBodyProps) {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tenant.current() })
       if (response.data && typeof response.data === 'object' && 'logoUrl' in response.data) {
-        setLogoPreview((response.data as { logoUrl?: string }).logoUrl ?? logoPreview)
+        setLogoPreview(resolveMediaUrl((response.data as { logoUrl?: string }).logoUrl) ?? logoPreview)
       }
       toast({
         title: 'Logo uploaded',

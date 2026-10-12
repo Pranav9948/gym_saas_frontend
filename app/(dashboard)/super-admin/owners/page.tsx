@@ -138,7 +138,7 @@ export default function SuperAdminOwnersPage() {
             {owners.map((owner) => {
               const photo = ownerPhoto(owner)
               return (
-                <Card key={owner.id} className="overflow-hidden">
+                <Card key={owner.id} className="overflow-hidden border border-border shadow-sm transition-shadow hover:shadow-md">
                   <CardContent className="space-y-4 p-5">
                     <div className="flex items-start gap-3">
                       <Avatar className="size-14">

@@ -1,12 +1,9 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
-import { LogOut, Settings } from 'lucide-react'
-import { GymBrand } from '@/components/owner/GymBrand'
-import { personInitials } from '@/components/staff/staff-ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { GymBrand } from "@/components/owner/GymBrand";
+import { personInitials } from "@/components/staff/staff-ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +11,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ROUTES } from '@/config'
-import { useAuth } from '@/hooks'
+} from "@/components/ui/dropdown-menu";
+import { ROUTES } from "@/config";
+import { useAuth } from "@/hooks";
+import { LogOut, Settings } from "lucide-react";
+import Link from "next/link";
 
 export function MemberNavbar() {
-  const { user, tenant, logout } = useAuth()
+  const { user, tenant, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
@@ -34,7 +33,9 @@ export function MemberNavbar() {
             />
           </div>
           <div className="hidden md:block">
-            <p className="truncate text-sm font-medium">{tenant?.name ?? 'GymFlow'}</p>
+            <p className="truncate text-sm font-medium">
+              {tenant?.name ?? "GymFlow"}
+            </p>
             <p className="text-xs text-muted-foreground">Your training</p>
           </div>
         </div>
@@ -43,7 +44,9 @@ export function MemberNavbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:pr-2.5">
               <Avatar className="size-7">
-                {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
+                {user?.avatarUrl ? (
+                  <AvatarImage src={user.avatarUrl} alt="" />
+                ) : null}
                 <AvatarFallback className="bg-sky-500/15 text-xs font-semibold text-sky-700 dark:text-sky-400">
                   {personInitials(user?.firstName, user?.lastName)}
                 </AvatarFallback>
@@ -81,5 +84,5 @@ export function MemberNavbar() {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }

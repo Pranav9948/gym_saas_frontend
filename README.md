@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GymFlow — Gym Management SaaS
+
+A multi-tenant gym management platform built to simplify gym operations, membership management, attendance, billing and business analytics.
+
+**Live Demo:** https://gym-saas.com
+
+**Interactive Demo:** https://app.supademo.com/demo/cmv6wiajd02zwqmuq9g0on80n
+
+## Features
+
+- Multi-tenant gym management
+- Role-based dashboards and access control
+- Member and trainer management
+- Attendance tracking
+- Subscription and billing management
+- Revenue and membership analytics
+- Super-admin platform management
+- Responsive dashboard interface
+
+## Frontend Technology Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Zustand
+- TanStack Query
+- React Hook Form
+- Zod
+- shadcn/ui
+
+## Project Structure
+
+- `app/` — Application routes and pages
+- `components/` — Reusable UI components
+- `services/` — API service integrations
+- `hooks/` — Custom React hooks
+- `store/` — Client-side state management
+- `schemas/` — Validation schemas
+- `types/` — TypeScript definitions
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js
+- pnpm
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Pranav9948/gym_saas_frontend.git
+cd gym_saas_frontend
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Configure the required environment variables using the provided `example-env` file.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Run locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev
+```
 
-## Learn More
+Open http://localhost:3000.
 
-To learn more about Next.js, take a look at the following resources:
+## Screenshots
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+AddED screenshots of the dashboard, member management, attendance and analytics pages here.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Independently developed SaaS project with a live frontend demo. No paying customers currently.
